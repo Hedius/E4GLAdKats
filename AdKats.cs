@@ -13648,30 +13648,35 @@ namespace PRoConEvents
                                     command.Parameters.AddWithValue("@team1_tpm", Math.Round(team1.GetTicketDifferenceRate(), 2));
                                     command.Parameters.AddWithValue("@team2_tpm", Math.Round(team2.GetTicketDifferenceRate(), 2));
                                     command.Parameters.AddWithValue("@map", _serverInfo.InfoObject.Map);
-                                    if (team1.TeamPlayerCount > 0 || team2.TeamPlayerCount > 0)
+                            
+                                    try
                                     {
-                                        try
+                                        //Attempt to execute the query
+                                        if (SafeExecuteNonQuery(command) > 0)
                                         {
-                                            //Attempt to execute the query
-                                            if (SafeExecuteNonQuery(command) > 0)
-                                            {
-                                                Log.Debug(() => "round stat pushed to database", 5);
-                                            }
+                                            Log.Debug(() => "round stat pushed to database", 5);
                                         }
-                                        catch (Exception e)
-                                        {
-                                            Log.HandleException(new AException("Invalid round stats when posting. " + FormatTimeString(_serverInfo.GetRoundElapsedTime(), 2) + "|" + team1.TeamPlayerCount + "|" + team2.TeamPlayerCount + "|" + Math.Round(team1.TeamTotalScore, 2) + "|" + Math.Round(team2.TeamTotalScore, 2) + "|" + Math.Round(team1.TeamScoreDifferenceRate, 2) + "|" + team1.TeamScoreDifferenceRate + "|" + Math.Round(team2.TeamScoreDifferenceRate, 2) + "|" + team2.TeamScoreDifferenceRate + "|" + team1.TeamTicketCount + "|" + team2.TeamTicketCount + "|" + Math.Round(team1.GetTicketDifferenceRate(), 2) + "|" + team1.GetTicketDifferenceRate() + "|" + Math.Round(team2.GetTicketDifferenceRate(), 2) + "|" + team2.GetTicketDifferenceRate(), e));
-                                        }
+                                    }
+                                    catch (Exception e)
+                                    {
+                                        Log.HandleException(new AException("Invalid round stats when posting. " + FormatTimeString(_serverInfo.GetRoundElapsedTime(), 2) + "|" + team1.TeamPlayerCount + "|" + team2.TeamPlayerCount + "|" + Math.Round(team1.TeamTotalScore, 2) + "|" + Math.Round(team2.TeamTotalScore, 2) + "|" + Math.Round(team1.TeamScoreDifferenceRate, 2) + "|" + team1.TeamScoreDifferenceRate + "|" + Math.Round(team2.TeamScoreDifferenceRate, 2) + "|" + team2.TeamScoreDifferenceRate + "|" + team1.TeamTicketCount + "|" + team2.TeamTicketCount + "|" + Math.Round(team1.GetTicketDifferenceRate(), 2) + "|" + team1.GetTicketDifferenceRate() + "|" + Math.Round(team2.GetTicketDifferenceRate(), 2) + "|" + team2.GetTicketDifferenceRate(), e));
                                     }
                                 }
                             }
 
                             watch.Stop();
-                            if (watch.Elapsed.TotalSeconds < 30)
+                            // dynamic wait time, Log every 30s if the server has players else every 10 minutes.
+                            int logDelay = 30;
+                            if (team1.TeamPlayerCount == 0 && team2.TeamPlayerCount == 0) 
                             {
-                                Threading.Wait(TimeSpan.FromSeconds(30) - watch.Elapsed);
+                             logDelay = 600;
                             }
-                            roundTimeSeconds += 30;
+                            
+                            if (watch.Elapsed.TotalSeconds < logDelay)
+                            {
+                                Threading.Wait(TimeSpan.FromSeconds(logDelay) - watch.Elapsed);
+                            }
+                            roundTimeSeconds += logDelay;
                         }
                     }
                     catch (Exception e)
