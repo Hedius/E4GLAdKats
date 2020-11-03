@@ -21,11 +21,11 @@
  * Development by Daniel J. Gradinjan (ColColonCleaner)
  * 
  * AdKats.cs
- * Version 7.6.0.9
- * 16-MAY-2020
+ * Version 8.0.0.0
+ * 03-NOV-2020
  * 
  * Automatic Update Information
- * <version_code>7.6.0.9</version_code>
+ * <version_code>8.0.0.0</version_code>
  */
 
 using System;
@@ -68,7 +68,7 @@ namespace PRoConEvents
     {
 
         //Current Plugin Version
-        private const String PluginVersion = "7.6.0.9";
+        private const String PluginVersion = "8.0.0.0";
 
         public enum GameVersionEnum
         {
@@ -200,7 +200,7 @@ namespace PRoConEvents
         private Int32 _MemoryUsageRestartProcon = 2048;
 
         //Debug
-        private String _debugSoldierName = "ColColonCleaner";
+        private String _debugSoldierName = "H3dius";
         private Boolean _toldCol;
         private Boolean _debugDisplayPlayerFetches;
 
@@ -1100,15 +1100,15 @@ namespace PRoConEvents
 
         public String GetPluginWebsite()
         {
-            return "github.com/AdKats/AdKats";
+            return "github.com/Hedius/AdKats";
         }
 
         public String GetPluginDescription()
         {
             String concat = @"
             <p>
-                <a href='https://github.com/AdKats/AdKats' name=adkats>
-                    <img src='https://raw.githubusercontent.com/AdKats/AdKats/master/images/AdKats.jpg' alt='AdKats Advanced In-Game Admin Tools'>
+                <a href='https://github.com/Hedius/AdKats' name=adkats>
+                    <img src='https://raw.githubusercontent.com/Hedius/AdKats/master/images/AdKats.jpg' alt='AdKats Advanced In-Game Admin Tools'>
                 </a>
             </p>";
             try
@@ -9420,7 +9420,7 @@ namespace PRoConEvents
                     Log.Debug(() => "Fetching plugin links...", 2);
                     try
                     {
-                        _pluginLinks = Util.ClientDownloadTimer(client, "https://raw.github.com/AdKats/AdKats/master/LINKS.md?cacherand=" + Environment.TickCount);
+                        _pluginLinks = Util.ClientDownloadTimer(client, "https://raw.github.com/Hedius/AdKats/master/LINKS.md?cacherand=" + Environment.TickCount);
                         Log.Debug(() => "Plugin links fetched.", 1);
                     }
                     catch (Exception)
@@ -9439,7 +9439,7 @@ namespace PRoConEvents
                     Log.Debug(() => "Fetching plugin readme...", 2);
                     try
                     {
-                        _pluginDescription = Util.ClientDownloadTimer(client, "https://raw.github.com/AdKats/AdKats/master/README.md?cacherand=" + Environment.TickCount);
+                        _pluginDescription = Util.ClientDownloadTimer(client, "https://raw.github.com/Hedius/AdKats/master/README.md?cacherand=" + Environment.TickCount);
                         Log.Debug(() => "Plugin readme fetched.", 1);
                     }
                     catch (Exception)
@@ -9458,7 +9458,7 @@ namespace PRoConEvents
                     Log.Debug(() => "Fetching plugin changelog...", 2);
                     try
                     {
-                        _pluginChangelog = Util.ClientDownloadTimer(client, "https://raw.github.com/AdKats/AdKats/master/CHANGELOG.md?cacherand=" + Environment.TickCount);
+                        _pluginChangelog = Util.ClientDownloadTimer(client, "https://raw.github.com/Hedius/AdKats/master/CHANGELOG.md?cacherand=" + Environment.TickCount);
                         Log.Debug(() => "Plugin changelog fetched.", 1);
                     }
                     catch (Exception)
@@ -13681,7 +13681,8 @@ namespace PRoConEvents
                                         `team2_tickets`,
                                         `team1_tpm`, 
                                         `team2_tpm`,
-                                        `roundstat_time`
+                                        `roundstat_time`,
+                                        `map`
                                     ) 
                                     VALUES 
                                     (
@@ -13698,7 +13699,8 @@ namespace PRoConEvents
                                         @team2_tickets,
                                         @team1_tpm, 
                                         @team2_tpm,
-                                        UTC_TIMESTAMP()
+                                        UTC_TIMESTAMP(),
+                                        @map
                                     )";
                                     command.Parameters.AddWithValue("@server_id", _serverInfo.ServerID);
                                     command.Parameters.AddWithValue("@round_id", _roundID);
@@ -13713,6 +13715,7 @@ namespace PRoConEvents
                                     command.Parameters.AddWithValue("@team2_tickets", team2.TeamTicketCount);
                                     command.Parameters.AddWithValue("@team1_tpm", Math.Round(team1.GetTicketDifferenceRate(), 2));
                                     command.Parameters.AddWithValue("@team2_tpm", Math.Round(team2.GetTicketDifferenceRate(), 2));
+                                    command.Parameters.AddWithValue("@map", _serverInfo.InfoObject.Map);
                                     if (team1.TeamPlayerCount > 0 || team2.TeamPlayerCount > 0)
                                     {
                                         try
@@ -17020,9 +17023,9 @@ namespace PRoConEvents
                     }
 
                     //Handle Dev Notifications
-                    if (soldierName == "ColColonCleaner" && !_toldCol)
+                    if (soldierName == "H3dius" && !_toldCol)
                     {
-                        PlayerTellMessage("ColColonCleaner", "AdKats " + PluginVersion + " running!");
+                        PlayerTellMessage("H3dius", "AdKats " + PluginVersion + " running!");
                         _toldCol = true;
                     }
 
@@ -34029,16 +34032,16 @@ namespace PRoConEvents
             Log.Debug(() => "Entering PurgeExtendedRoundStats", 6);
             try
             {
-                //Purge all extended round stats older than 60 days
+                //Purge all extended round stats older than two years
                 using (MySqlConnection connection = GetDatabaseConnection())
                 {
                     using (MySqlCommand command = connection.CreateCommand())
                     {
-                        command.CommandText = @"delete from tbl_extendedroundstats where tbl_extendedroundstats.roundstat_time < date_sub(sysdate(), interval 60 day)";
+                        command.CommandText = @"delete from tbl_extendedroundstats where tbl_extendedroundstats.roundstat_time < date_sub(sysdate(), interval 2 year)";
                         Int32 affectedRows = SafeExecuteNonQuery(command);
                         if (affectedRows > 0)
                         {
-                            Log.Debug(() => "Purged " + affectedRows + " extended round stats older than 60 days.", 5);
+                            Log.Debug(() => "Purged " + affectedRows + " extended round stats older than 2 years.", 5);
                         }
                     }
                 }
@@ -34055,16 +34058,16 @@ namespace PRoConEvents
             Log.Debug(() => "Entering PurgeOutdatedStatistics", 6);
             try
             {
-                //Purge all Adkats statistics older than 90 days
+                //Purge all Adkats statistics older than 180 days
                 using (MySqlConnection connection = GetDatabaseConnection())
                 {
                     using (MySqlCommand command = connection.CreateCommand())
                     {
-                        command.CommandText = @"delete from adkats_statistics where adkats_statistics.stat_time < date_sub(sysdate(), interval 90 day)";
+                        command.CommandText = @"delete from adkats_statistics where adkats_statistics.stat_time < date_sub(sysdate(), interval 180 day)";
                         Int32 affectedRows = SafeExecuteNonQuery(command);
                         if (affectedRows > 0)
                         {
-                            Log.Debug(() => "Purged " + affectedRows + " AdKats statistics older than 90 days.", 5);
+                            Log.Debug(() => "Purged " + affectedRows + " AdKats statistics older than 180 days.", 5);
                         }
                     }
                 }
@@ -38761,7 +38764,7 @@ namespace PRoConEvents
                         Log.Debug(() => "Fetching plugin changelog...", 2);
                         try
                         {
-                            command.CommandText = Util.ClientDownloadTimer(client, "https://raw.github.com/AdKats/AdKats/master/adkats.sql?cacherand=" + Environment.TickCount);
+                            command.CommandText = Util.ClientDownloadTimer(client, "https://raw.github.com/Hedius/AdKats/master/adkats.sql?cacherand=" + Environment.TickCount);
                             Log.Debug(() => "SQL setup script fetched.", 1);
                         }
                         catch (Exception)
@@ -38905,6 +38908,7 @@ namespace PRoConEvents
                         `team1_tpm` double NOT NULL,
                         `team2_tpm` double NOT NULL,
                         `roundstat_time` datetime NOT NULL,
+                        `map` varchar(25) NULL DEFAULT NULL,
                         PRIMARY KEY (`roundstat_id`)
                     ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='AdKats - Extended Round Stats'", true);
             }
@@ -43950,9 +43954,7 @@ namespace PRoConEvents
                         SELECT 
                             COUNT(*) AS `ban_count`
                         FROM 
-	                        `adkats_bans`
-                        WHERE 
-                            `ban_status` = 'Active'";
+	                        `adkats_bans`";
 
                         using (MySqlDataReader reader = SafeExecuteReader(command))
                         {
@@ -43982,9 +43984,7 @@ namespace PRoConEvents
 	                        `ban_enforceGUID`, 
 	                        `ban_enforceIP` 
                         FROM 
-	                        `adkats_bans`
-                        WHERE 
-                            `ban_status` = 'Active'";
+	                        `adkats_bans`";
 
                         List<ABan> importedBans = new List<ABan>();
                         using (MySqlDataReader reader = SafeExecuteReader(command))
@@ -44014,10 +44014,6 @@ namespace PRoConEvents
                                     ban_enforceGUID = (reader.GetString("ban_enforceGUID") == "Y"),
                                     ban_enforceIP = (reader.GetString("ban_enforceIP") == "Y")
                                 };
-                                if (aBan.ban_status != "Active") 
-                                {
-                                    continue;
-                                }
                                 if (aBan.ban_record == null)
                                 {
                                     aBan.ban_record = new ARecord
@@ -47704,9 +47700,9 @@ namespace PRoConEvents
                 }
                 if (!_FeedServerReservedSlots)
                 {
-                    ExecuteCommand("procon.protected.send", "reservedSlotsList.add", "ColColonCleaner");
-                    ExecuteCommand("procon.protected.send", "reservedSlotsList.add", "PhirePhrey");
-                    ExecuteCommand("procon.protected.send", "reservedSlotsList.save");
+                    // ExecuteCommand("procon.protected.send", "reservedSlotsList.add", "ColColonCleaner");
+                    // ExecuteCommand("procon.protected.send", "reservedSlotsList.add", "PhirePhrey");
+                    // ExecuteCommand("procon.protected.send", "reservedSlotsList.save");
                     ExecuteCommand("procon.protected.send", "reservedSlotsList.list");
                     return;
                 }
@@ -47745,6 +47741,7 @@ namespace PRoConEvents
                         }
                     }
                 }
+                /*
                 if (!allowedReservedSlotPlayers.Contains("ColColonCleaner"))
                 {
                     allowedReservedSlotPlayers.Add("ColColonCleaner");
@@ -47753,6 +47750,7 @@ namespace PRoConEvents
                 {
                     allowedReservedSlotPlayers.Add("PhirePhrey");
                 }
+                */
                 //All players fetched, update the server lists
                 //Remove soldiers from the list where needed
                 foreach (String playerName in _CurrentReservedSlotPlayers)
@@ -50039,7 +50037,7 @@ namespace PRoConEvents
                     String updateInfo;
                     try
                     {
-                        updateInfo = Util.ClientDownloadTimer(client, "https://raw.github.com/AdKats/AdKats/master/adkatsupdates.json" + "?cacherand=" + Environment.TickCount);
+                        updateInfo = Util.ClientDownloadTimer(client, "https://raw.github.com/Hedius/AdKats/master/adkatsupdates.json" + "?cacherand=" + Environment.TickCount);
                         Log.Debug(() => "SQL updates fetched.", 1);
                     }
                     catch (Exception)
@@ -51524,8 +51522,8 @@ namespace PRoConEvents
                             {
                                 try
                                 {
-                                    string stableURL = "https://raw.githubusercontent.com/AdKats/AdKats/master/AdKats.cs" + "?cacherand=" + Environment.TickCount;
-                                    string testURL = "https://raw.githubusercontent.com/AdKats/AdKats/test/AdKats.cs" + "?cacherand=" + Environment.TickCount;
+                                    string stableURL = "https://raw.githubusercontent.com/Hedius/AdKats/master/AdKats.cs" + "?cacherand=" + Environment.TickCount;
+                                    string testURL = "https://raw.githubusercontent.com/Hedius/AdKats/test/AdKats.cs" + "?cacherand=" + Environment.TickCount;
                                     if (_pluginVersionStatus == VersionStatus.OutdatedBuild)
                                     {
                                         pluginSource = Util.ClientDownloadTimer(client, stableURL);
@@ -52699,10 +52697,6 @@ namespace PRoConEvents
         {
             Int32 upperCount = 0;
             Int32 totalCount = 0;
-            if (String.IsNullOrEmpty(input))
-            {
-                return 0;
-            }
             try
             {
                 foreach (var character in input.ToCharArray())
@@ -52716,15 +52710,11 @@ namespace PRoConEvents
                         }
                     }
                 }
-                if (totalCount == 0) 
-                {
-                    return 0;
-                }
-                return (Int32)Math.Ceiling((Double)upperCount / (Double)totalCount * 100.0);
+                return (Int32)Math.Round((Double)upperCount / (Double)totalCount * 100.0);
             }
             catch (Exception e)
             {
-                Log.HandleException(new AException("Error getting string upper percentage. " + input.Length + "," + upperCount + "," + totalCount, e));
+                Log.HandleException(new AException("Error getting string upper percentage.", e));
             }
             return 0;
         }
