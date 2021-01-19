@@ -20,11 +20,11 @@
  * Development by Daniel J. Gradinjan (ColColonCleaner)
  * 
  * AdKats.cs
- * Version 8.0.0.1
- * 04-NOV-2020
+ * Version 8.0.0.2
+ * 19-JAN-2021
  * 
  * Automatic Update Information
- * <version_code>8.0.0.1</version_code>
+ * <version_code>8.0.0.2</version_code>
  */
 
 using System;
@@ -67,7 +67,7 @@ namespace PRoConEvents
     {
 
         //Current Plugin Version
-        private const String PluginVersion = "8.0.0.1";
+        private const String PluginVersion = "8.0.0.2";
 
         public enum GameVersionEnum
         {
@@ -61514,7 +61514,7 @@ namespace PRoConEvents
                             if (record.target_player.PBPlayerInfo != null)
                             {
                                 sb.Append("PB GUID: " + record.target_player.PBPlayerInfo.GUID + "<br/>");
-                                sb.Append("IP: " + record.target_player.PBPlayerInfo.Ip.Split(':')[0] + "<br/>");
+                                // sb.Append("IP: " + record.target_player.PBPlayerInfo.Ip.Split(':')[0] + "<br/>");
                                 sb.Append("Country: " + record.target_player.PBPlayerInfo.PlayerCountry + "<br/>");
                             }
                             String processedCustomHTML = Plugin.ReplacePlayerInformation(CustomHTMLAddition, record.target_player);
