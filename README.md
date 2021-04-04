@@ -2705,16 +2705,12 @@ plugin.CallOtherPlugin("AdKats", "IssueCommand", command);
         <td>Source updates.</td>
     </tr>
     <tr>
-        <td>adkats.gamerethos.net</td>
+        <td>api.myrcon.net</td>
         <td>Version management, and backup source for definition files.</td>
     </tr>
     <tr>
         <td>ip-api.com</td>
         <td>Player location tracking.</td>
-    </tr>
-    <tr>
-        <td>metabans.com</td>
-        <td>Ban enforcer posting.</td>
     </tr>
     <tr>
         <td>www.timeanddate.com</td>
