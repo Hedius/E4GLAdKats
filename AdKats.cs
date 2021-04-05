@@ -50977,6 +50977,17 @@ namespace PRoConEvents
                 Log.Debug(() => "Downloaded from " + GetDomainName(url) + " in " + timer.ElapsedMilliseconds + "ms", 7);
                 return returnString;
             }
+            
+            public String ClientUploadTimer(WebClient wClient, String url, String data)
+            {
+                Log.Debug(() => "Preparing to upload to " + GetDomainName(url), 7);
+                Stopwatch timer = new Stopwatch();
+                timer.Start();
+                String returnString = wClient.UploadString(url, data);
+                timer.Stop();
+                Log.Debug(() => "Uploaded to " + GetDomainName(url) + " in " + timer.ElapsedMilliseconds + "ms", 7);
+                return returnString;
+            }
 
             public string GetDomainName(string url)
             {
