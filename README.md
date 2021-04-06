@@ -1,4 +1,4 @@
-[//]: # "<latest_stable_release>8.0.0.2</latest_stable_release>"
+[//]: # "<latest_stable_release>8.0.0.3</latest_stable_release>"
 <p>
     <a name=adkats />
     <img src="https://i.imgur.com/r9pwH3A.png" alt="AdKats Advanced In-Game Admin Tools">
@@ -8,7 +8,7 @@
 </p>
 <p>
     <a href="https://myrcon.net/files/file/32-on-spawn-loadout-enforcer-for-infantryvehicles-adkatslrt/" name=thread>
-        <img src="https://raw.githubusercontent.com/ColColonCleaner/AdKats/master/images/AdKats_Docs_Loadout.jpg" alt="AdKats Thread">
+        <img src="https://raw.githubusercontent.com/Hedius/E4GLAdKats/master/images/AdKats_Docs_Loadout.jpg" alt="AdKats Thread">
     </a>
 </p>
 <h2>Overview</h2>
@@ -4202,3 +4202,13 @@ plugin.CallOtherPlugin("AdKats", "IssueCommand", command);
         Don't let more than one person use this at any time.
     </li>
 </ul>
+<h3>X98. Proxy Settings:</h3>
+<ul>
+    <li><b>'Use Proxy for Battlelog'</b> -
+        Send all battlelog requests over a proxy server.
+    </li>
+    <li><b>'Proxy URL'</b> -
+        The full URI of the proxy in the format `http://IP:PORT` or `http://USER:PW@IP:PORT`.
+    </li>
+</ul>
+
