@@ -938,7 +938,7 @@ namespace PRoConEvents
             AddSettingSection("C32", "Challenge Settings");
             AddSettingSection("D98", "Database Timing Mismatch");
             AddSettingSection("D99", "Debugging");
-            AddSettingSection("X98", "Proxy Settings");
+            AddSettingSection("X98", "Proxy Settings");  
             AddSettingSection("X99", "Experimental");
             AddSettingSection("Y99", "Event Automation");
             //Build setting section enum
@@ -2903,7 +2903,6 @@ namespace PRoConEvents
                 if (IsActiveSettingSection(proxySection))
                 {
                     buildList.Add(new CPluginVariable(GetSettingSection(proxySection) + t + "Use Proxy for Battlelog", typeof(Boolean), _UseProxy));
-                    
                     if (_UseProxy)
                     {
                         buildList.Add(new CPluginVariable(GetSettingSection(proxySection) + t + "Proxy URL", typeof(String), _ProxyURL));
@@ -3364,7 +3363,7 @@ namespace PRoConEvents
                     {
                         return;
                     }
-                    using (WebClient client = new WebClient())
+                    using (WebClient client = new GZipWebClient())
                     {
                         try
                         {
@@ -8956,7 +8955,6 @@ namespace PRoConEvents
                         strValue = "";
                         Log.Warn("Invalid Proxy URL! Make sure that the URI is valid!");
                     }
-                    
                     _ProxyURL = strValue;
                     QueueSettingForUpload(new CPluginVariable(@"Proxy URL", typeof(String), _ProxyURL));
                 }
@@ -9400,7 +9398,7 @@ namespace PRoConEvents
                     Thread.CurrentThread.Name = "DescFetching";
                     _pluginDescFetchProgress = "Started";
                     //Create web client
-                    WebClient client = new WebClient();
+                    WebClient client = new GZipWebClient();
                     //Download the readme and changelog
                     Log.Debug(() => "Fetching plugin links...", 2);
                     try
@@ -38704,7 +38702,7 @@ namespace PRoConEvents
                 {
                     using (MySqlCommand command = connection.CreateCommand())
                     {
-                        WebClient client = new WebClient();
+                        WebClient client = new GZipWebClient();
                         Log.Debug(() => "Fetching plugin changelog...", 2);
                         try
                         {
@@ -47380,7 +47378,7 @@ namespace PRoConEvents
         public Boolean GetGlobalUTCTimestamp(out DateTime globalUTCTime)
         {
             globalUTCTime = UtcNow();
-            using (WebClient client = new WebClient())
+            using (WebClient client = new GZipWebClient())
             {
                 try
                 {
@@ -48746,7 +48744,7 @@ namespace PRoConEvents
                 if (GameVersion == GameVersionEnum.BF3)
                 {
                     Log.Debug(() => "Preparing to fetch battlelog info for BF3 player " + aPlayer.GetVerboseName(), 7);
-                    using (WebClient client = new WebClient())
+                    using (WebClient client = new GZipWebClient())
                     {
                         if(_UseProxy && !String.IsNullOrEmpty(_ProxyURL))
                         {
@@ -48811,7 +48809,7 @@ namespace PRoConEvents
                 else if (GameVersion == GameVersionEnum.BF4)
                 {
                     Log.Debug(() => "Preparing to fetch battlelog info for BF4 player " + aPlayer.GetVerboseName(), 7);
-                    using (WebClient client = new WebClient())
+                    using (WebClient client = new GZipWebClient())
                     {
                         if(_UseProxy && !String.IsNullOrEmpty(_ProxyURL))
                         {
@@ -48968,7 +48966,7 @@ namespace PRoConEvents
                 else if (GameVersion == GameVersionEnum.BFHL)
                 {
                     Log.Debug(() => "Preparing to fetch battlelog info for BFHL player " + aPlayer.GetVerboseName(), 7);
-                    using (WebClient client = new WebClient())
+                    using (WebClient client = new GZipWebClient())
                     {
                         if(_UseProxy && !String.IsNullOrEmpty(_ProxyURL))
                         {
@@ -49110,7 +49108,7 @@ namespace PRoConEvents
             }
             if (GameVersion == GameVersionEnum.BF3)
             {
-                using (WebClient client = new WebClient())
+                using (WebClient client = new GZipWebClient())
                 {
                     if(_UseProxy && !String.IsNullOrEmpty(_ProxyURL))
                     {
@@ -49313,12 +49311,12 @@ namespace PRoConEvents
             }
             else if (GameVersion == GameVersionEnum.BF4)
             {
-                using (WebClient client = new WebClient())
+                using (WebClient client = new GZipWebClient())
                 {
                     if(_UseProxy && !String.IsNullOrEmpty(_ProxyURL))
                     {
                         client.Proxy = new WebProxy(_ProxyURL, true); 
-                    } 
+                    }               
                     try
                     {
                         //Fetch stats
@@ -49556,7 +49554,7 @@ namespace PRoConEvents
             }
             else if (GameVersion == GameVersionEnum.BFHL)
             {
-                using (WebClient client = new WebClient())
+                using (WebClient client = new GZipWebClient())
                 {
                     if(_UseProxy && !String.IsNullOrEmpty(_ProxyURL))
                     {
@@ -49709,7 +49707,7 @@ namespace PRoConEvents
         {
             Log.Debug(() => "Entering FetchAdKatsReputationDefinitions", 7);
             ArrayList repTable = null;
-            using (WebClient client = new WebClient())
+            using (WebClient client = new GZipWebClient())
             {
                 String repInfo;
                 Log.Debug(() => "Fetching reputation definitions...", 2);
@@ -49780,7 +49778,7 @@ namespace PRoConEvents
         {
             Log.Debug(() => "Entering FetchASpecialGroupDefinitions", 7);
             List<ASpecialGroup> SpecialGroupsList = null;
-            using (WebClient client = new WebClient())
+            using (WebClient client = new GZipWebClient())
             {
                 String groupInfo;
                 Log.Debug(() => "Fetching special group definitions...", 2);
@@ -49988,7 +49986,7 @@ namespace PRoConEvents
         {
             Log.Debug(() => "Entering FetchSQLUpdates", 7);
             List<ASQLUpdate> SQLUpdates = new List<ASQLUpdate>();
-            using (WebClient client = new WebClient())
+            using (WebClient client = new GZipWebClient())
             {
                 try
                 {
@@ -51039,6 +51037,24 @@ namespace PRoConEvents
                 }
             }
         }
+        
+        public class GZipWebClient : WebClient
+        {
+            private String ua;
+    
+            public GZipWebClient(String ua = "Mozilla/5.0 (compatible; PRoCon 1; AdKats)")
+            {
+                this.ua = ua;
+            }
+            
+            protected override WebRequest GetWebRequest(Uri address)
+            {
+                HttpWebRequest request = (HttpWebRequest)base.GetWebRequest(address);
+                request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
+                request.UserAgent = ua;
+                return request;
+            }
+        }
 
         public class Utilities
         {
@@ -51224,7 +51240,7 @@ namespace PRoConEvents
             if (false && _UseExperimentalTools && GameVersion == GameVersionEnum.BF4)
             {
                 String externalPluginSource;
-                using (WebClient client = new WebClient())
+                using (WebClient client = new GZipWebClient())
                 {
                     try
                     {
@@ -51338,7 +51354,7 @@ namespace PRoConEvents
             if (!String.IsNullOrEmpty(_AdKatsLRTExtensionToken))
             {
                 String extensionSource;
-                using (WebClient client = new WebClient())
+                using (WebClient client = new GZipWebClient())
                 {
                     try
                     {
@@ -51487,7 +51503,7 @@ namespace PRoConEvents
                                 Log.Info("Preparing to download plugin update to version " + _latestPluginVersion);
                             }
                             String pluginSource = null;
-                            using (WebClient client = new WebClient())
+                            using (WebClient client = new GZipWebClient())
                             {
                                 try
                                 {
@@ -52696,7 +52712,7 @@ namespace PRoConEvents
                 return;
             }
             IPAPILocation loc = new IPAPILocation(aPlayer.player_ip);
-            using (WebClient client = new WebClient())
+            using (WebClient client = new GZipWebClient())
             {
                 try
                 {
@@ -61366,7 +61382,7 @@ namespace PRoConEvents
             {
                 _plugin.Log.Debug(() => "Entering FetchAWeaponNames", 7);
                 Hashtable weaponNames = null;
-                using (WebClient client = new WebClient())
+                using (WebClient client = new GZipWebClient())
                 {
                     String downloadString;
                     _plugin.Log.Debug(() => "Fetching weapon names...", 2);
@@ -61996,7 +62012,7 @@ namespace PRoConEvents
             private Hashtable FetchWeaponDefinitions()
             {
                 Hashtable statTable = null;
-                using (WebClient client = new WebClient())
+                using (WebClient client = new GZipWebClient())
                 {
                     String weaponInfo;
                     Plugin.Log.Debug(() => "Fetching weapon statistic definitions...", 2);
@@ -62187,7 +62203,7 @@ namespace PRoConEvents
                     //Attempt to fetch and parse
                     if (!String.IsNullOrEmpty(widgetURL))
                     {
-                        using (WebClient client = new WebClient())
+                        using (WebClient client = new GZipWebClient())
                         {
                             try
                             {

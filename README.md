@@ -4211,4 +4211,3 @@ plugin.CallOtherPlugin("AdKats", "IssueCommand", command);
         The full URI of the proxy in the format `http://IP:PORT` or `http://USER:PW@IP:PORT`.
     </li>
 </ul>
-
