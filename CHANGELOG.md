@@ -1185,3 +1185,21 @@ Added small improvements to fuzzy player match response text.</li>
 <ul>
     <li><b>No upgrade SQL required.</b></li>
 </ul>
+
+<h4>8.0.0.5 (17-APR-2021)</h4>
+<b>Enhancements</b><br/>
+<ul>
+	<li>No Enchancements</li>
+</ul>
+<b>Changes</b><br/>
+<ul>
+    <li>No changes</li>
+</ul>
+<b>Bugs Fixed</b><br/>
+<ul>
+	<li>Do not kick players if they have a profile without a soldier. (persona id fetch issue)</li>
+</ul>
+<b>Upgrade SQL from 4.0.0.0 - Current</b><br/>
+<ul>
+    <li><b>No upgrade SQL required.</b></li>
+</ul>
