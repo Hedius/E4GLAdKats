@@ -48751,7 +48751,7 @@ namespace PRoConEvents
                     {
                         if(_UseProxy && !String.IsNullOrEmpty(_ProxyURL))
                         {
-                            client.Proxy = new WebProxy(_ProxyURL, true); 
+                            Util.SetWebClientProxy(client, _ProxyURL);
                         }
                         try
                         {
@@ -48816,7 +48816,7 @@ namespace PRoConEvents
                     {
                         if(_UseProxy && !String.IsNullOrEmpty(_ProxyURL))
                         {
-                            client.Proxy = new WebProxy(_ProxyURL, true); 
+                            Util.SetWebClientProxy(client, _ProxyURL);
                         }
                         try
                         {
@@ -48977,7 +48977,7 @@ namespace PRoConEvents
                     {
                         if(_UseProxy && !String.IsNullOrEmpty(_ProxyURL))
                         {
-                            client.Proxy = new WebProxy(_ProxyURL, true); 
+                            Util.SetWebClientProxy(client, _ProxyURL);
                         }
                         try
                         {
@@ -49122,7 +49122,7 @@ namespace PRoConEvents
                 {
                     if(_UseProxy && !String.IsNullOrEmpty(_ProxyURL))
                     {
-                        client.Proxy = new WebProxy(_ProxyURL, true); 
+                         Util.SetWebClientProxy(client, _ProxyURL);
                     }
                     try
                     {
@@ -49325,7 +49325,7 @@ namespace PRoConEvents
                 {
                     if(_UseProxy && !String.IsNullOrEmpty(_ProxyURL))
                     {
-                        client.Proxy = new WebProxy(_ProxyURL, true); 
+                        Util.SetWebClientProxy(client, _ProxyURL);
                     }               
                     try
                     {
@@ -49568,7 +49568,7 @@ namespace PRoConEvents
                 {
                     if(_UseProxy && !String.IsNullOrEmpty(_ProxyURL))
                     {
-                        client.Proxy = new WebProxy(_ProxyURL, true); 
+                        Util.SetWebClientProxy(client, _ProxyURL);
                     }
                     try
                     {
@@ -51073,6 +51073,25 @@ namespace PRoConEvents
             public Utilities(Logger log)
             {
                 Log = log;
+            }
+            
+            public void SetWebClientProxy(WebClient wClient, String proxyURL)
+            {
+                if(!String.IsNullOrEmpty(proxyURL))
+                {
+                    Uri uri = new Uri(proxyURL);
+                    wClient.Proxy = new WebProxy(proxyURL, true); 
+                    if (!String.IsNullOrEmpty(uri.UserInfo))
+                    {
+                        string[] parameters = uri.UserInfo.Split(':');
+                        if (parameters.Length < 2) 
+                        {
+                            Log.Warn("Invalid URI auth data!");
+                            return;
+                        }
+                        wClient.Proxy.Credentials = new NetworkCredential(parameters[0], parameters[1]);
+                    }
+                }
             }
 
             public String ClientDownloadTimer(WebClient wClient, String url)
