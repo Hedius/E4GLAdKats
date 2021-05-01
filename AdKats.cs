@@ -3363,7 +3363,7 @@ namespace PRoConEvents
                     {
                         return;
                     }
-                    using (WebClient client = new GZipWebClient())
+                    using (GZipWebClient client = new GZipWebClient(compress:false))
                     {
                         try
                         {
@@ -9401,7 +9401,7 @@ namespace PRoConEvents
                     Thread.CurrentThread.Name = "DescFetching";
                     _pluginDescFetchProgress = "Started";
                     //Create web client
-                    WebClient client = new GZipWebClient();
+                    GZipWebClient client = new GZipWebClient(compress:false);
                     //Download the readme and changelog
                     Log.Debug(() => "Fetching plugin links...", 2);
                     try
@@ -38705,7 +38705,7 @@ namespace PRoConEvents
                 {
                     using (MySqlCommand command = connection.CreateCommand())
                     {
-                        WebClient client = new GZipWebClient();
+                        GZipWebClient client = new GZipWebClient(compress:false);
                         Log.Debug(() => "Fetching plugin changelog...", 2);
                         try
                         {
@@ -47381,7 +47381,7 @@ namespace PRoConEvents
         public Boolean GetGlobalUTCTimestamp(out DateTime globalUTCTime)
         {
             globalUTCTime = UtcNow();
-            using (WebClient client = new GZipWebClient())
+            using (GZipWebClient client = new GZipWebClient(compress:false))
             {
                 try
                 {
@@ -48747,11 +48747,11 @@ namespace PRoConEvents
                 if (GameVersion == GameVersionEnum.BF3)
                 {
                     Log.Debug(() => "Preparing to fetch battlelog info for BF3 player " + aPlayer.GetVerboseName(), 7);
-                    using (WebClient client = new GZipWebClient())
+                    using (GZipWebClient client = new GZipWebClient())
                     {
                         if(_UseProxy && !String.IsNullOrEmpty(_ProxyURL))
                         {
-                            Util.SetWebClientProxy(client, _ProxyURL);
+                            client.SetProxy(_ProxyURL);
                         }
                         try
                         {
@@ -48812,11 +48812,11 @@ namespace PRoConEvents
                 else if (GameVersion == GameVersionEnum.BF4)
                 {
                     Log.Debug(() => "Preparing to fetch battlelog info for BF4 player " + aPlayer.GetVerboseName(), 7);
-                    using (WebClient client = new GZipWebClient())
+                    using (GZipWebClient client = new GZipWebClient())
                     {
                         if(_UseProxy && !String.IsNullOrEmpty(_ProxyURL))
                         {
-                            Util.SetWebClientProxy(client, _ProxyURL);
+                            client.SetProxy(_ProxyURL);
                         }
                         try
                         {
@@ -48973,11 +48973,11 @@ namespace PRoConEvents
                 else if (GameVersion == GameVersionEnum.BFHL)
                 {
                     Log.Debug(() => "Preparing to fetch battlelog info for BFHL player " + aPlayer.GetVerboseName(), 7);
-                    using (WebClient client = new GZipWebClient())
+                    using (GZipWebClient client = new GZipWebClient())
                     {
                         if(_UseProxy && !String.IsNullOrEmpty(_ProxyURL))
-                        {
-                            Util.SetWebClientProxy(client, _ProxyURL);
+                        { 
+                            client.SetProxy(_ProxyURL);
                         }
                         try
                         {
@@ -49118,11 +49118,11 @@ namespace PRoConEvents
             }
             if (GameVersion == GameVersionEnum.BF3)
             {
-                using (WebClient client = new GZipWebClient())
+                using (GZipWebClient client = new GZipWebClient())
                 {
                     if(_UseProxy && !String.IsNullOrEmpty(_ProxyURL))
                     {
-                         Util.SetWebClientProxy(client, _ProxyURL);
+                        client.SetProxy(_ProxyURL);
                     }
                     try
                     {
@@ -49321,11 +49321,11 @@ namespace PRoConEvents
             }
             else if (GameVersion == GameVersionEnum.BF4)
             {
-                using (WebClient client = new GZipWebClient())
+                using (GZipWebClient client = new GZipWebClient())
                 {
                     if(_UseProxy && !String.IsNullOrEmpty(_ProxyURL))
                     {
-                        Util.SetWebClientProxy(client, _ProxyURL);
+                        client.SetProxy(_ProxyURL);
                     }               
                     try
                     {
@@ -49564,11 +49564,11 @@ namespace PRoConEvents
             }
             else if (GameVersion == GameVersionEnum.BFHL)
             {
-                using (WebClient client = new GZipWebClient())
+                using (GZipWebClient client = new GZipWebClient())
                 {
                     if(_UseProxy && !String.IsNullOrEmpty(_ProxyURL))
                     {
-                        Util.SetWebClientProxy(client, _ProxyURL);
+                        client.SetProxy(_ProxyURL);
                     }
                     try
                     {
@@ -49717,7 +49717,7 @@ namespace PRoConEvents
         {
             Log.Debug(() => "Entering FetchAdKatsReputationDefinitions", 7);
             ArrayList repTable = null;
-            using (WebClient client = new GZipWebClient())
+            using (GZipWebClient client = new GZipWebClient(compress:false))
             {
                 String repInfo;
                 Log.Debug(() => "Fetching reputation definitions...", 2);
@@ -49788,7 +49788,7 @@ namespace PRoConEvents
         {
             Log.Debug(() => "Entering FetchASpecialGroupDefinitions", 7);
             List<ASpecialGroup> SpecialGroupsList = null;
-            using (WebClient client = new GZipWebClient())
+            using (GZipWebClient client = new GZipWebClient(compress:false))
             {
                 String groupInfo;
                 Log.Debug(() => "Fetching special group definitions...", 2);
@@ -49996,7 +49996,7 @@ namespace PRoConEvents
         {
             Log.Debug(() => "Entering FetchSQLUpdates", 7);
             List<ASQLUpdate> SQLUpdates = new List<ASQLUpdate>();
-            using (WebClient client = new GZipWebClient())
+            using (GZipWebClient client = new GZipWebClient(compress:false))
             {
                 try
                 {
@@ -51048,24 +51048,69 @@ namespace PRoConEvents
             }
         }
         
-        public class GZipWebClient : WebClient
-        {
+        public class GZipWebClient : WebClient {
             private String ua;
-    
-            public GZipWebClient(String ua = "Mozilla/5.0 (compatible; PRoCon 1; AdKats)")
-            {
+            private bool compress;
+
+            public GZipWebClient(String ua = "Mozilla/5.0 (compatible; PRoCon 1; AdKats)", bool compress = true) {
                 this.ua = ua;
+                this.compress = compress;
+                base.Headers["User-Agent"] = ua;
+            }
+
+            public string GZipDownloadString(string address) {
+                return this.GZipDownloadString(new Uri(address));
             }
             
-            protected override WebRequest GetWebRequest(Uri address)
-            {
-                HttpWebRequest request = (HttpWebRequest)base.GetWebRequest(address);
-                request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
-                request.UserAgent = ua;
-                return request;
-            }
-        }
+            public string GZipDownloadString(Uri address) {
+                base.Headers[HttpRequestHeader.UserAgent] = ua;
+                
+                if (compress == false)
+                    return base.DownloadString(address);
+                
+                base.Headers[HttpRequestHeader.AcceptEncoding] = "gzip";
+                var stream = this.OpenRead(address);
+                if (stream == null)
+                    return "";
+                
+                var contentEncoding = ResponseHeaders[HttpResponseHeader.ContentEncoding];
+                base.Headers.Remove(HttpRequestHeader.AcceptEncoding);
 
+                Stream decompressedStream = null;
+                StreamReader reader = null;
+                if (!string.IsNullOrEmpty(contentEncoding) && contentEncoding.ToLower().Contains("gzip")) {
+                    decompressedStream = new GZipStream(stream, CompressionMode.Decompress);
+                    reader = new StreamReader(decompressedStream);
+                }
+                else {
+                    reader = new StreamReader(stream);
+                }
+                var data =  reader.ReadToEnd();
+                reader.Close();
+                decompressedStream?.Close();
+                stream.Close();
+                return data;
+            }
+
+            public void SetProxy(String proxyURL)
+            {
+                if(!String.IsNullOrEmpty(proxyURL))
+                {
+                    Uri uri = new Uri(proxyURL);
+                    this.Proxy = new WebProxy(proxyURL, true); 
+                    if (!String.IsNullOrEmpty(uri.UserInfo))
+                    {
+                        string[] parameters = uri.UserInfo.Split(':');
+                        if (parameters.Length < 2) 
+                        {
+                            return;
+                        }
+                        this.Proxy.Credentials = new NetworkCredential(parameters[0], parameters[1]);
+                    }
+                }
+            }
+        } 
+        
         public class Utilities
         {
             private Logger Log;
@@ -51075,31 +51120,12 @@ namespace PRoConEvents
                 Log = log;
             }
             
-            public void SetWebClientProxy(WebClient wClient, String proxyURL)
-            {
-                if(!String.IsNullOrEmpty(proxyURL))
-                {
-                    Uri uri = new Uri(proxyURL);
-                    wClient.Proxy = new WebProxy(proxyURL, true); 
-                    if (!String.IsNullOrEmpty(uri.UserInfo))
-                    {
-                        string[] parameters = uri.UserInfo.Split(':');
-                        if (parameters.Length < 2) 
-                        {
-                            Log.Warn("Invalid URI auth data!");
-                            return;
-                        }
-                        wClient.Proxy.Credentials = new NetworkCredential(parameters[0], parameters[1]);
-                    }
-                }
-            }
-
-            public String ClientDownloadTimer(WebClient wClient, String url)
+            public String ClientDownloadTimer(GZipWebClient wClient, String url)
             {
                 Log.Debug(() => "Preparing to download from " + GetDomainName(url), 7);
                 Stopwatch timer = new Stopwatch();
                 timer.Start();
-                String returnString = wClient.DownloadString(url);
+                String returnString = wClient.GZipDownloadString(url);
                 timer.Stop();
                 Log.Debug(() => "Downloaded from " + GetDomainName(url) + " in " + timer.ElapsedMilliseconds + "ms", 7);
                 return returnString;
@@ -51269,7 +51295,7 @@ namespace PRoConEvents
             if (false && _UseExperimentalTools && GameVersion == GameVersionEnum.BF4)
             {
                 String externalPluginSource;
-                using (WebClient client = new GZipWebClient())
+                using (GZipWebClient client = new GZipWebClient(compress:false))
                 {
                     try
                     {
@@ -51383,7 +51409,7 @@ namespace PRoConEvents
             if (!String.IsNullOrEmpty(_AdKatsLRTExtensionToken))
             {
                 String extensionSource;
-                using (WebClient client = new GZipWebClient())
+                using (GZipWebClient client = new GZipWebClient(compress:false))
                 {
                     try
                     {
@@ -51532,7 +51558,7 @@ namespace PRoConEvents
                                 Log.Info("Preparing to download plugin update to version " + _latestPluginVersion);
                             }
                             String pluginSource = null;
-                            using (WebClient client = new GZipWebClient())
+                            using (GZipWebClient client = new GZipWebClient(compress:false))
                             {
                                 try
                                 {
@@ -52741,7 +52767,7 @@ namespace PRoConEvents
                 return;
             }
             IPAPILocation loc = new IPAPILocation(aPlayer.player_ip);
-            using (WebClient client = new GZipWebClient())
+            using (GZipWebClient client = new GZipWebClient(compress:false))
             {
                 try
                 {
@@ -61411,7 +61437,7 @@ namespace PRoConEvents
             {
                 _plugin.Log.Debug(() => "Entering FetchAWeaponNames", 7);
                 Hashtable weaponNames = null;
-                using (WebClient client = new GZipWebClient())
+                using (GZipWebClient client = new GZipWebClient(compress:false))
                 {
                     String downloadString;
                     _plugin.Log.Debug(() => "Fetching weapon names...", 2);
@@ -62041,7 +62067,7 @@ namespace PRoConEvents
             private Hashtable FetchWeaponDefinitions()
             {
                 Hashtable statTable = null;
-                using (WebClient client = new GZipWebClient())
+                using (GZipWebClient client = new GZipWebClient(compress:false))
                 {
                     String weaponInfo;
                     Plugin.Log.Debug(() => "Fetching weapon statistic definitions...", 2);
@@ -62232,7 +62258,7 @@ namespace PRoConEvents
                     //Attempt to fetch and parse
                     if (!String.IsNullOrEmpty(widgetURL))
                     {
-                        using (WebClient client = new GZipWebClient())
+                        using (GZipWebClient client = new GZipWebClient(compress:false))
                         {
                             try
                             {
