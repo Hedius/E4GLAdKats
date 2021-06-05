@@ -21,7 +21,7 @@
  * 
  * AdKats.cs
  * Version 8.0.0.6
- * 17-APR-2021
+ * 05-JUN-2021
  * 
  * Automatic Update Information
  * <version_code>8.0.0.6</version_code>
@@ -226,7 +226,7 @@ namespace PRoConEvents
         private DateTime _LastServerInfoTrigger = DateTime.UtcNow - TimeSpan.FromSeconds(30);
         private DateTime _LastServerInfoReceive = DateTime.UtcNow - TimeSpan.FromSeconds(30);
         private Object _battlelogLocker = new Object();
-        private readonly TimeSpan _BattlelogWaitDuration = TimeSpan.FromSeconds(10);
+        private TimeSpan _BattlelogWaitDuration = TimeSpan.FromSeconds(5);
         private DateTime _LastIPAPIAction = DateTime.UtcNow - TimeSpan.FromSeconds(5);
         private readonly TimeSpan _IPAPIWaitDuration = TimeSpan.FromSeconds(6);
         private Object _IPAPILocker = new Object();
@@ -51071,10 +51071,14 @@ namespace PRoConEvents
             private String ua;
             private bool compress;
 
-            public GZipWebClient(String ua = "Mozilla/5.0 (compatible; PRoCon 1; AdKats)", bool compress = true) {
-                this.ua = ua;
-                this.compress = compress;
+            public GZipWebClient() {
+                this.ua = "Mozilla/5.0 (compatible; PRoCon 1; AdKats)";
                 base.Headers["User-Agent"] = ua;
+                compress = true;
+            }
+
+            public GZipWebClient(bool compress) : this() {
+                this.compress = compress;
             }
 
             public string GZipDownloadString(string address) {
@@ -61638,10 +61642,15 @@ namespace PRoConEvents
                 {
                     case GameVersionEnum.BF3:
                         CustomHTMLAddition = @"<br><a href='http://battlelog.battlefield.com/bf3/user/%player_name%/'>BF3 Battlelog Profile</a><br>
-<br><a href='http://history.anticheatinc.com/bf3/?searchvalue=%player_name%'>AntiCheat, INC. Search</a><br>";
+<br><a href='http://bf3stats.com/stats_pc/%player_name%'>BF3Stats Profile</a><br>
+<br><a href='http://history.anticheatinc.com/bf3/?searchvalue=%player_name%'>AntiCheat, INC. Search</a><br>
+<br><a href='http://i-stats.net/index.php?action=pcheck&game=BF3&player=%player_name%'>I-Stats Search</a><br>
+<br><a href='http://www.team-des-fra.fr/CoM/bf3.php?p=%player_name%'>TeamDes Search</a><br>
+<br><a href='http://cheatometer.hedix.de/?p=%player_name%'>Hedix Search</a><br>";
                         break;
                     case GameVersionEnum.BF4:
                         CustomHTMLAddition = @"<br><a href='http://battlelog.battlefield.com/bf4/de/user/%player_name%/'>BF4 Battlelog Profile</a><br>
+<br><a href='http://bf4stats.com/pc/%player_name%'>BF4Stats Profile</a><br>
 <br><a href='http://history.anticheatinc.com/bf4/?searchvalue=%player_name%'>AntiCheat, INC. Search</a><br>";
                         break;
                     default:
