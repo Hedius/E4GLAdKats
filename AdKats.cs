@@ -33207,12 +33207,7 @@ namespace PRoConEvents
                 if (_RoundMutedPlayers.ContainsKey(record.target_player.player_name))
                 {
                     _RoundMutedPlayers.Remove(record.target_player.player_name);
-                    if (record.record_source != ARecord.Sources.InGame &&
-                        record.record_source != ARecord.Sources.Automated &&
-                        record.record_source != ARecord.Sources.ServerCommand)
-                    {
-                        SendMessageToSource(record, record.GetTargetNames() + " has been unmuted.");
-                    }
+                    SendMessageToSource(record, record.GetTargetNames() + " has been unmuted.");
                     PlayerSayMessage(record.target_player.player_name, _UnMutePlayerMessage);
                 }
                 else
