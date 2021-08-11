@@ -525,6 +525,7 @@ namespace PRoConEvents
         private String _MutedPlayerKickMessage = "Talking excessively while muted.";
         private String _MutedPlayerKillMessage = "Do not talk while muted. You can speak again next round.";
         private String _MutedPlayerMuteMessage = "You have been muted by an admin, talking will cause punishment. You can speak again next round.";
+        private String _UnMutePlayerMessage = "You have been unmuted by an admin.";
         private Boolean _MutedPlayerIgnoreCommands = true;
 
         //Surrender
@@ -1842,6 +1843,7 @@ namespace PRoConEvents
                     buildList.Add(new CPluginVariable(GetSettingSection("A11") + t + "On-Player-Muted Message", typeof(String), _MutedPlayerMuteMessage));
                     buildList.Add(new CPluginVariable(GetSettingSection("A11") + t + "On-Player-Killed Message", typeof(String), _MutedPlayerKillMessage));
                     buildList.Add(new CPluginVariable(GetSettingSection("A11") + t + "On-Player-Kicked Message", typeof(String), _MutedPlayerKickMessage));
+                    buildList.Add(new CPluginVariable(GetSettingSection("A11") + t + "On-Player-Unmuted Message", typeof(String), _UnMutePlayerMessage));
                     buildList.Add(new CPluginVariable(GetSettingSection("A11") + t + "# Chances to give player before kicking", typeof(int), _MutedPlayerChances));
                     buildList.Add(new CPluginVariable(GetSettingSection("A11") + t + "Ignore commands for mute enforcement", typeof(Boolean), _MutedPlayerIgnoreCommands));
                 }
@@ -8007,6 +8009,15 @@ namespace PRoConEvents
                         _MutedPlayerKickMessage = strValue;
                         //Once setting has been changed, upload the change to database
                         QueueSettingForUpload(new CPluginVariable(@"On-Player-Kicked Message", typeof(String), _MutedPlayerKickMessage));
+                    }
+                }
+                else if (Regex.Match(strVariable, @"On-Player-Unmuted Message").Success)
+                {
+                    if (_UnMutePlayerMessage != strValue)
+                    {
+                        _UnMutePlayerMessage = strValue;
+                        //Once setting has been changed, upload the change to database
+                        QueueSettingForUpload(new CPluginVariable(@"On-Player-Unmuted Message", typeof(String), _UnMutePlayerMessage));
                     }
                 }
                 if (Regex.Match(strVariable, @"# Chances to give player before kicking").Success)
@@ -23873,6 +23884,58 @@ namespace PRoConEvents
                             }
                         }
                         break;
+                    case "player_unmute":
+                        {
+                            //Remove previous commands awaiting confirmation
+                            CancelSourcePendingAction(record);
+
+                            if (_serverInfo.ServerType == "OFFICIAL")
+                            {
+                                SendMessageToSource(record, record.command_type.command_name + " cannot be performed on official servers.");
+                                FinalizeRecord(record);
+                                return;
+                            }
+
+                            //Parse parameters using max param count
+                            String[] parameters = Util.ParseParameters(remainingMessage, 2);
+                            switch (parameters.Length)
+                            {
+                                case 0:
+                                    if (record.record_source != ARecord.Sources.InGame)
+                                    {
+                                        SendMessageToSource(record, "You can't use a self-targeted command from outside the game.");
+                                        FinalizeRecord(record);
+                                        return;
+                                    }
+                                    record.record_message = "Self-Inflicted";
+                                    record.target_name = record.source_name;
+                                    CompleteTargetInformation(record, true, false, true);
+                                    break;
+                                case 1:
+                                    record.target_name = parameters[0];
+                                    record.record_message = "Unmuting Player";
+                                    CompleteTargetInformation(record, false, false, true);
+                                    break;
+                                case 2:
+                                    record.target_name = parameters[0];
+
+                                    //attempt to handle via pre-message ID
+                                    record.record_message = GetPreMessage(parameters[1], _RequirePreMessageUse);
+                                    if (record.record_message == null)
+                                    {
+                                        SendMessageToSource(record, "Invalid PreMessage ID, valid PreMessage IDs are 1-" + _PreMessageList.Count);
+                                        FinalizeRecord(record);
+                                        return;
+                                    }
+                                    CompleteTargetInformation(record, false, false, true);
+                                    break;
+                                default:
+                                    SendMessageToSource(record, "Invalid parameters, unable to submit.");
+                                    FinalizeRecord(record);
+                                    return;
+                            }
+                        }
+                        break;
                     case "player_join":
                         {
                             //Remove previous commands awaiting confirmation
@@ -29465,6 +29528,9 @@ namespace PRoConEvents
                     case "player_mute":
                         MuteTarget(record);
                         break;
+                    case "player_unmute":
+                        UnMuteTarget(record);
+                        break;
                     case "player_join":
                         JoinTarget(record);
                         break;
@@ -33140,6 +33206,37 @@ namespace PRoConEvents
                 FinalizeRecord(record);
             }
             Log.Debug(() => "Exiting muteTarget", 6);
+        }
+        
+        public void UnMuteTarget(ARecord record)
+        {
+            Log.Debug(() => "Entering UnMuteTarget", 6);
+            try
+            {
+                record.record_action_executed = true;
+                if (_RoundMutedPlayers.ContainsKey(record.target_player.player_name))
+                {
+                    _RoundMutedPlayers.Remove(record.target_player.player_name);
+                    if (record.record_source != ARecord.Sources.InGame &&
+                        record.record_source != ARecord.Sources.Automated &&
+                        record.record_source != ARecord.Sources.ServerCommand)
+                    {
+                        SendMessageToSource(record, record.GetTargetNames() + " has been unmuted.");
+                    }
+                    PlayerSayMessage(record.target_player.player_name, _UnMutePlayerMessage);
+                }
+                else
+                {
+                    SendMessageToSource(record, record.GetTargetNames() + " is not muted.");
+                }
+            }
+            catch (Exception e)
+            {
+                record.record_exception = new AException("Error while taking action for UnMute record.", e);
+                Log.HandleException(record.record_exception);
+                FinalizeRecord(record);
+            }
+            Log.Debug(() => "Exiting UnMuteTarget", 6);
         }
 
         public void JoinTarget(ARecord record)
@@ -39365,6 +39462,7 @@ namespace PRoConEvents
                 QueueSettingForUpload(new CPluginVariable(@"On-Player-Muted Message", typeof(String), _MutedPlayerMuteMessage));
                 QueueSettingForUpload(new CPluginVariable(@"On-Player-Killed Message", typeof(String), _MutedPlayerKillMessage));
                 QueueSettingForUpload(new CPluginVariable(@"On-Player-Kicked Message", typeof(String), _MutedPlayerKickMessage));
+                QueueSettingForUpload(new CPluginVariable(@"On-Player-Unmuted Message", typeof(String), _UnMutePlayerMessage));
                 QueueSettingForUpload(new CPluginVariable(@"# Chances to give player before kicking", typeof(Int32), _MutedPlayerChances));
                 QueueSettingForUpload(new CPluginVariable(@"Ignore commands for mute enforcement", typeof(Boolean), _MutedPlayerIgnoreCommands));
                 QueueSettingForUpload(new CPluginVariable(@"Ticket Window High", typeof(Int32), _TeamSwapTicketWindowHigh));
@@ -45654,6 +45752,11 @@ namespace PRoConEvents
                                     SendNonQuery("Adding command player_report_expire", "INSERT INTO `adkats_commands` VALUES(145, 'Invisible', 'player_report_expire', 'Log', 'Report Player (Expired)', 'expirereport', TRUE, 'Any')", true);
                                     newCommands = true;
                                 }
+                                if (!_CommandIDDictionary.ContainsKey(146))
+                                {
+                                    SendNonQuery("Adding command player_unmute", "INSERT INTO `adkats_commands` VALUES(146, 'Active', 'player_unmute', 'Log', 'Unmute Player', 'unmute', TRUE, 'Any')", true);
+                                    newCommands = true;
+                                }
                                 if (newCommands)
                                 {
                                     FetchCommands();
@@ -45694,6 +45797,7 @@ namespace PRoConEvents
             _CommandDescriptionDictionary["player_punish"] = "Increases infraction points, then punishes the player. Requires a reason.";
             _CommandDescriptionDictionary["player_forgive"] = "Decreases infraction points and informs the player. Requires a reason.";
             _CommandDescriptionDictionary["player_mute"] = "Mutes a player for the current round. Talking will cause punishment. Requires a reason.";
+            _CommandDescriptionDictionary["player_unmute"] = "Unmutes a muted player.";
             _CommandDescriptionDictionary["player_join"] = "Switches you to a players squad if there is room.";
             _CommandDescriptionDictionary["player_roundwhitelist"] = "DISABLED COMMAND";
             _CommandDescriptionDictionary["player_move"] = "When the player dies it queues them to switch teams when a slot is available.";
