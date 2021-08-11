@@ -1203,3 +1203,22 @@ Added small improvements to fuzzy player match response text.</li>
 <ul>
     <li><b>No upgrade SQL required.</b></li>
 </ul>
+
+<h4>8.0.0.7 (11-AUG-2021)</h4>
+<b>Enhancements</b><br/>
+<ul>
+	<li>Add unmute command</li>
+</ul>
+<b>Changes</b><br/>
+<ul>
+    <li>Unmute Command (player_unmute)</li>
+    <li>Settings for unmute msg</li>
+</ul>
+<b>Bugs Fixed</b><br/>
+<ul>
+	<li>No Bug Fixes</li>
+</ul>
+<b>Upgrade SQL from 4.0.0.0 - Current</b><br/>
+<ul>
+    <li><b>No upgrade SQL required.</b></li>
+</ul>
