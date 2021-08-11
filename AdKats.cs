@@ -20,11 +20,11 @@
  * Development by Daniel J. Gradinjan (ColColonCleaner)
  * 
  * AdKats.cs
- * Version 8.0.0.7
+ * Version 8.0.0.8
  * 11-AUG-2021
  * 
  * Automatic Update Information
- * <version_code>8.0.0.7</version_code>
+ * <version_code>8.0.0.8</version_code>
  */
 
 using System;
@@ -67,7 +67,7 @@ namespace PRoConEvents
     {
 
         //Current Plugin Version
-        private const String PluginVersion = "8.0.0.7";
+        private const String PluginVersion = "8.0.0.8";
 
         public enum GameVersionEnum
         {

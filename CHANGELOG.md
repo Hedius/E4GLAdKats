@@ -1222,3 +1222,21 @@ Added small improvements to fuzzy player match response text.</li>
 <ul>
     <li><b>No upgrade SQL required.</b></li>
 </ul>
+
+<h4>8.0.0.8 (11-AUG-2021)</h4>
+<b>Enhancements</b><br/>
+<ul>
+	<li>No Enchancements</li>
+</ul>
+<b>Changes</b><br/>
+<ul>
+    <li>No Changes</li>
+</ul>
+<b>Bugs Fixed</b><br/>
+<ul>
+	<li>Fix outdated repo URLs</li>
+</ul>
+<b>Upgrade SQL from 4.0.0.0 - Current</b><br/>
+<ul>
+    <li><b>No upgrade SQL required.</b></li>
+</ul>
