@@ -843,5 +843,11 @@
     "command_typeaction": "144|144",
     "target_weight": 0,
     "source_weight": 0
+  },
+  {
+    "command_typeaction": "146|146",
+    "target_weight": 10,
+    "source_weight": 0.5
   }
+
 ] 

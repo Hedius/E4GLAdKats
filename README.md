@@ -700,13 +700,12 @@
 </p>
 <h3>Player Muting</h3>
 <p>
-    Players can be muted using the mute command.
+    Players can be muted using the mute command and unmuted using the unmute command.
     Muting lasts until the end of the round.
     Players who talk in chat after being muted will be killed each time they talk (up through X chat messages).
     On the (X+1)th chat message they are kicked from the server.
     A player coming back during the same round is kicked again on their first chat message.
     No action other than kill or kick is used by this system.
-    There will be no way to un-mute players, there was a reason they were muted, and they can talk again next round.
     Admins cannot mute other admins.
 </p>
 <h3>Player Joining</h3>
@@ -1503,6 +1502,20 @@ plugin.CallOtherPlugin("AdKats", "IssueCommand", command);
             The in-game command used for muting players.
             Players will be muted till the end of the round, X kills then kick if they keep talking.
             Admins cannot be muted.
+        </td>
+    </tr>
+    <tr>
+        <td><b>Un-Mute Player</b></td>
+        <td>unmute</td>
+        <td>
+            None<br/>
+            OR<br/>
+            [player]<br/>
+            OR<br/>
+            [player][reason]
+        </td>
+        <td>
+            The in-game command used for unmuting players.
         </td>
     </tr>
     <tr>
@@ -3216,6 +3229,9 @@ plugin.CallOtherPlugin("AdKats", "IssueCommand", command);
     </li>
     <li><b>'On-Player-Kicked Message'</b> - 
         The message given to players when they are kicked for talking more than X times in chat after muting.
+    </li>
+    <li><b>'On-Player-Unmuted Message'</b> - 
+        The message given to players when they are unmuted by an admin.
     </li>
     <li><b>'# Chances to give player before kicking'</b> - 
         The number of chances players get to talk after being muted before they are kicked. 
