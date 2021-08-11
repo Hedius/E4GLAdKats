@@ -49846,7 +49846,7 @@ namespace PRoConEvents
                 Log.Debug(() => "Fetching reputation definitions...", 2);
                 try
                 {
-                    repInfo = Util.ClientDownloadTimer(client, "https://raw.github.com/AdKats/AdKats/master/adkatsreputationstats.json" + "?cacherand=" + Environment.TickCount);
+                    repInfo = Util.ClientDownloadTimer(client, "https://raw.github.com/Hedius/E4GLAdKats/master/adkatsreputationstats.json" + "?cacherand=" + Environment.TickCount);
                     Log.Debug(() => "Reputation definitions fetched.", 1);
                 }
                 catch (Exception)
@@ -49917,7 +49917,7 @@ namespace PRoConEvents
                 Log.Debug(() => "Fetching special group definitions...", 2);
                 try
                 {
-                    groupInfo = Util.ClientDownloadTimer(client, "https://raw.github.com/AdKats/AdKats/master/adkatsspecialgroups.json" + "?cacherand=" + Environment.TickCount);
+                    groupInfo = Util.ClientDownloadTimer(client, "https://raw.github.com/Hedius/E4GLAdKats/master/adkatsspecialgroups.json" + "?cacherand=" + Environment.TickCount);
                     Log.Debug(() => "Special group definitions fetched.", 1);
                 }
                 catch (Exception)
@@ -61570,7 +61570,7 @@ namespace PRoConEvents
                     _plugin.Log.Debug(() => "Fetching weapon names...", 2);
                     try
                     {
-                        downloadString = _plugin.Util.ClientDownloadTimer(client, "https://raw.github.com/AdKats/AdKats/master/adkatsweaponnames.json" + "?cacherand=" + Environment.TickCount);
+                        downloadString = _plugin.Util.ClientDownloadTimer(client, "https://raw.github.com/Hedius/E4GLAdKats/master/adkatsweaponnames.json" + "?cacherand=" + Environment.TickCount);
                         _plugin.Log.Debug(() => "Weapon names fetched.", 1);
                     }
                     catch (Exception)
@@ -62205,7 +62205,7 @@ namespace PRoConEvents
                     Plugin.Log.Debug(() => "Fetching weapon statistic definitions...", 2);
                     try
                     {
-                        weaponInfo = Plugin.Util.ClientDownloadTimer(client, "https://raw.github.com/AdKats/AdKats/master/adkatsblweaponstats.json" + "?cacherand=" + Environment.TickCount);
+                        weaponInfo = Plugin.Util.ClientDownloadTimer(client, "https://raw.github.com/HediusAdKats/E4GLAdKats/master/adkatsblweaponstats.json" + "?cacherand=" + Environment.TickCount);
                         Plugin.Log.Debug(() => "Weapon statistic definitions fetched.", 1);
                     }
                     catch (Exception)
