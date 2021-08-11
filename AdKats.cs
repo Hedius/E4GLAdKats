@@ -62205,7 +62205,7 @@ namespace PRoConEvents
                     Plugin.Log.Debug(() => "Fetching weapon statistic definitions...", 2);
                     try
                     {
-                        weaponInfo = Plugin.Util.ClientDownloadTimer(client, "https://raw.github.com/Hedius/AdKats/E4GLAdKats/master/adkatsblweaponstats.json" + "?cacherand=" + Environment.TickCount);
+                        weaponInfo = Plugin.Util.ClientDownloadTimer(client, "https://raw.github.com/Hedius/E4GLAdKats/master/adkatsblweaponstats.json" + "?cacherand=" + Environment.TickCount);
                         Plugin.Log.Debug(() => "Weapon statistic definitions fetched.", 1);
                     }
                     catch (Exception)
