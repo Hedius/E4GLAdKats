@@ -31228,7 +31228,6 @@ namespace PRoConEvents
                         (
                             `player_group`,
                             `player_id`,
-                            `player_server`,
                             `player_identifier`,
                             `player_effective`,
                             `player_expiration`
@@ -31237,7 +31236,6 @@ namespace PRoConEvents
                         (
                             @player_group,
                             @player_id,
-                            @player_server,
                             @player_name,
                             UTC_TIMESTAMP(),
                             DATE_ADD(UTC_TIMESTAMP(), INTERVAL @duration_minutes MINUTE)
@@ -31255,14 +31253,13 @@ namespace PRoConEvents
                         }
                         command.Parameters.AddWithValue("@player_group", "whitelist_bf4db");
                         command.Parameters.AddWithValue("@player_id", record.target_player.player_id);
-                        command.Parameters.AddWithValue("@player_server", _serverInfo.ServerID);
                         command.Parameters.AddWithValue("@player_name", record.target_player.player_name);
                         command.Parameters.AddWithValue("@duration_minutes", record.command_numeric);
 
                         Int32 rowsAffected = SafeExecuteNonQuery(command);
                         if (rowsAffected > 0)
                         {
-                            String message = "Player " + record.GetTargetNames() + " given " + ((record.command_numeric == 10518984) ? ("permanent") : (FormatTimeString(TimeSpan.FromMinutes(record.command_numeric), 2))) + " BF4DB whitelist.";
+                            String message = "Player " + record.GetTargetNames() + " given " + ((record.command_numeric == 10518984) ? ("permanent") : (FormatTimeString(TimeSpan.FromMinutes(record.command_numeric), 2))) + " BF4DB whitelist for all servers.";
                             SendMessageToSource(record, message);
                             Log.Debug(() => message, 3);
                             FetchAllAccess(true);
