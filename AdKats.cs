@@ -48025,7 +48025,7 @@ namespace PRoConEvents
                             }
                         }
                     }
-                    SetExternalPluginSetting("BF4DB", "BF4DB|Whitelist", CPluginVariable.EncodeStringArray(bf4dbWhitelistedPlayers.ToArray()));
+                    SetExternalPluginSetting("BF4DB", "Whitelist", CPluginVariable.EncodeStringArray(bf4dbWhitelistedPlayers.ToArray()));
                 }
             }
             catch (Exception e)
