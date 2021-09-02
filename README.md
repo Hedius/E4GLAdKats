@@ -70,6 +70,7 @@
         Battlelog stats can be polled for players in the server, issuing automatic bans for damage mods, aimbots, magic bullet, and several others. 
         The LIVE system can detect damage mods and magic bullet from a single round of play. 
         DPS checks are enabled by default, with others available after a few clicks.
+        Furthermore, it is possible to send whitelists to the BF4DB plugin.
     </li>
     <li>
         <b>Surrender Vote System.</b>
@@ -1935,6 +1936,31 @@ plugin.CallOtherPlugin("AdKats", "IssueCommand", command);
         </td>
     </tr>
     <tr>
+        <td><b>BF4DB Whitelist Player</b></td>
+        <td>bf4dbwhitelist</td>
+        <td>
+            [duration or 'perm']<br/>
+            OR<br/>
+            [duration or 'perm'][player]<br/>
+            OR<br/>
+            [duration or 'perm'][player][reason]<br/>
+        </td>
+        <td>
+            The in-game command used for adding a player to BF4DB whitelist for the current server. The setting
+            "Feed BF4DB Whitelist" must be enabled to use this command.
+        </td>
+    </tr>
+    <tr>
+        <td><b>Remove BF4DB Whitelist</b></td>
+        <td>unbf4dbwhitelist</td>
+        <td>
+            [player]
+        </td>
+        <td>
+            The in-game command used for removing a player from BF4DB whitelist for the current server. "Feed BF4DB Whitelist" must be enabled to use this command.
+        </td>
+    </tr>
+    <tr>
         <td><b>Un-Spectator Blacklist Player</b></td>
         <td>unspecblacklist</td>
         <td>
@@ -3458,6 +3484,9 @@ plugin.CallOtherPlugin("AdKats", "IssueCommand", command);
     </li>
     <li><b>'Feed MULTIBalancer Even Dispersion List'</b> - 
         When enabled, the dispersion blacklist special player group is used to feed MULTIBalancer's even dispersion list.
+    </li>
+    <li><b>'Feed BF4DB Whitelist'</b> - 
+        When enabled, the BF4DB whitelist special player group is used to feed BF4DB's player whitelist.
     </li>
     <li><b>'Feed TeamKillTracker Whitelist'</b> - 
         When enabled, the TeamKillTracker whitelist special player group is used to feed TeamKillTracker's player whitelist.

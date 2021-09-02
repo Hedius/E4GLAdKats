@@ -602,7 +602,8 @@ namespace PRoConEvents
             "whitelist_anticheat",
             "whitelist_multibalancer",
             "whitelist_populator",
-            "whitelist_teamkill"
+            "whitelist_teamkill",
+            "whitelist_bf4db",
         };
         private Boolean _UsePerkExpirationNotify = false;
         private Int32 _PerkExpirationNotifyDays = 7;
@@ -612,6 +613,7 @@ namespace PRoConEvents
         private Boolean _FeedMultiBalancerWhitelist;
         private Boolean _FeedMultiBalancerWhitelist_Admins = true;
         private Boolean _FeedMultiBalancerDisperseList;
+        private Boolean _FeedBF4DBWhitelist;
         private Boolean _FeedTeamKillTrackerWhitelist;
         private Boolean _FeedTeamKillTrackerWhitelist_Admins;
         private Boolean _FeedServerReservedSlots;
@@ -2073,6 +2075,8 @@ namespace PRoConEvents
                         buildList.Add(new CPluginVariable(GetSettingSection("A16") + t + "Automatic MULTIBalancer Whitelist for Admins", typeof(Boolean), _FeedMultiBalancerWhitelist_Admins));
                     }
                     buildList.Add(new CPluginVariable(GetSettingSection("A16") + t + "Feed MULTIBalancer Even Dispersion List", typeof(Boolean), _FeedMultiBalancerDisperseList));
+                    // BF4DB
+                    buildList.Add(new CPluginVariable(GetSettingSection("A16") + t + "Feed BF4DB Whitelist", typeof(Boolean), _FeedBF4DBWhitelist));
                     //TeamKillTracker
                     buildList.Add(new CPluginVariable(GetSettingSection("A16") + t + "Feed TeamKillTracker Whitelist", typeof(Boolean), _FeedTeamKillTrackerWhitelist));
                     if (_FeedTeamKillTrackerWhitelist)
@@ -4665,6 +4669,23 @@ namespace PRoConEvents
                         FetchAllAccess(true);
                         //Once setting has been changed, upload the change to database
                         QueueSettingForUpload(new CPluginVariable(@"Automatic MULTIBalancer Whitelist for Admins", typeof(Boolean), _FeedMultiBalancerWhitelist_Admins));
+                    }
+                }
+                else if (Regex.Match(strVariable, @"Feed BF4DB Whitelist").Success)
+                {
+                    if (_serverInfo.ServerType == "OFFICIAL" && Boolean.Parse(strValue) == true)
+                    {
+                        strValue = "False";
+                        Log.Error("'" + strVariable + "' cannot be enabled on official servers.");
+                        return;
+                    }
+                    Boolean feedBF4DB = Boolean.Parse(strValue);
+                    if (feedBF4DB != _FeedBF4DBWhitelist)
+                    {
+                        _FeedBF4DBWhitelist = feedBF4DB;
+                        FetchAllAccess(true);
+                        //Once setting has been changed, upload the change to database
+                        QueueSettingForUpload(new CPluginVariable(@"Feed BF4DB Whitelist", typeof(Boolean), _FeedMultiBalancerWhitelist));
                     }
                 }
                 else if (Regex.Match(strVariable, @"Feed TeamKillTracker Whitelist").Success)
@@ -20816,6 +20837,15 @@ namespace PRoConEvents
                             }
                             Log.Debug(() => record.command_type.command_key + " record allowed to continue processing.", 5);
                             break;
+                        case "player_whitelistbf4db_remove":
+                            if (!GetMatchingASPlayersOfGroup("whitelist_bf4db", record.target_player).Any())
+                            {
+                                SendMessageToSource(record, "Matching player not in the BF4DB whitelist.");
+                                FinalizeRecord(record);
+                                return;
+                            }
+                            Log.Debug(() => record.command_type.command_key + " record allowed to continue processing.", 5);
+                            break;
                         case "player_whitelistpopulator_remove":
                             if (!GetMatchingASPlayersOfGroup("whitelist_populator", record.target_player).Any())
                             {
@@ -26368,6 +26398,136 @@ namespace PRoConEvents
                             }
                         }
                         break;
+                    case "player_whitelistbf4db":
+                        {
+                            // Rant: GOD THIS IS SO REDUNDANT - .... same code in each case here...
+                            // MY EYES ARE BLEEDING :) Hedius.
+                            //Remove previous commands awaiting confirmation
+                            CancelSourcePendingAction(record);
+
+                            if (!_FeedBF4DBWhitelist)
+                            {
+                                SendMessageToSource(record, "Enable 'Feed BF4DB Whitelist' to use this command.");
+                                FinalizeRecord(record);
+                                return;
+                            }
+
+                            String defaultReason = "BF4DB Whitelist";
+
+                            //Parse parameters using max param count
+                            String[] parameters = Util.ParseParameters(remainingMessage, 3);
+
+                            if (parameters.Length > 0)
+                            {
+                                String stringDuration = parameters[0].ToLower();
+                                Log.Debug(() => "Raw Duration: " + stringDuration, 6);
+                                if (stringDuration == "perm")
+                                {
+                                    //20 years in minutes
+                                    record.command_numeric = 10518984;
+                                    defaultReason = "Permanent " + defaultReason;
+                                }
+                                else
+                                {
+                                    //Default is minutes
+                                    Double recordDuration = 0.0;
+                                    Double durationMultiplier = 1.0;
+                                    if (stringDuration.EndsWith("s"))
+                                    {
+                                        stringDuration = stringDuration.TrimEnd('s');
+                                        durationMultiplier = (1.0 / 60.0);
+                                    }
+                                    else if (stringDuration.EndsWith("m"))
+                                    {
+                                        stringDuration = stringDuration.TrimEnd('m');
+                                        durationMultiplier = 1.0;
+                                    }
+                                    else if (stringDuration.EndsWith("h"))
+                                    {
+                                        stringDuration = stringDuration.TrimEnd('h');
+                                        durationMultiplier = 60.0;
+                                    }
+                                    else if (stringDuration.EndsWith("d"))
+                                    {
+                                        stringDuration = stringDuration.TrimEnd('d');
+                                        durationMultiplier = 1440.0;
+                                    }
+                                    else if (stringDuration.EndsWith("w"))
+                                    {
+                                        stringDuration = stringDuration.TrimEnd('w');
+                                        durationMultiplier = 10080.0;
+                                    }
+                                    else if (stringDuration.EndsWith("y"))
+                                    {
+                                        stringDuration = stringDuration.TrimEnd('y');
+                                        durationMultiplier = 525949.0;
+                                    }
+                                    if (!Double.TryParse(stringDuration, out recordDuration))
+                                    {
+                                        SendMessageToSource(record, "Invalid duration given, unable to submit.");
+                                        FinalizeRecord(record);
+                                        return;
+                                    }
+                                    record.command_numeric = (int)(recordDuration * durationMultiplier);
+                                    if (record.command_numeric <= 0)
+                                    {
+                                        SendMessageToSource(record, "Invalid duration given, unable to submit.");
+                                        FinalizeRecord(record);
+                                        return;
+                                    }
+                                    defaultReason = FormatTimeString(TimeSpan.FromMinutes(record.command_numeric), 2) + " " + defaultReason;
+                                }
+                            }
+
+                            switch (parameters.Length)
+                            {
+                                case 0:
+                                    //No parameters
+                                    SendMessageToSource(record, "No parameters given, unable to submit.");
+                                    FinalizeRecord(record);
+                                    return;
+                                case 1:
+                                    //time
+                                    if (record.record_source != ARecord.Sources.InGame)
+                                    {
+                                        SendMessageToSource(record, "You can't use a self-targeted command from outside the game.");
+                                        FinalizeRecord(record);
+                                        return;
+                                    }
+                                    record.target_name = record.source_name;
+                                    record.record_message = defaultReason;
+                                    CompleteTargetInformation(record, false, true, true);
+                                    break;
+                                case 2:
+                                    //time
+                                    //player
+                                    record.target_name = parameters[1];
+                                    record.record_message = defaultReason;
+                                    CompleteTargetInformation(record, false, true, true);
+                                    break;
+                                case 3:
+                                    //time
+                                    //player
+                                    //reason
+                                    record.target_name = parameters[1];
+                                    Log.Debug(() => "target: " + record.target_name, 6);
+                                    record.record_message = GetPreMessage(parameters[2], _RequirePreMessageUse);
+                                    if (record.record_message == null)
+                                    {
+                                        SendMessageToSource(record, "Invalid PreMessage ID, valid PreMessage IDs are 1-" + _PreMessageList.Count);
+                                        FinalizeRecord(record);
+                                        return;
+                                    }
+                                    Log.Debug(() => "" + record.record_message, 6);
+                                    CompleteTargetInformation(record, false, true, true);
+                                    break;
+                                default:
+                                    SendMessageToSource(record, "Invalid parameters, unable to submit.");
+                                    FinalizeRecord(record);
+                                    return;
+                            }
+                        }
+                        break;
                     case "player_slotreserved":
                         {
                             //Remove previous commands awaiting confirmation
@@ -27127,6 +27287,49 @@ namespace PRoConEvents
                                     break;
                                 case 1:
                                     record.record_message = "Removing Autobalance Dispersion";
+                                    record.target_name = parameters[0];
+                                    //Handle based on report ID if possible
+                                    if (!HandlePlayerReport(record))
+                                    {
+                                        CompleteTargetInformation(record, false, true, true);
+                                    }
+                                    break;
+                                default:
+                                    SendMessageToSource(record, "Invalid parameters, unable to submit.");
+                                    FinalizeRecord(record);
+                                    return;
+                            }
+                        }
+                        break;
+                    case "player_whitelistbf4db_remove":
+                        {
+                            //Remove previous commands awaiting confirmation
+                            CancelSourcePendingAction(record);
+
+                            if (!_FeedBF4DBWhitelist)
+                            {
+                                SendMessageToSource(record, "Enable 'Feed BF4DB Whitelist' to use this command.");
+                                FinalizeRecord(record);
+                                return;
+                            }
+
+                            //Parse parameters using max param count
+                            String[] parameters = Util.ParseParameters(remainingMessage, 1);
+                            switch (parameters.Length)
+                            {
+                                case 0:
+                                    if (record.record_source != ARecord.Sources.InGame)
+                                    {
+                                        SendMessageToSource(record, "You can't use a self-targeted command from outside the game.");
+                                        FinalizeRecord(record);
+                                        return;
+                                    }
+                                    record.record_message = "Removing BF4DB Whitelist";
+                                    record.target_name = record.source_name;
+                                    CompleteTargetInformation(record, true, true, false);
+                                    break;
+                                case 1:
+                                    record.record_message = "Removing BF4DB Whitelist";
                                     record.target_name = parameters[0];
                                     //Handle based on report ID if possible
                                     if (!HandlePlayerReport(record))
@@ -29575,6 +29778,9 @@ namespace PRoConEvents
                     case "player_whitelistbalance":
                         BalanceWhitelistTarget(record);
                         break;
+                    case "player_whitelistbf4db": 
+                        BF4DBWhitelistTarget(record);
+                        break;
                     case "player_slotreserved":
                         ReservedSlotTarget(record);
                         break;
@@ -29664,6 +29870,9 @@ namespace PRoConEvents
                         break;
                     case "player_blacklistdisperse_remove":
                         BalanceDisperseRemoveTarget(record);
+                        break; 
+                    case "player_whitelistbf4db_remove": 
+                        BF4DBWhitelistRemoveTarget(record);
                         break;
                     case "player_whitelistpopulator":
                         PopulatorWhitelistTarget(record);
@@ -30921,6 +31130,81 @@ namespace PRoConEvents
                 FinalizeRecord(record);
             }
             Log.Debug(() => "Exiting BalanceWhitelistTarget", 6);
+        }
+        
+        public void BF4DBWhitelistTarget(ARecord record)
+        {
+            Log.Debug(() => "Entering BF4DBWhitelistTarget", 6);
+            try
+            {
+                record.record_action_executed = true;
+                using (MySqlConnection connection = GetDatabaseConnection())
+                {
+                    using (MySqlCommand command = connection.CreateCommand())
+                    {
+                        command.CommandText = @"
+                        DELETE FROM
+                            `adkats_specialplayers`
+                        WHERE `player_group` = @player_group
+                          AND (`player_id` = @player_id OR `player_identifier` = @player_name);
+                        INSERT INTO
+                            `adkats_specialplayers`
+                        (
+                            `player_group`,
+                            `player_id`,
+                            `player_server`,
+                            `player_identifier`,
+                            `player_effective`,
+                            `player_expiration`
+                        )
+                        VALUES
+                        (
+                            @player_group,
+                            @player_id,
+                            @player_server,
+                            @player_name,
+                            UTC_TIMESTAMP(),
+                            DATE_ADD(UTC_TIMESTAMP(), INTERVAL @duration_minutes MINUTE)
+                        )";
+                        if (record.target_player.player_id <= 0)
+                        {
+                            Log.Error("Player ID invalid when assigning special player entry. Unable to complete.");
+                            SendMessageToSource(record, "Player ID invalid when assigning special player entry. Unable to complete.");
+                            FinalizeRecord(record);
+                            return;
+                        }
+                        if (record.command_numeric > 10518984)
+                        {
+                            record.command_numeric = 10518984;
+                        }
+                        command.Parameters.AddWithValue("@player_group", "whitelist_bf4db");
+                        command.Parameters.AddWithValue("@player_id", record.target_player.player_id);
+                        command.Parameters.AddWithValue("@player_server", _serverInfo.ServerID);
+                        command.Parameters.AddWithValue("@player_name", record.target_player.player_name);
+                        command.Parameters.AddWithValue("@duration_minutes", record.command_numeric);
+
+                        Int32 rowsAffected = SafeExecuteNonQuery(command);
+                        if (rowsAffected > 0)
+                        {
+                            String message = "Player " + record.GetTargetNames() + " given " + ((record.command_numeric == 10518984) ? ("permanent") : (FormatTimeString(TimeSpan.FromMinutes(record.command_numeric), 2))) + " BF4DB whitelist.";
+                            SendMessageToSource(record, message);
+                            Log.Debug(() => message, 3);
+                            FetchAllAccess(true);
+                        }
+                        else
+                        {
+                            Log.Error("Unable to add player to BF4DB whitelist. Error uploading.");
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                record.record_exception = new AException("Error while taking action for BF4DB Whitelist record.", e);
+                Log.HandleException(record.record_exception);
+                FinalizeRecord(record);
+            }
+            Log.Debug(() => "Exiting BF4DBWhitelistTarget", 6);
         }
 
         public void ReservedSlotTarget(ARecord record)
@@ -32600,6 +32884,66 @@ namespace PRoConEvents
                 FinalizeRecord(record);
             }
             Log.Debug(() => "Exiting BalanceDisperseRemoveTarget", 6);
+        }
+        
+        public void BF4DBWhitelistRemoveTarget(ARecord record)
+        {
+            Log.Debug(() => "Entering BF4DBWhitelistRemoveTarget", 6);
+            try
+            {
+                //Case for multiple targets
+                if (record.target_player == null)
+                {
+                    SendMessageToSource(record, "BF4DBWhitelistRemoveTarget not available for multiple targets.");
+                    Log.Error("BF4DBWhitelistRemoveTarget not available for multiple targets.");
+                    FinalizeRecord(record);
+                    return;
+                }
+                List<ASpecialPlayer> matchingPlayers = GetMatchingASPlayersOfGroup("whitelist_bf4db", record.target_player);
+                if (!matchingPlayers.Any())
+                {
+                    SendMessageToSource(record, "Matching player not in the BF4DB whitelist.");
+                    FinalizeRecord(record);
+                    return;
+                }
+                record.record_action_executed = true;
+                using (MySqlConnection connection = GetDatabaseConnection())
+                {
+                    Boolean updated = false;
+                    foreach (ASpecialPlayer asPlayer in matchingPlayers)
+                    {
+                        using (MySqlCommand command = connection.CreateCommand())
+                        {
+                            command.CommandText = @"DELETE FROM `adkats_specialplayers` WHERE `specialplayer_id` = @sp_id";
+                            command.Parameters.AddWithValue("@sp_id", asPlayer.specialplayer_id);
+                            Int32 rowsAffected = SafeExecuteNonQuery(command);
+                            if (rowsAffected > 0)
+                            {
+                                String message = "Player " + record.GetTargetNames() + " removed from BF4DB whitelist.";
+                                Log.Debug(() => message, 3);
+                                updated = true;
+                            }
+                            else
+                            {
+                                Log.Error("Unable to remove player from BF4DB whitelist. Error uploading.");
+                            }
+                        }
+                    }
+                    if (updated)
+                    {
+                        String message = "Player " + record.GetTargetNames() + " removed from BF4DB whitelist.";
+                        SendMessageToSource(record, message);
+                        FetchAllAccess(true);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                record.record_exception = new AException("Error while taking action for " + record.command_action.command_name + " record.", e);
+                Log.HandleException(record.record_exception);
+                FinalizeRecord(record);
+            }
+            Log.Debug(() => "Exiting BF4DBWhitelistRemoveTarget", 6);
         }
 
         public void AllCapsBlacklistRemoveTarget(ARecord record)
@@ -39192,6 +39536,7 @@ namespace PRoConEvents
                 QueueSettingForUpload(new CPluginVariable(@"Feed MULTIBalancer Whitelist", typeof(Boolean), _FeedMultiBalancerWhitelist));
                 QueueSettingForUpload(new CPluginVariable(@"Feed MULTIBalancer Even Dispersion List", typeof(Boolean), _FeedMultiBalancerDisperseList));
                 QueueSettingForUpload(new CPluginVariable(@"Automatic MULTIBalancer Whitelist for Admins", typeof(Boolean), _FeedMultiBalancerWhitelist_Admins));
+                QueueSettingForUpload(new CPluginVariable(@"Feed BF4DB Whitelist", typeof(Boolean), _FeedBF4DBWhitelist));
                 QueueSettingForUpload(new CPluginVariable(@"Feed TeamKillTracker Whitelist", typeof(Boolean), _FeedTeamKillTrackerWhitelist));
                 QueueSettingForUpload(new CPluginVariable(@"Automatic TeamKillTracker Whitelist for Admins", typeof(Boolean), _FeedTeamKillTrackerWhitelist_Admins));
                 QueueSettingForUpload(new CPluginVariable(@"Automatic Reserved Slot for Admins", typeof(Boolean), _FeedServerReservedSlots_Admins));
@@ -45646,6 +45991,16 @@ namespace PRoConEvents
                                     SendNonQuery("Adding command player_report_expire", "INSERT INTO `adkats_commands` VALUES(145, 'Invisible', 'player_report_expire', 'Log', 'Report Player (Expired)', 'expirereport', TRUE, 'Any')", true);
                                     newCommands = true;
                                 }
+                                if (!_CommandIDDictionary.ContainsKey(147))
+                                {
+                                    SendNonQuery("Adding command player_whitelistbf4db", "INSERT INTO `adkats_commands` VALUES(147, 'Active', 'player_whitelistbf4db', 'Log', 'BF4DB Whitelist Player', 'bf4dbwhitelist', TRUE, 'AnyHidden')", true);
+                                    newCommands = true;
+                                }
+                                if (!_CommandIDDictionary.ContainsKey(148))
+                                {
+                                    SendNonQuery("Adding command player_whitelistbf4db_remove", "INSERT INTO `adkats_commands` VALUES(148, 'Active', 'player_whitelistbf4db_remove', 'Log', 'Remove BF4DB Whitelist', 'unbf4dbwhitelist', TRUE, 'AnyHidden')", true);
+                                    newCommands = true;
+                                }
                                 if (newCommands)
                                 {
                                     FetchCommands();
@@ -45720,6 +46075,7 @@ namespace PRoConEvents
             _CommandDescriptionDictionary["server_swapnuke"] = "Queues all players to switch teams immediately.";
             _CommandDescriptionDictionary["player_blacklistdisperse"] = "Adds the target player to even dispersion for the server.";
             _CommandDescriptionDictionary["player_whitelistbalance"] = "Adds the target player to autobalance whitelist for the server.";
+            _CommandDescriptionDictionary["player_whitelistbf4db"] = "Adds the target player to BF4DB whitelist for the server.";
             _CommandDescriptionDictionary["player_slotreserved"] = "Adds the target player to reserved slots for the server.";
             _CommandDescriptionDictionary["player_slotspectator"] = "Adds the target player to spectator slots for the server.";
             _CommandDescriptionDictionary["player_changename"] = "Invisible command. Issued when a player changes their name.";
@@ -45770,6 +46126,7 @@ namespace PRoConEvents
             _CommandDescriptionDictionary["player_slotreserved_remove"] = "Removes a player from reserved slot list.";
             _CommandDescriptionDictionary["player_whitelistbalance_remove"] = "Removes a player from autobalance whitelist.";
             _CommandDescriptionDictionary["player_blacklistdisperse_remove"] = "Removes a player from autobalance dispersion.";
+            _CommandDescriptionDictionary["player_whitelistbfdb_remove"] = "Removes a player from BF4DB whitelist.";
             _CommandDescriptionDictionary["player_whitelistpopulator"] = "Whitelists a player to be considered a populator.";
             _CommandDescriptionDictionary["player_whitelistpopulator_remove"] = "Removes a player from the populator whitelist.";
             _CommandDescriptionDictionary["player_whitelistteamkill"] = "Whitelists a player from being acted on by TeamKillTracker.";
@@ -47075,6 +47432,7 @@ namespace PRoConEvents
             UpdateMULTIBalancerWhitelist();
             UpdateMULTIBalancerDisperseList();
             UpdateTeamKillTrackerWhitelist();
+            UpdateBF4DBWhitelist();
             ExecuteCommand("procon.protected.send", "reservedSlotsList.list");
             Thread.Sleep(50);
             UpdateReservedSlots();
@@ -47633,6 +47991,49 @@ namespace PRoConEvents
             catch (Exception e)
             {
                 Log.HandleException(new AException("Error while updating TeamKillTracker whitelist.", e));
+            }
+        }
+
+        private void UpdateBF4DBWhitelist()
+        {
+            try
+            {
+                if (_FeedBF4DBWhitelist)
+                {
+                    List<string> bf4dbWhitelistedPlayers = new List<String>();
+                    //Pull players from special player cache
+                    List<ASpecialPlayer> whitelistedPlayers = GetVerboseASPlayersOfGroup("whitelist_bf4db");
+                    if (whitelistedPlayers.Any())
+                    {
+                        foreach (ASpecialPlayer asPlayer in whitelistedPlayers)
+                        {
+                            String playerIdentifier = null;
+                            if (asPlayer.player_object != null && !String.IsNullOrEmpty(asPlayer.player_object.player_name))
+                            {
+                                playerIdentifier = asPlayer.player_object.player_name;
+                            }
+                            else
+                            {
+                                playerIdentifier = asPlayer.player_identifier;
+                            }
+                            //Skip if no valid info found
+                            if (String.IsNullOrEmpty(playerIdentifier))
+                            {
+                                Log.Error("Player under whitelist_bf4db was not valid. Unable to add to BF4DB whitelist.");
+                                continue;
+                            }
+                            if (!bf4dbWhitelistedPlayers.Contains(playerIdentifier))
+                            {
+                                bf4dbWhitelistedPlayers.Add(playerIdentifier);
+                            }
+                        }
+                    }
+                    SetExternalPluginSetting("BF4DB", "BF4DB|Whitelist", CPluginVariable.EncodeStringArray(bf4dbWhitelistedPlayers.ToArray()));
+                }
+            }
+            catch (Exception e)
+            {
+                Log.HandleException(new AException("Error while updating BF4DB whitelist.", e));
             }
         }
 
