@@ -1103,7 +1103,7 @@ namespace PRoConEvents
             String concat = @"
             <p>
                 <a href='https://github.com/Hedius/E4GLAdKats' name=adkats>
-                    <img src='https://raw.githubusercontent.com/Hedius/E4GLAdKats/master/images/AdKats.jpg' alt='AdKats Advanced In-Game Admin Tools'>
+                    <img src='https://raw.githubusercontent.com/Hedius/E4GLAdKats/main/images/AdKats.jpg' alt='AdKats Advanced In-Game Admin Tools'>
                 </a>
             </p>";
             try
@@ -9438,7 +9438,7 @@ namespace PRoConEvents
                     Log.Debug(() => "Fetching plugin links...", 2);
                     try
                     {
-                        _pluginLinks = Util.ClientDownloadTimer(client, "https://raw.github.com/Hedius/E4GLAdKats/master/LINKS.md?cacherand=" + Environment.TickCount);
+                        _pluginLinks = Util.ClientDownloadTimer(client, "https://raw.github.com/Hedius/E4GLAdKats/main/LINKS.md?cacherand=" + Environment.TickCount);
                         Log.Debug(() => "Plugin links fetched.", 1);
                     }
                     catch (Exception)
@@ -9457,7 +9457,7 @@ namespace PRoConEvents
                     Log.Debug(() => "Fetching plugin readme...", 2);
                     try
                     {
-                        _pluginDescription = Util.ClientDownloadTimer(client, "https://raw.github.com/Hedius/E4GLAdKats/master/README.md?cacherand=" + Environment.TickCount);
+                        _pluginDescription = Util.ClientDownloadTimer(client, "https://raw.github.com/Hedius/E4GLAdKats/main/README.md?cacherand=" + Environment.TickCount);
                         Log.Debug(() => "Plugin readme fetched.", 1);
                     }
                     catch (Exception)
@@ -9476,7 +9476,7 @@ namespace PRoConEvents
                     Log.Debug(() => "Fetching plugin changelog...", 2);
                     try
                     {
-                        _pluginChangelog = Util.ClientDownloadTimer(client, "https://raw.github.com/Hedius/E4GLAdKats/master/CHANGELOG.md?cacherand=" + Environment.TickCount);
+                        _pluginChangelog = Util.ClientDownloadTimer(client, "https://raw.github.com/Hedius/E4GLAdKats/main/CHANGELOG.md?cacherand=" + Environment.TickCount);
                         Log.Debug(() => "Plugin changelog fetched.", 1);
                     }
                     catch (Exception)
@@ -39160,7 +39160,7 @@ namespace PRoConEvents
                         Log.Debug(() => "Fetching plugin changelog...", 2);
                         try
                         {
-                            command.CommandText = Util.ClientDownloadTimer(client, "https://raw.github.com/Hedius/E4GLAdKats/master/adkats.sql?cacherand=" + Environment.TickCount);
+                            command.CommandText = Util.ClientDownloadTimer(client, "https://raw.github.com/Hedius/E4GLAdKats/main/adkats.sql?cacherand=" + Environment.TickCount);
                             Log.Debug(() => "SQL setup script fetched.", 1);
                         }
                         catch (Exception)
@@ -50241,7 +50241,7 @@ namespace PRoConEvents
                 Log.Debug(() => "Fetching reputation definitions...", 2);
                 try
                 {
-                    repInfo = Util.ClientDownloadTimer(client, "https://raw.github.com/Hedius/E4GLAdKats/master/adkatsreputationstats.json" + "?cacherand=" + Environment.TickCount);
+                    repInfo = Util.ClientDownloadTimer(client, "https://raw.github.com/Hedius/E4GLAdKats/main/adkatsreputationstats.json" + "?cacherand=" + Environment.TickCount);
                     Log.Debug(() => "Reputation definitions fetched.", 1);
                 }
                 catch (Exception)
@@ -50312,7 +50312,7 @@ namespace PRoConEvents
                 Log.Debug(() => "Fetching special group definitions...", 2);
                 try
                 {
-                    groupInfo = Util.ClientDownloadTimer(client, "https://raw.github.com/Hedius/E4GLAdKats/master/adkatsspecialgroups.json" + "?cacherand=" + Environment.TickCount);
+                    groupInfo = Util.ClientDownloadTimer(client, "https://raw.github.com/Hedius/E4GLAdKats/main/adkatsspecialgroups.json" + "?cacherand=" + Environment.TickCount);
                     Log.Debug(() => "Special group definitions fetched.", 1);
                 }
                 catch (Exception)
@@ -50521,7 +50521,7 @@ namespace PRoConEvents
                     String updateInfo;
                     try
                     {
-                        updateInfo = Util.ClientDownloadTimer(client, "https://raw.github.com/Hedius/E4GLAdKats/master/adkatsupdates.json" + "?cacherand=" + Environment.TickCount);
+                        updateInfo = Util.ClientDownloadTimer(client, "https://raw.github.com/Hedius/E4GLAdKats/main/adkatsupdates.json" + "?cacherand=" + Environment.TickCount);
                         Log.Debug(() => "SQL updates fetched.", 1);
                     }
                     catch (Exception)
@@ -52084,7 +52084,7 @@ namespace PRoConEvents
                             {
                                 try
                                 {
-                                    string stableURL = "https://raw.githubusercontent.com/Hedius/E4GLAdKats/master/AdKats.cs" + "?cacherand=" + Environment.TickCount;
+                                    string stableURL = "https://raw.githubusercontent.com/Hedius/E4GLAdKats/main/AdKats.cs" + "?cacherand=" + Environment.TickCount;
                                     string testURL = "https://raw.githubusercontent.com/Hedius/E4GLAdKats/test/AdKats.cs" + "?cacherand=" + Environment.TickCount;
                                     if (_pluginVersionStatus == VersionStatus.OutdatedBuild)
                                     {
@@ -52099,7 +52099,7 @@ namespace PRoConEvents
                                 {
                                     try
                                     {
-                                        string stableURL = "https://api.myrcon.net/plugins/adkats/branch/master" + "?cacherand=" + Environment.TickCount;
+                                        string stableURL = "https://api.myrcon.net/plugins/adkats/branch/main" + "?cacherand=" + Environment.TickCount;
                                         string testURL = "https://api.myrcon.net/plugins/adkats/branch/test" + "?cacherand=" + Environment.TickCount;
                                         if (_pluginVersionStatus == VersionStatus.OutdatedBuild)
                                         {
@@ -61965,7 +61965,7 @@ namespace PRoConEvents
                     _plugin.Log.Debug(() => "Fetching weapon names...", 2);
                     try
                     {
-                        downloadString = _plugin.Util.ClientDownloadTimer(client, "https://raw.github.com/Hedius/E4GLAdKats/master/adkatsweaponnames.json" + "?cacherand=" + Environment.TickCount);
+                        downloadString = _plugin.Util.ClientDownloadTimer(client, "https://raw.github.com/Hedius/E4GLAdKats/main/adkatsweaponnames.json" + "?cacherand=" + Environment.TickCount);
                         _plugin.Log.Debug(() => "Weapon names fetched.", 1);
                     }
                     catch (Exception)
@@ -62600,7 +62600,7 @@ namespace PRoConEvents
                     Plugin.Log.Debug(() => "Fetching weapon statistic definitions...", 2);
                     try
                     {
-                        weaponInfo = Plugin.Util.ClientDownloadTimer(client, "https://raw.github.com/Hedius/E4GLAdKats/master/adkatsblweaponstats.json" + "?cacherand=" + Environment.TickCount);
+                        weaponInfo = Plugin.Util.ClientDownloadTimer(client, "https://raw.github.com/Hedius/E4GLAdKats/main/adkatsblweaponstats.json" + "?cacherand=" + Environment.TickCount);
                         Plugin.Log.Debug(() => "Weapon statistic definitions fetched.", 1);
                     }
                     catch (Exception)
