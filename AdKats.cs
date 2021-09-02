@@ -20,11 +20,11 @@
  * Development by Daniel J. Gradinjan (ColColonCleaner)
  * 
  * AdKats.cs
- * Version 8.0.0.7
+ * Version 8.0.0.9
  * 11-AUG-2021
  * 
  * Automatic Update Information
- * <version_code>8.0.0.7</version_code>
+ * <version_code>8.0.0.9</version_code>
  */
 
 using System;
@@ -67,7 +67,7 @@ namespace PRoConEvents
     {
 
         //Current Plugin Version
-        private const String PluginVersion = "8.0.0.7";
+        private const String PluginVersion = "8.0.0.9";
 
         public enum GameVersionEnum
         {
@@ -33560,13 +33560,8 @@ namespace PRoConEvents
                 record.record_action_executed = true;
                 if (_RoundMutedPlayers.ContainsKey(record.target_player.player_name))
                 {
-                    _RoundMutedPlayers.Remove(record.target_player.player_name);
-                    if (record.record_source != ARecord.Sources.InGame &&
-                        record.record_source != ARecord.Sources.Automated &&
-                        record.record_source != ARecord.Sources.ServerCommand)
-                    {
-                        SendMessageToSource(record, record.GetTargetNames() + " has been unmuted.");
-                    }
+                    _RoundMutedPlayers.Remove(record.target_player.player_name); 
+                    SendMessageToSource(record, record.GetTargetNames() + " has been unmuted.");
                     PlayerSayMessage(record.target_player.player_name, _UnMutePlayerMessage);
                 }
                 else
@@ -50246,7 +50241,7 @@ namespace PRoConEvents
                 Log.Debug(() => "Fetching reputation definitions...", 2);
                 try
                 {
-                    repInfo = Util.ClientDownloadTimer(client, "https://raw.github.com/AdKats/AdKats/master/adkatsreputationstats.json" + "?cacherand=" + Environment.TickCount);
+                    repInfo = Util.ClientDownloadTimer(client, "https://raw.github.com/Hedius/E4GLAdKats/master/adkatsreputationstats.json" + "?cacherand=" + Environment.TickCount);
                     Log.Debug(() => "Reputation definitions fetched.", 1);
                 }
                 catch (Exception)
@@ -50317,7 +50312,7 @@ namespace PRoConEvents
                 Log.Debug(() => "Fetching special group definitions...", 2);
                 try
                 {
-                    groupInfo = Util.ClientDownloadTimer(client, "https://raw.github.com/AdKats/AdKats/master/adkatsspecialgroups.json" + "?cacherand=" + Environment.TickCount);
+                    groupInfo = Util.ClientDownloadTimer(client, "https://raw.github.com/Hedius/E4GLAdKats/master/adkatsspecialgroups.json" + "?cacherand=" + Environment.TickCount);
                     Log.Debug(() => "Special group definitions fetched.", 1);
                 }
                 catch (Exception)
@@ -61970,7 +61965,7 @@ namespace PRoConEvents
                     _plugin.Log.Debug(() => "Fetching weapon names...", 2);
                     try
                     {
-                        downloadString = _plugin.Util.ClientDownloadTimer(client, "https://raw.github.com/AdKats/AdKats/master/adkatsweaponnames.json" + "?cacherand=" + Environment.TickCount);
+                        downloadString = _plugin.Util.ClientDownloadTimer(client, "https://raw.github.com/Hedius/E4GLAdKats/master/adkatsweaponnames.json" + "?cacherand=" + Environment.TickCount);
                         _plugin.Log.Debug(() => "Weapon names fetched.", 1);
                     }
                     catch (Exception)
@@ -62605,7 +62600,7 @@ namespace PRoConEvents
                     Plugin.Log.Debug(() => "Fetching weapon statistic definitions...", 2);
                     try
                     {
-                        weaponInfo = Plugin.Util.ClientDownloadTimer(client, "https://raw.github.com/AdKats/AdKats/master/adkatsblweaponstats.json" + "?cacherand=" + Environment.TickCount);
+                        weaponInfo = Plugin.Util.ClientDownloadTimer(client, "https://raw.github.com/Hedius/E4GLAdKats/master/adkatsblweaponstats.json" + "?cacherand=" + Environment.TickCount);
                         Plugin.Log.Debug(() => "Weapon statistic definitions fetched.", 1);
                     }
                     catch (Exception)
