@@ -1258,3 +1258,24 @@ Added small improvements to fuzzy player match response text.</li>
 <ul>
     <li><b>No upgrade SQL required.</b></li>
 </ul>
+
+<h4>8.0.1.0 (02-SEP-2021)</h4>
+<b>Enhancements</b><br/>
+<ul>
+	<li>BF4DB whitelist function</li>
+    <li>Rename default branch to main.</li>
+</ul>
+<b>Changes</b><br/>
+<ul>
+    <li>New commands /bf4dbwhitelist /unbf4dbwhitelist</li>
+    <li>New setting 'Feed BF4DB Whitelist'</li>
+    <li>Possibility to whitelist groups</li>
+</ul>
+<b>Bugs Fixed</b><br/>
+<ul>
+	<li>No bugs fixed</li>
+</ul>
+<b>Upgrade SQL from 4.0.0.0 - Current</b><br/>
+<ul>
+    <li><b>No upgrade SQL required.</b></li>
+</ul>
