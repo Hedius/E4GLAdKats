@@ -1571,7 +1571,11 @@ plugin.CallOtherPlugin("AdKats", "IssueCommand", command);
         <td><b>Pull Player</b></td>
         <td>pull</td>
         <td>
-            [player]
+            [player][reason]<br/>
+            OR<br/>
+            [reportID]<br/>
+            OR<br/>
+            [reportID][reason]
         </td>
         <td>
             Pulls a player to your current squad, killing them in the process.
