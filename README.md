@@ -1525,9 +1525,11 @@ plugin.CallOtherPlugin("AdKats", "IssueCommand", command);
         <td>
             None<br/>
             OR<br/>
-            [player]<br/>
+            [player][reason]<br/>
             OR<br/>
-            [reportID]
+            [reportID]<br/>
+            OR<br/>
+            [reportID][reason]
         </td>
         <td>
             The in-game command used for moving players between teams.
@@ -1541,9 +1543,11 @@ plugin.CallOtherPlugin("AdKats", "IssueCommand", command);
         <td>
             None<br/>
             OR<br/>
-            [player]<br/>
+            [player][reason]<br/>
             OR<br/>
-            [reportID]
+            [reportID]<br/>
+            OR<br/>
+            [reportID][reason]
         </td>
         <td>
             The in-game command used for force-moving players between teams.

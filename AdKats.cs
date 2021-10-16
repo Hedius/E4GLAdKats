@@ -21371,7 +21371,7 @@ namespace PRoConEvents
                             }
 
                             //Parse parameters using max param count
-                            String[] parameters = Util.ParseParameters(remainingMessage, 1);
+                            String[] parameters = Util.ParseParameters(remainingMessage, 2);
                             switch (parameters.Length)
                             {
                                 case 0:
@@ -21385,14 +21385,40 @@ namespace PRoConEvents
                                     CompleteTargetInformation(record, true, false, false);
                                     break;
                                 case 1:
-                                    record.record_message = "MovePlayer";
                                     record.target_name = parameters[0];
+                                    //Handle based on report ID as only option
+                                    if (!HandlePlayerReport(record))
+                                    {
+                                        SendMessageToSource(record, "No reason given, unable to submit.");
+                                    }
+                                    FinalizeRecord(record);
+                                    return;
+                                case 2:
+                                    record.target_name = parameters[0];
+                              
+                                    //attempt to handle via pre-message ID
+                                    record.record_message = GetPreMessage(parameters[1], _RequirePreMessageUse);
+                                    if (record.record_message == null)
+                                    {
+                                        SendMessageToSource(record, "Invalid PreMessage ID, valid PreMessage IDs are 1-" + _PreMessageList.Count);
+                                        FinalizeRecord(record);
+                                        return;
+                                    }
+                              
                                     //Handle based on report ID if possible
                                     if (!HandlePlayerReport(record))
                                     {
-                                        CompleteTargetInformation(record, false, false, false);
+                                        if (record.record_message.Length >= _RequiredReasonLength)
+                                        {
+                                            CompleteTargetInformation(record, false, false, true);
+                                        }
+                                        else
+                                        {
+                                            SendMessageToSource(record, "Reason too short, unable to submit.");
+                                            FinalizeRecord(record);
+                                        }
                                     }
-                                    break;
+                                    break; 
                                 default:
                                     SendMessageToSource(record, "Invalid parameters, unable to submit.");
                                     FinalizeRecord(record);
@@ -21413,7 +21439,7 @@ namespace PRoConEvents
                             }
 
                             //Parse parameters using max param count
-                            String[] parameters = Util.ParseParameters(remainingMessage, 1);
+                            String[] parameters = Util.ParseParameters(remainingMessage, 2);
                             switch (parameters.Length)
                             {
                                 case 0:
@@ -21428,14 +21454,40 @@ namespace PRoConEvents
                                     CompleteTargetInformation(record, true, false, false);
                                     break;
                                 case 1:
-                                    record.record_message = "ForceMovePlayer";
                                     record.target_name = parameters[0];
+                                    //Handle based on report ID as only option
+                                    if (!HandlePlayerReport(record))
+                                    {
+                                        SendMessageToSource(record, "No reason given, unable to submit.");
+                                    }
+                                    FinalizeRecord(record);
+                                    return;
+                                case 2:
+                                    record.target_name = parameters[0];
+                              
+                                    //attempt to handle via pre-message ID
+                                    record.record_message = GetPreMessage(parameters[1], _RequirePreMessageUse);
+                                    if (record.record_message == null)
+                                    {
+                                        SendMessageToSource(record, "Invalid PreMessage ID, valid PreMessage IDs are 1-" + _PreMessageList.Count);
+                                        FinalizeRecord(record);
+                                        return;
+                                    }
+                              
                                     //Handle based on report ID if possible
                                     if (!HandlePlayerReport(record))
                                     {
-                                        CompleteTargetInformation(record, false, false, false);
+                                        if (record.record_message.Length >= _RequiredReasonLength)
+                                        {
+                                            CompleteTargetInformation(record, false, false, true);
+                                        }
+                                        else
+                                        {
+                                            SendMessageToSource(record, "Reason too short, unable to submit.");
+                                            FinalizeRecord(record);
+                                        }
                                     }
-                                    break;
+                                    break; 
                                 default:
                                     SendMessageToSource(record, "Invalid parameters, unable to submit.");
                                     FinalizeRecord(record);
