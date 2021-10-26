@@ -1315,3 +1315,21 @@ Added small improvements to fuzzy player match response text.</li>
 <ul>
     <li><b>No upgrade SQL required.</b></li>
 </ul>
+
+<h4>8.0.1.3 (27-OCT-2021)</h4>
+<b>Enhancements</b><br/>
+<ul>
+	<li>Posibility to modify the base URL of the discord widget API.</li>
+</ul>
+<b>Changes</b><br/>
+<ul>
+    <li>None</li>
+</ul>
+<b>Bugs Fixed</b><br/>
+<ul>
+	<li>No bugs fixed</li>
+</ul>
+<b>Upgrade SQL from 4.0.0.0 - Current</b><br/>
+<ul>
+    <li><b>No upgrade SQL required.</b></li>
+</ul>

@@ -1,4 +1,4 @@
-[//]: # "<latest_stable_release>8.0.1.2</latest_stable_release>"
+[//]: # "<latest_stable_release>8.0.1.3</latest_stable_release>"
 <p>
     <a name=adkats />
     <img src="https://i.imgur.com/r9pwH3A.png" alt="AdKats Advanced In-Game Admin Tools">
@@ -4013,6 +4013,12 @@ plugin.CallOtherPlugin("AdKats", "IssueCommand", command);
     </li>
     <li><b>'Enable Discord Player Monitor'</b> - 
         When enabled, the below settings will be used to monitor players in the targeted discord server.
+    </li>
+    <li><b>'Discord API URL'</b> - 
+        The base API URL. Default: https://discord.com/ This value can be changes to another URL, because 
+        the official version no longer shows discord member IDs in the widget.json. 
+        The application [DiscordVoiceStatus](https://gitlab.com/e4gl/DiscordVoiceStatus) can be used to generate a 
+        API endpoint.
     </li>
     <li><b>'Discord Server ID'</b> - 
         The ID of the discord server to monitor. This value can be found in the widget.json URL for the server.
