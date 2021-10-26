@@ -2568,6 +2568,7 @@ namespace PRoConEvents
                         discordMembers = _DiscordManager.GetMembers(false, false, false);
                         buildList.Add(new CPluginVariable(GetSettingSection(discordMonitorSection) + t + "[" + discordMembers.Count() + "] Discord All Members (Display)", typeof(String[]), discordMembers.OrderBy(aMember => (aMember.Channel != null ? aMember.Channel.Name : "_NO VOICE_")).Select(aMember => aMember.Name + " (" + (aMember.Channel != null ? aMember.Channel.Name : "_NO VOICE_") + ")").ToArray()));
                         buildList.Add(new CPluginVariable(GetSettingSection(discordMonitorSection) + t + "Enable Discord Player Monitor", typeof(Boolean), _DiscordPlayerMonitorEnable));
+                        buildList.Add(new CPluginVariable(GetSettingSection(discordMonitorSection) + t + "Discord API URL", typeof(String), _DiscordManager.APIUrl));
                         buildList.Add(new CPluginVariable(GetSettingSection(discordMonitorSection) + t + "Discord Server ID", typeof(String), _DiscordManager.ServerID));
                         buildList.Add(new CPluginVariable(GetSettingSection(discordMonitorSection) + t + "Discord Channel Names", typeof(String[]), _DiscordManager.ChannelNames));
                         buildList.Add(new CPluginVariable(GetSettingSection(discordMonitorSection) + t + "Require Voice in Discord to Issue Admin Commands", typeof(Boolean), _DiscordPlayerRequireVoiceForAdmin));
@@ -5698,6 +5699,14 @@ namespace PRoConEvents
                         QueueSettingForUpload(new CPluginVariable(@"Enable Discord Player Monitor", typeof(Boolean), _DiscordPlayerMonitorEnable));
                     }
                 }
+                else if (Regex.Match(strVariable, @"Discord API URL").Success)
+                {
+                    if (_DiscordManager.APIUrl != strValue)
+                    {
+                        _DiscordManager.APIUrl = strValue;
+                        QueueSettingForUpload(new CPluginVariable(@"Discord API URL", typeof(String), _DiscordManager.APIUrl));
+                    }
+                } 
                 else if (Regex.Match(strVariable, @"Discord Server ID").Success)
                 {
                     if (_DiscordManager.ServerID != strValue)
@@ -39767,6 +39776,7 @@ namespace PRoConEvents
                 // Discord Monitor
                 QueueSettingForUpload(new CPluginVariable(@"Monitor Discord Players", typeof(Boolean), _DiscordPlayerMonitorView));
                 QueueSettingForUpload(new CPluginVariable(@"Enable Discord Player Monitor", typeof(Boolean), _DiscordPlayerMonitorEnable));
+                QueueSettingForUpload(new CPluginVariable(@"Discord Server API URL", typeof(String), _DiscordManager.APIUrl));
                 QueueSettingForUpload(new CPluginVariable(@"Discord Server ID", typeof(String), _DiscordManager.ServerID));
                 QueueSettingForUpload(new CPluginVariable(@"Discord Channel Names", typeof(String), CPluginVariable.EncodeStringArray(_DiscordManager.ChannelNames)));
                 QueueSettingForUpload(new CPluginVariable(@"Require Voice in Discord to Issue Admin Commands", typeof(Boolean), _DiscordPlayerRequireVoiceForAdmin));
@@ -43468,8 +43478,8 @@ namespace PRoConEvents
                                 `SoldierName` = @player_name,
                                 `EAGUID` = @player_guid,
                                 `ClanTag` = @player_clanTag,
-                                `IP_Address` = @player_ip,
-                                `DiscordID` = @player_discord_id
+                                `IP_Address` = @player_ip
+                                -- `DiscordID` = @player_discord_id
                             WHERE
                                 `PlayerID` = @player_id";
                             command.Parameters.AddWithValue("@player_id", aPlayer.player_id);
@@ -43477,7 +43487,8 @@ namespace PRoConEvents
                             command.Parameters.AddWithValue("@player_guid", aPlayer.player_guid);
                             command.Parameters.AddWithValue("@player_clanTag", String.IsNullOrEmpty(aPlayer.player_clanTag) ? "" : aPlayer.player_clanTag);
                             command.Parameters.AddWithValue("@player_ip", String.IsNullOrEmpty(aPlayer.player_ip) ? null : aPlayer.player_ip);
-                            command.Parameters.AddWithValue("@player_discord_id", String.IsNullOrEmpty(aPlayer.player_discord_id) ? null : aPlayer.player_discord_id);
+                            // Do not update the discord ID from AdKats -> this is fully handled by the E4GL discord bot.
+                            // command.Parameters.AddWithValue("@player_discord_id", String.IsNullOrEmpty(aPlayer.player_discord_id) ? null : aPlayer.player_discord_id);
                             //Attempt to execute the query
                             if (SafeExecuteNonQuery(command) > 0)
                             {
@@ -62742,6 +62753,7 @@ namespace PRoConEvents
             public AdKats _plugin;
             //Settings
             public Boolean Enabled;
+            public String APIUrl = "https://discord.com/"
             public String ServerID;
             public String[] ChannelNames = { };
             public Boolean DebugMembers;
@@ -63135,7 +63147,7 @@ namespace PRoConEvents
                     _plugin.Log.Error("Cannot get discord widget URL, no server ID provided.");
                     return null;
                 }
-                return "https://discordapp.com/api/servers/" + ServerID + "/widget.json";
+                return APIUrl + "api/servers/" + ServerID + "/widget.json";
             }
 
             public class DiscordMember
