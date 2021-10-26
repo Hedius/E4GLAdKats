@@ -39776,7 +39776,7 @@ namespace PRoConEvents
                 // Discord Monitor
                 QueueSettingForUpload(new CPluginVariable(@"Monitor Discord Players", typeof(Boolean), _DiscordPlayerMonitorView));
                 QueueSettingForUpload(new CPluginVariable(@"Enable Discord Player Monitor", typeof(Boolean), _DiscordPlayerMonitorEnable));
-                QueueSettingForUpload(new CPluginVariable(@"Discord Server API URL", typeof(String), _DiscordManager.APIUrl));
+                QueueSettingForUpload(new CPluginVariable(@"Discord API URL", typeof(String), _DiscordManager.APIUrl));
                 QueueSettingForUpload(new CPluginVariable(@"Discord Server ID", typeof(String), _DiscordManager.ServerID));
                 QueueSettingForUpload(new CPluginVariable(@"Discord Channel Names", typeof(String), CPluginVariable.EncodeStringArray(_DiscordManager.ChannelNames)));
                 QueueSettingForUpload(new CPluginVariable(@"Require Voice in Discord to Issue Admin Commands", typeof(Boolean), _DiscordPlayerRequireVoiceForAdmin));
