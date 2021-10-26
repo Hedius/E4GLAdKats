@@ -62753,7 +62753,7 @@ namespace PRoConEvents
             public AdKats _plugin;
             //Settings
             public Boolean Enabled;
-            public String APIUrl = "https://discord.com/"
+            public String APIUrl = "https://discord.com/";
             public String ServerID;
             public String[] ChannelNames = { };
             public Boolean DebugMembers;
