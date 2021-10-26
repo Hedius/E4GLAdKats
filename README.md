@@ -4017,7 +4017,7 @@ plugin.CallOtherPlugin("AdKats", "IssueCommand", command);
     <li><b>'Discord API URL'</b> - 
         The base API URL. Default: https://discord.com/ This value can be changes to another URL, because 
         the official version no longer shows discord member IDs in the widget.json. 
-        The application [DiscordVoiceStatus](https://gitlab.com/e4gl/DiscordVoiceStatus) can be used to generate a 
+        The application <a href="https://gitlab.com/e4gl/DiscordVoiceStatus" target="_blank">DiscordVoiceStatus</a> can be used to generate a 
         API endpoint.
     </li>
     <li><b>'Discord Server ID'</b> - 
