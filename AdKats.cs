@@ -26838,12 +26838,24 @@ namespace PRoConEvents
                                     //reason
                                     record.target_name = parameters[1];
                                     Log.Debug(() => "target: " + record.target_name, 6);
+                                    
                                     record.record_message = GetPreMessage(parameters[2], _RequirePreMessageUse);
                                     if (record.record_message == null)
                                     {
                                         SendMessageToSource(record, "Invalid PreMessage ID, valid PreMessage IDs are 1-" + _PreMessageList.Count);
                                         FinalizeRecord(record);
                                         return;
+                                    }
+
+                                    //Handle based on report ID if possible
+                                    if (!HandlePlayerReport(record))
+                                    {
+                                        if (record.record_message.Length < _RequiredReasonLength)
+                                        {
+                                            SendMessageToSource(record, "Reason too short, unable to submit.");
+                                            FinalizeRecord(record);
+                                            return;
+                                        } 
                                     }
                                     Log.Debug(() => "" + record.record_message, 6);
                                     CompleteTargetInformation(record, false, true, true);
@@ -33954,7 +33966,8 @@ namespace PRoConEvents
                 }
                 else
                 {
-                    SendMessageToSource(record, record.GetTargetNames() + " is not muted.");
+                    if (!persistentMute)
+                        SendMessageToSource(record, record.GetTargetNames() + " is not muted.");
                     FinalizeRecord(record);
                     return;
                 }
