@@ -18,13 +18,14 @@
  * Discord report posting by jbrunink
  * 
  * Development by Daniel J. Gradinjan (ColColonCleaner)
+ * Work on fork by Hedius
  * 
  * AdKats.cs
- * Version 8.0.1.3
- * 27-OCT-2021
+ * Version 8.0.1.4
+ * 28-OCT-2021
  * 
  * Automatic Update Information
- * <version_code>8.0.1.3</version_code>
+ * <version_code>8.0.1.4</version_code>
  */
 
 using System;
@@ -67,7 +68,7 @@ namespace PRoConEvents
     {
 
         //Current Plugin Version
-        private const String PluginVersion = "8.0.1.3";
+        private const String PluginVersion = "8.0.1.4";
 
         public enum GameVersionEnum
         {
