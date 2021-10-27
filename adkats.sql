@@ -320,6 +320,9 @@ REPLACE INTO `adkats_commands` VALUES(144, 'Invisible', 'player_challenge_comple
 REPLACE INTO `adkats_commands` VALUES(146, 'Active', 'player_unmute', 'Log', 'Unmute Player', 'unmute', TRUE, 'Any');
 REPLACE INTO `adkats_commands` VALUES(147, 'Active', 'player_whitelistbf4db', 'Log', 'BF4DB Whitelist Player', 'bf4dbwhitelist', TRUE, 'AnyHidden');
 REPLACE INTO `adkats_commands` VALUES(148, 'Active', 'player_whitelistbf4db_remove', 'Log', 'Remove BF4DB Whitelist', 'unbf4dbwhitelist', TRUE, 'AnyHidden');
+REPLACE INTO `adkats_commands` VALUES(149, 'Active', 'player_persistentmute', 'Log', 'Persistent Mute Player', 'pmute', TRUE, 'AnyHidden');
+REPLACE INTO `adkats_commands` VALUES(150, 'Active', 'player_persistentmute_remove', 'Log', 'Remove Persistent Mute', 'punmute', TRUE, 'AnyHidden');
+
 
 DROP TABLE IF EXISTS `adkats_infractions_global`;
 CREATE TABLE IF NOT EXISTS `adkats_infractions_global` (

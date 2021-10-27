@@ -524,6 +524,8 @@ namespace PRoConEvents
         private Int32 _MutedPlayerChances = 5;
         private String _MutedPlayerKickMessage = "Talking excessively while muted.";
         private String _MutedPlayerKillMessage = "Do not talk while muted. You can speak again next round.";
+        private String _PersistentMutedPlayerKickMessage = "Talking excessively while muted.";  
+        private String _PersistentMutedPlayerKillMessage = "Do not talk while muted. This mute is permanent/temp.";
         private String _MutedPlayerMuteMessage = "You have been muted by an admin, talking will cause punishment. You can speak again next round.";
         private String _UnMutePlayerMessage = "You have been unmuted by an admin.";
         private Boolean _MutedPlayerIgnoreCommands = true;
@@ -1844,7 +1846,9 @@ namespace PRoConEvents
                     //Muting Settings
                     buildList.Add(new CPluginVariable(GetSettingSection("A11") + t + "On-Player-Muted Message", typeof(String), _MutedPlayerMuteMessage));
                     buildList.Add(new CPluginVariable(GetSettingSection("A11") + t + "On-Player-Killed Message", typeof(String), _MutedPlayerKillMessage));
-                    buildList.Add(new CPluginVariable(GetSettingSection("A11") + t + "On-Player-Kicked Message", typeof(String), _MutedPlayerKickMessage));
+                    buildList.Add(new CPluginVariable(GetSettingSection("A11") + t + "On-Player-Kicked Message", typeof(String), _MutedPlayerKickMessage)); 
+                    buildList.Add(new CPluginVariable(GetSettingSection("A11") + t + "Persistent On-Player-Killed Message", typeof(String), _PersistentMutedPlayerKillMessage)); 
+                    buildList.Add(new CPluginVariable(GetSettingSection("A11") + t + "Persistent On-Player-Kicked Message", typeof(String), _PersistentMutedPlayerKickMessage));
                     buildList.Add(new CPluginVariable(GetSettingSection("A11") + t + "On-Player-Unmuted Message", typeof(String), _UnMutePlayerMessage));
                     buildList.Add(new CPluginVariable(GetSettingSection("A11") + t + "# Chances to give player before kicking", typeof(int), _MutedPlayerChances));
                     buildList.Add(new CPluginVariable(GetSettingSection("A11") + t + "Ignore commands for mute enforcement", typeof(Boolean), _MutedPlayerIgnoreCommands));
@@ -8021,6 +8025,24 @@ namespace PRoConEvents
                         _MutedPlayerMuteMessage = strValue;
                         //Once setting has been changed, upload the change to database
                         QueueSettingForUpload(new CPluginVariable(@"On-Player-Muted Message", typeof(String), _MutedPlayerMuteMessage));
+                    }
+                }
+                else if (Regex.Match(strVariable, @"Persistent On-Player-Killed Message").Success)
+                {
+                    if (_PersistentMutedPlayerKillMessage != strValue)
+                    {
+                        _PersistentMutedPlayerKillMessage = strValue;
+                        //Once setting has been changed, upload the change to database
+                        QueueSettingForUpload(new CPluginVariable(@"Persistent On-Player-Killed Message", typeof(String), _PersistentMutedPlayerKillMessage));
+                    }
+                }
+                else if (Regex.Match(strVariable, @"Persistent On-Player-Kicked Message").Success)
+                {
+                    if (_PersistentMutedPlayerKickMessage != strValue)
+                    {
+                        _PersistentMutedPlayerKickMessage = strValue;
+                        //Once setting has been changed, upload the change to database
+                        QueueSettingForUpload(new CPluginVariable(@"Persistent On-Player-Kicked Message", typeof(String), _PersistentMutedPlayerKickMessage));
                     }
                 }
                 else if (Regex.Match(strVariable, @"On-Player-Killed Message").Success)
@@ -19771,6 +19793,13 @@ namespace PRoConEvents
                                 {
                                     //Check if the player is muted
                                     Log.Debug(() => "Checking for mute case.", 7);
+                                    // Persistent mute?
+                                    var persistentMute = GetMatchingVerboseASPlayersOfGroup("persistent_mute", aPlayer).Any();
+                                    // Add persistent mute to RoundMutedPlayers if the player is missing in the list.
+                                    if (persistentMute && !_RoundMutedPlayers.ContainsKey(messageObject.Speaker)) {
+                                        Log.Debug(() => "Adding missing persistent mute to RoundMutedPlayers.", 4);
+                                        _RoundMutedPlayers.Add(messageObject.Speaker, 0);
+                                    }
                                     if (_RoundMutedPlayers.ContainsKey(messageObject.Speaker))
                                     {
                                         if (_MutedPlayerIgnoreCommands && isCommand)
@@ -19796,16 +19825,19 @@ namespace PRoConEvents
                                             record.target_name = messageObject.Speaker;
                                             if (_RoundMutedPlayers[messageObject.Speaker] > _MutedPlayerChances)
                                             {
-                                                record.record_message = _MutedPlayerKickMessage;
+                                                record.record_message = persistentMute ? _PersistentMutedPlayerKickMessage : _MutedPlayerKickMessage;
                                                 record.command_type = GetCommandByKey("player_kick");
                                                 record.command_action = GetCommandByKey("player_kick");
                                             }
                                             else
                                             {
-                                                record.record_message = _MutedPlayerKillMessage;
+                                                record.record_message = persistentMute ? _PersistentMutedPlayerKillMessage : _MutedPlayerKillMessage;
                                                 record.command_type = GetCommandByKey("player_kill");
                                                 record.command_action = GetCommandByKey("player_kill");
-                                                AdminSayMessage(record.GetTargetNames() + " killed for talking while muted. They can speak again next round.");
+                                                if (!persistentMute)
+                                                    AdminSayMessage(record.GetTargetNames() + " killed for talking while muted. They can speak again next round.");
+                                                else
+                                                    AdminSayMessage(record.GetTargetNames() + " killed for talking while being perma/temp muted.");
                                             }
                                             QueueRecordForProcessing(record);
                                             continue;
@@ -20871,6 +20903,15 @@ namespace PRoConEvents
                             if (!GetMatchingASPlayersOfGroup("whitelist_bf4db", record.target_player).Any())
                             {
                                 SendMessageToSource(record, "Matching player not in the BF4DB whitelist.");
+                                FinalizeRecord(record);
+                                return;
+                            }
+                            Log.Debug(() => record.command_type.command_key + " record allowed to continue processing.", 5);
+                            break; 
+                        case "player_peristentmute_remove":
+                            if (!GetMatchingASPlayersOfGroup("persistent_mute", record.target_player).Any())
+                            {
+                                SendMessageToSource(record, "Matching player not perma/temp muted.");
                                 FinalizeRecord(record);
                                 return;
                             }
@@ -26692,6 +26733,128 @@ namespace PRoConEvents
                             }
                         }
                         break;
+                    case "player_persistentmute":
+                        {
+                            // Rant: GOD THIS IS SO REDUNDANT - .... same code in each case here...
+                            // MY EYES ARE BLEEDING :) Hedius.
+                            //Remove previous commands awaiting confirmation
+                            CancelSourcePendingAction(record);
+                    
+                            String defaultReason = "Perma/Temp Muting Player";
+                    
+                            //Parse parameters using max param count
+                            String[] parameters = Util.ParseParameters(remainingMessage, 3);
+                    
+                            if (parameters.Length > 0)
+                            {
+                                String stringDuration = parameters[0].ToLower();
+                                Log.Debug(() => "Raw Duration: " + stringDuration, 6);
+                                if (stringDuration == "perm")
+                                {
+                                    //20 years in minutes
+                                    record.command_numeric = 10518984;
+                                    defaultReason = "Permanent " + defaultReason;
+                                }
+                                else
+                                {
+                                    //Default is minutes
+                                    Double recordDuration = 0.0;
+                                    Double durationMultiplier = 1.0;
+                                    if (stringDuration.EndsWith("s"))
+                                    {
+                                        stringDuration = stringDuration.TrimEnd('s');
+                                        durationMultiplier = (1.0 / 60.0);
+                                    }
+                                    else if (stringDuration.EndsWith("m"))
+                                    {
+                                        stringDuration = stringDuration.TrimEnd('m');
+                                        durationMultiplier = 1.0;
+                                    }
+                                    else if (stringDuration.EndsWith("h"))
+                                    {
+                                        stringDuration = stringDuration.TrimEnd('h');
+                                        durationMultiplier = 60.0;
+                                    }
+                                    else if (stringDuration.EndsWith("d"))
+                                    {
+                                        stringDuration = stringDuration.TrimEnd('d');
+                                        durationMultiplier = 1440.0;
+                                    }
+                                    else if (stringDuration.EndsWith("w"))
+                                    {
+                                        stringDuration = stringDuration.TrimEnd('w');
+                                        durationMultiplier = 10080.0;
+                                    }
+                                    else if (stringDuration.EndsWith("y"))
+                                    {
+                                        stringDuration = stringDuration.TrimEnd('y');
+                                        durationMultiplier = 525949.0;
+                                    }
+                                    if (!Double.TryParse(stringDuration, out recordDuration))
+                                    {
+                                        SendMessageToSource(record, "Invalid duration given, unable to submit.");
+                                        FinalizeRecord(record);
+                                        return;
+                                    }
+                                    record.command_numeric = (int)(recordDuration * durationMultiplier);
+                                    if (record.command_numeric <= 0)
+                                    {
+                                        SendMessageToSource(record, "Invalid duration given, unable to submit.");
+                                        FinalizeRecord(record);
+                                        return;
+                                    }
+                                    defaultReason = FormatTimeString(TimeSpan.FromMinutes(record.command_numeric), 2) + " " + defaultReason;
+                                }
+                            }
+                    
+                            switch (parameters.Length)
+                            {
+                                case 0:
+                                    //No parameters
+                                    SendMessageToSource(record, "No parameters given, unable to submit.");
+                                    FinalizeRecord(record);
+                                    return; 
+                                case 1:
+                                    //time
+                                    if (record.record_source != ARecord.Sources.InGame)
+                                    {
+                                        SendMessageToSource(record, "You can't use a self-targeted command from outside the game.");
+                                        FinalizeRecord(record);
+                                        return;
+                                    }
+                                    record.target_name = record.source_name;
+                                    record.record_message = defaultReason;
+                                    CompleteTargetInformation(record, false, true, true);
+                                    break;
+                                case 2:
+                                    //time
+                                    //player
+                                    SendMessageToSource(record, "No reason given, unable to submit.");
+                                    FinalizeRecord(record);
+                                    return;
+                                case 3:
+                                    //time
+                                    //player
+                                    //reason
+                                    record.target_name = parameters[1];
+                                    Log.Debug(() => "target: " + record.target_name, 6);
+                                    record.record_message = GetPreMessage(parameters[2], _RequirePreMessageUse);
+                                    if (record.record_message == null)
+                                    {
+                                        SendMessageToSource(record, "Invalid PreMessage ID, valid PreMessage IDs are 1-" + _PreMessageList.Count);
+                                        FinalizeRecord(record);
+                                        return;
+                                    }
+                                    Log.Debug(() => "" + record.record_message, 6);
+                                    CompleteTargetInformation(record, false, true, true);
+                                    break;
+                                default:
+                                    SendMessageToSource(record, "Invalid parameters, unable to submit.");
+                                    FinalizeRecord(record);
+                                    return;
+                            }
+                        }
+                        break;
                     case "player_slotreserved":
                         {
                             //Remove previous commands awaiting confirmation
@@ -29822,7 +29985,11 @@ namespace PRoConEvents
                     case "player_mute":
                         MuteTarget(record);
                         break;
-                    case "player_unmute":
+                    case "player_persistentmute": 
+                        PersistentMuteTarget(record);
+                        break;
+                    case "player_unmute": 
+                    case "player_persistentmute_remove":
                         UnMuteTarget(record);
                         break;
                     case "player_join":
@@ -33640,22 +33807,158 @@ namespace PRoConEvents
             Log.Debug(() => "Exiting muteTarget", 6);
         }
         
-        public void UnMuteTarget(ARecord record)
+        public void PersistentMuteTarget(ARecord record)
         {
-            Log.Debug(() => "Entering UnMuteTarget", 6);
+            Log.Debug(() => "Entering PersistentMuteTarget", 6);
+            if (HasAccess(record.target_player, GetCommandByKey("player_persistentmute")))
+            {
+                SendMessageToSource(record, "You can't mute an admin.");
+                FinalizeRecord(record);
+                return;
+            }
+
             try
             {
                 record.record_action_executed = true;
+                using (MySqlConnection connection = GetDatabaseConnection())
+                {
+                    using (MySqlCommand command = connection.CreateCommand())
+                    {
+                        command.CommandText = @"
+                        DELETE FROM
+                            `adkats_specialplayers`
+                        WHERE `player_group` = @player_group
+                          AND (`player_id` = @player_id OR `player_identifier` = @player_name);
+                        INSERT INTO
+                            `adkats_specialplayers`
+                        (
+                            `player_group`,
+                            `player_id`,
+                            `player_identifier`,
+                            `player_effective`,
+                            `player_expiration`
+                        )
+                        VALUES
+                        (
+                            @player_group,
+                            @player_id,
+                            @player_name,
+                            UTC_TIMESTAMP(),
+                            DATE_ADD(UTC_TIMESTAMP(), INTERVAL @duration_minutes MINUTE)
+                        )";
+                        if (record.target_player.player_id <= 0)
+                        {
+                            Log.Error("Player ID invalid when assigning special player entry. Unable to complete.");
+                            SendMessageToSource(record, "Player ID invalid when assigning special player entry. Unable to complete.");
+                            FinalizeRecord(record);
+                            return;
+                        }
+                        if (record.command_numeric > 10518984)
+                        {
+                            record.command_numeric = 10518984;
+                        }
+                        command.Parameters.AddWithValue("@player_group", "persistent_mute");
+                        command.Parameters.AddWithValue("@player_id", record.target_player.player_id);
+                        command.Parameters.AddWithValue("@player_name", record.target_player.player_name);
+                        command.Parameters.AddWithValue("@duration_minutes", record.command_numeric);
+        
+                        Int32 rowsAffected = SafeExecuteNonQuery(command);
+                        if (rowsAffected > 0)
+                        {
+                            String message = "Player " + record.GetTargetNames() + " given " + ((record.command_numeric == 10518984) ? ("permanent") : (FormatTimeString(TimeSpan.FromMinutes(record.command_numeric), 2))) + " persistent mute on all servers.";
+                            AdminSayMessage(message);
+                            if (record.record_source != ARecord.Sources.InGame &&
+                                record.record_source != ARecord.Sources.Automated &&
+                                record.record_source != ARecord.Sources.ServerCommand)
+                            {
+                                SendMessageToSource(record, message);
+                            }
+                            Log.Debug(() => message, 3);
+                            FetchAllAccess(true);
+                        }
+                        else
+                        {
+                            Log.Error("Unable to add player to persistent mute list. Error uploading.");
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                record.record_exception = new AException("Error while taking action for persistent mute record.", e);
+                Log.HandleException(record.record_exception);
+                FinalizeRecord(record);
+            }
+            Log.Debug(() => "Exiting PersistentMuteTarget", 6);
+        }
+        
+        public void UnMuteTarget(ARecord record)
+        {
+            Log.Debug(() => "Entering UnMuteTarget", 6);
+            try 
+            {
+                //Case for multiple targets
+                if (record.target_player == null)
+                {
+                    SendMessageToSource(record, "UnMuteTarget not available for multiple targets.");
+                    Log.Error("UnMuteTarget not available for multiple targets.");
+                    FinalizeRecord(record);
+                    return;
+                }
+                var persistentMute = GetMatchingVerboseASPlayersOfGroup("persistent_mute", record.target_player).Any();
+                if (persistentMute) 
+                { 
+                    List<ASpecialPlayer> matchingPlayers = GetMatchingASPlayersOfGroup("persistent_mute", record.target_player);
+                    if (!matchingPlayers.Any())
+                    {
+                        SendMessageToSource(record, "Matching player not in the persistent mute list.");
+                        FinalizeRecord(record);
+                        return;
+                    }
+                    using (MySqlConnection connection = GetDatabaseConnection())
+                    {
+                        Boolean updated = false;
+                        foreach (ASpecialPlayer asPlayer in matchingPlayers)
+                        {
+                            using (MySqlCommand command = connection.CreateCommand())
+                            {
+                                command.CommandText = @"DELETE FROM `adkats_specialplayers` WHERE `specialplayer_id` = @sp_id";
+                                command.Parameters.AddWithValue("@sp_id", asPlayer.specialplayer_id);
+                                Int32 rowsAffected = SafeExecuteNonQuery(command);
+                                if (rowsAffected > 0) 
+                                {
+                                    String message = "Player " + record.GetTargetNames() + " removed from persistent mutes.";
+                                    Log.Debug(() => message, 3);
+                                    updated = true;
+                                }
+                                else 
+                                {
+                                    Log.Error("Unable to remove player from persistent mutes. Error uploading.");
+                                }
+                            }
+                        }
+                        if (updated) 
+                        {
+                            String message = "Player " + record.GetTargetNames() + " has been unmuted. (removed perma/temp mute)";
+                            SendMessageToSource(record, message);
+                            FetchAllAccess(true);
+                        }
+                    }
+                }
                 if (_RoundMutedPlayers.ContainsKey(record.target_player.player_name))
                 {
                     _RoundMutedPlayers.Remove(record.target_player.player_name); 
-                    SendMessageToSource(record, record.GetTargetNames() + " has been unmuted.");
+                    if (!persistentMute)
+                        SendMessageToSource(record, record.GetTargetNames() + " has been unmuted.");
                     PlayerSayMessage(record.target_player.player_name, _UnMutePlayerMessage);
                 }
                 else
                 {
                     SendMessageToSource(record, record.GetTargetNames() + " is not muted.");
+                    FinalizeRecord(record);
+                    return;
                 }
+                record.record_action_executed = true;
             }
             catch (Exception e)
             {
@@ -39890,7 +40193,9 @@ namespace PRoConEvents
                 QueueSettingForUpload(new CPluginVariable(@"Send update if reported players leave without action", typeof(Boolean), _DiscordReportsLeftWithoutAction));
                 QueueSettingForUpload(new CPluginVariable(@"On-Player-Muted Message", typeof(String), _MutedPlayerMuteMessage));
                 QueueSettingForUpload(new CPluginVariable(@"On-Player-Killed Message", typeof(String), _MutedPlayerKillMessage));
-                QueueSettingForUpload(new CPluginVariable(@"On-Player-Kicked Message", typeof(String), _MutedPlayerKickMessage));
+                QueueSettingForUpload(new CPluginVariable(@"On-Player-Kicked Message", typeof(String), _MutedPlayerKickMessage));   
+                QueueSettingForUpload(new CPluginVariable(@"Persistent On-Player-Killed Message", typeof(String), _PersistentMutedPlayerKillMessage));
+                QueueSettingForUpload(new CPluginVariable(@"Persistent On-Player-Kicked Message", typeof(String), _PersistentMutedPlayerKickMessage));
                 QueueSettingForUpload(new CPluginVariable(@"On-Player-Unmuted Message", typeof(String), _UnMutePlayerMessage));
                 QueueSettingForUpload(new CPluginVariable(@"# Chances to give player before kicking", typeof(Int32), _MutedPlayerChances));
                 QueueSettingForUpload(new CPluginVariable(@"Ignore commands for mute enforcement", typeof(Boolean), _MutedPlayerIgnoreCommands));
@@ -46196,6 +46501,16 @@ namespace PRoConEvents
                                     SendNonQuery("Adding command player_whitelistbf4db_remove", "INSERT INTO `adkats_commands` VALUES(148, 'Active', 'player_whitelistbf4db_remove', 'Log', 'Remove BF4DB Whitelist', 'unbf4dbwhitelist', TRUE, 'AnyHidden')", true);
                                     newCommands = true;
                                 }
+                                if (!_CommandIDDictionary.ContainsKey(149))
+                                {
+                                    SendNonQuery("Adding command player_persistentmute", "INSERT INTO `adkats_commands` VALUES(149, 'Active', 'player_persistentmute', 'Log', 'Persistent Mute Player', 'pmute', TRUE, 'AnyHidden')", true);
+                                    newCommands = true;
+                                }
+                                if (!_CommandIDDictionary.ContainsKey(150))
+                                {
+                                    SendNonQuery("Adding command player_persistentmute_remove", "INSERT INTO `adkats_commands` VALUES(150, 'Active', 'player_persistentmute_remove', 'Log', 'Remove Persistent Mute', 'punmute', TRUE, 'AnyHidden')", true);
+                                    newCommands = true;
+                                }
                                 if (newCommands)
                                 {
                                     FetchCommands();
@@ -46236,7 +46551,9 @@ namespace PRoConEvents
             _CommandDescriptionDictionary["player_punish"] = "Increases infraction points, then punishes the player. Requires a reason.";
             _CommandDescriptionDictionary["player_forgive"] = "Decreases infraction points and informs the player. Requires a reason.";
             _CommandDescriptionDictionary["player_mute"] = "Mutes a player for the current round. Talking will cause punishment. Requires a reason.";
+            _CommandDescriptionDictionary["player_persistentmute"] = "Mutes a player for a given time span or permanent. Talking will cause punishment. Requires a reason.";
             _CommandDescriptionDictionary["player_unmute"] = "Unmutes a muted player.";
+            _CommandDescriptionDictionary["player_persistentmute_remove"] = "Unmutes a perma/temp muted player.";
             _CommandDescriptionDictionary["player_join"] = "Switches you to a players squad if there is room.";
             _CommandDescriptionDictionary["player_roundwhitelist"] = "DISABLED COMMAND";
             _CommandDescriptionDictionary["player_move"] = "When the player dies it queues them to switch teams when a slot is available.";
