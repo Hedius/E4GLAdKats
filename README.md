@@ -133,6 +133,7 @@
         <b>Player Muting.</b>
         Players can be muted if necessary, giving warnings and kicks if they talk. 
         Automatic mute in specific cases like language can be orchestrated by other plugins like Insane limits.
+        Furthermore, /pmute can be used to issue permanent and temp mutes.
     </li>
     <li>
         <b>Player Joining.</b>
@@ -703,6 +704,7 @@
 <p>
     Players can be muted using the mute command and unmuted using the unmute command.
     Muting lasts until the end of the round.
+    Furthermore, /pmute offers the posibility to issue permanent and temporary mutes over several rounds.
     Players who talk in chat after being muted will be killed each time they talk (up through X chat messages).
     On the (X+1)th chat message they are kicked from the server.
     A player coming back during the same round is kicked again on their first chat message.
@@ -1506,8 +1508,24 @@ plugin.CallOtherPlugin("AdKats", "IssueCommand", command);
         </td>
     </tr>
     <tr>
+        <td><b>Persistent Mute Player</b></td>
+        <td>pmute</td>
+        <td>
+            [duration or 'perm']<br/>
+            OR<br/>
+            [duration or 'perm'][player][reason]<br/>
+            OR<br/>
+            [duration or 'perm'][reportID][reason]
+        </td>
+        <td>
+            The in-game command used for perma/temp muting players.
+            Admins cannot be muted.
+        </td>
+    </tr>
+
+    <tr>
         <td><b>Un-Mute Player</b></td>
-        <td>unmute</td>
+        <td>unmute and punmute</td>
         <td>
             None<br/>
             OR<br/>
@@ -3263,6 +3281,12 @@ plugin.CallOtherPlugin("AdKats", "IssueCommand", command);
     </li>
     <li><b>'On-Player-Kicked Message'</b> - 
         The message given to players when they are kicked for talking more than X times in chat after muting.
+    </li>
+    <li><b>'Persistent On-Player-Killed Message'</b> - 
+        The message given to players when they are killed for talking in chat after perma or temp muting.
+    </li>
+    <li><b>'Persistent On-Player-Kicked Message'</b> - 
+        The message given to players when they are kicked for talking more than X times in chat after perma or temp muting.
     </li>
     <li><b>'On-Player-Unmuted Message'</b> - 
         The message given to players when they are unmuted by an admin.
