@@ -114,6 +114,11 @@
 			"group_id":22,
 			"group_key":"challenge_ignore",
 			"group_name":"Challenge Ignoring Status"
+		},
+		{
+			"group_id":23,
+			"group_key":"persistent_mute",
+			"group_name":"Persistent Mute"
 		}
 	]
 }
