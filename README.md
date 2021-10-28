@@ -1522,7 +1522,6 @@ plugin.CallOtherPlugin("AdKats", "IssueCommand", command);
             Admins cannot be muted.
         </td>
     </tr>
-
     <tr>
         <td><b>Un-Mute Player</b></td>
         <td>unmute and punmute</td>
