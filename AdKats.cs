@@ -48937,8 +48937,9 @@ namespace PRoConEvents
                 }
 
                 //Import the command numeric
-                //Only required for temp ban
-                if (record.command_type.command_key == "player_ban_temp")
+                //Only required for temp ban & persistent mutes
+                //ToDo: what about whitelists?
+                if (record.command_type.command_key == "player_ban_temp" || record.command_type.command_key == "player_persistentmute")
                 {
                     if (!parsedClientInformation.ContainsKey("command_numeric"))
                     {
