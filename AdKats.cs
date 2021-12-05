@@ -21,11 +21,11 @@
  * Work on fork by Hedius
  * 
  * AdKats.cs
- * Version 8.0.1.4
- * 28-OCT-2021
+ * Version 8.0.1.5
+ * 05-DEC-2021
  * 
  * Automatic Update Information
- * <version_code>8.0.1.4</version_code>
+ * <version_code>8.0.1.5</version_code>
  */
 
 using System;
@@ -68,7 +68,7 @@ namespace PRoConEvents
     {
 
         //Current Plugin Version
-        private const String PluginVersion = "8.0.1.4";
+        private const String PluginVersion = "8.0.1.5";
 
         public enum GameVersionEnum
         {

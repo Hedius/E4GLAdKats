@@ -1,4 +1,4 @@
-[//]: # "<latest_stable_release>8.0.1.4</latest_stable_release>"
+[//]: # "<latest_stable_release>8.0.1.5</latest_stable_release>"
 <p>
     <a name=adkats />
     <img src="https://i.imgur.com/r9pwH3A.png" alt="AdKats Advanced In-Game Admin Tools">

@@ -1351,3 +1351,22 @@ Added small improvements to fuzzy player match response text.</li>
 <ul>
     <li><b>No upgrade SQL required.</b></li>
 </ul>
+
+<h4>8.0.1.5 (05-DEC-2021)</h4>
+<b>Enhancements</b><br/>
+<ul>
+	<li>None</li>
+</ul>
+<b>Changes</b><br/>
+<ul>
+    <li>None</li>
+</ul>
+<b>Bugs Fixed</b><br/>
+<ul>
+	<li>Parse command_numeric if persitent mute is called from an external plugin.</li>
+    <li>Fixed battlelog queue not working correctly when player dictionary was empty.</li>
+</ul>
+<b>Upgrade SQL from 4.0.0.0 - Current</b><br/>
+<ul>
+    <li><b>No upgrade SQL required.</b></li>
+</ul>
