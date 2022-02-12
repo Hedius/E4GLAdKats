@@ -24021,7 +24021,8 @@ namespace PRoConEvents
                         }
                         break;
                     case "player_unmute":
-                        {
+                    case "player_persistentmute_remove":
+                    {
                             //Remove previous commands awaiting confirmation
                             CancelSourcePendingAction(record);
 
