@@ -998,6 +998,8 @@
     Add [whitelistbypass] to the beginning of any spambot message and it will be sent to all players,
     ignoring this whitelist.
     Individual players can be whitelisted from seeing messages using the spamwhitelist command.
+    Furthermore, players can be whitelisted if they are in TeamSpeak or Discord voice channels or
+    if their server playtime is below a defined threshold.
 </p>
 <h3>Commander Manager</h3>
 <p>
@@ -3352,6 +3354,15 @@ plugin.CallOtherPlugin("AdKats", "IssueCommand", command);
     <li><b>'Use First Spawn Reputation and Infraction Message'</b> - 
         Whether to inform players of their current server reputation and infraction count after the first spawn message is shown.
     </li>
+    <li><b>'Enable Alternative Spawn Message for Low Server Playtime'</b> - 
+    	Wheter to send a alternative spawn message to players with a server playtime below the defined threshold.
+    </li>
+    <li><b>'Low Server Playtime Spawn Message Threshold Hours'</b> - 
+    	Players with a server playtime below this alternative threshold will receive the alternative spawn message on their first spawn.
+    </li>
+    <li><b>'Low Server Playtime Spawn Message Text'</b> - 
+	Alternative message to send players when they first spawn in the server and are below the server playtime threshold. Uses tell.
+    </li>
     <li><b>'Use Perk Expiration Notification'</b> - 
         Whether to tell players that they have perks which are expiring soon.
         This message is sent when they first spawn into the server.
@@ -3382,6 +3393,9 @@ plugin.CallOtherPlugin("AdKats", "IssueCommand", command);
         <li>
             This is my fifth message which shows on every map and mode.
         </li>
+        <li>
+            This is a message which contains a [newline] line break.
+        </li>
     </ul>
 </p>
 <p>
@@ -3409,9 +3423,24 @@ plugin.CallOtherPlugin("AdKats", "IssueCommand", command);
     <li><b>'SpamBot Tell Delay Seconds'</b> - 
         The number of seconds between each TELL message is sent.
     </li>
-    <li><b>'Exclude Admins and Whitelist from Spam'</b> - 
-        Whether to exclude admins and whitelisted players from seeing any messages sent from the SpamBot.
+    <li><b>'Exclude Whitelist from Spam'</b> - 
+        Whether to exclude whitelisted players from seeing any messages sent from the SpamBot.
+	Furthermore, this setting enables additional switches.
     </li>
+    <li><b>'Exclude Admins from Spam'</b> - 
+    	Wheter to add admins to the SpamBot whitelist.
+    </li>
+    <li><b>'Exclude Teamspeak and Discord Players from Spam'</b> - 
+	Wheter to add players in TeamSpeak and Discord voice channels to the SpamBot whitelist.
+    </li>
+    <li><b>'Exclude High Reputation players from Spam'</b> - 
+    	Wheter to add players with a good reputation (> 75) to the SpamBot whitelist.
+    </li>
+    <li><b>'Minimum Server Playtime in Hours for Receiving Spam'</b> - 
+    	This setting defines a threshold for spam messages.
+	Players with a server playtime below this threshold wil be added to the SpamBot whitelist.
+    </li>
+
 </ul>
 <h3>A12-3. Battlecry Settings - Thanks WDF:</h3>
 <ul>
