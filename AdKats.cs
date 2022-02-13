@@ -720,6 +720,9 @@ namespace PRoConEvents
         private Boolean _UseFirstSpawnMessage;
         private Boolean _useFirstSpawnRepMessage;
         private String _FirstSpawnMessage = "FIRST SPAWN MESSAGE";
+        private Boolean _EnableLowPlaytimeSpawnMessage = false;
+        private Int32 _LowPlaytimeSpawnMessageHours = 5;
+        private String _LowPlaytimeSpawnMessage = "ALTERNATIVE SPAWN MESSAGE";
         private Boolean _DisplayTicketRatesInProconChat;
         private Boolean _InformReputablePlayersOfAdminJoins = false;
         private Boolean _InformAdminsOfAdminJoins = true;
@@ -1896,6 +1899,13 @@ namespace PRoConEvents
                     {
                         buildList.Add(new CPluginVariable(GetSettingSection("A12") + t + "First spawn message text", typeof(String), _FirstSpawnMessage));
                         buildList.Add(new CPluginVariable(GetSettingSection("A12") + t + "Use First Spawn Reputation and Infraction Message", typeof(Boolean), _useFirstSpawnRepMessage));
+
+                        buildList.Add(new CPluginVariable(GetSettingSection("A12") + t + "Enable Alternative Spawn Message for Low Server Playtime", typeof(Boolean), _EnableLowPlaytimeSpawnMessage));
+                        if (_EnableLowPlaytimeSpawnMessage)
+                        {
+                             buildList.Add(new CPluginVariable(GetSettingSection("A12") + t + "Low Server Playtime Spawn Message Threshold Hours", typeof(Int32), _LowPlaytimeSpawnMessageHours));
+                             buildList.Add(new CPluginVariable(GetSettingSection("A12") + t + "Low Server Playtime Spawn Message Text", typeof(String), _LowPlaytimeSpawnMessage));
+                        }
                     }
                     buildList.Add(new CPluginVariable(GetSettingSection("A12") + t + "Use Perk Expiration Notification", typeof(Boolean), _UsePerkExpirationNotify));
                     if (_UsePerkExpirationNotify)
@@ -8238,6 +8248,40 @@ namespace PRoConEvents
                         _FirstSpawnMessage = strValue;
                         //Once setting has been changed, upload the change to database
                         QueueSettingForUpload(new CPluginVariable(@"First spawn message text", typeof(String), _FirstSpawnMessage));
+                    }
+                }
+                else if (Regex.Match(strVariable, @"Enable Alternative Spawn Message for Low Server Playtime").Success)
+                {
+                    Boolean  enableLowPlaytimeSpawnMessage = Boolean.Parse(strValue);
+                    if (enableLowPlaytimeSpawnMessage != _EnableLowPlaytimeSpawnMessage)
+                    {
+                        _EnableLowPlaytimeSpawnMessage = enableLowPlaytimeSpawnMessage;
+                        //Once setting has been changed, upload the change to database
+                        QueueSettingForUpload(new CPluginVariable(@"Enable Alternative Spawn Message for Low Server Playtime", typeof(Boolean), _EnableLowPlaytimeSpawnMessage));
+                    }
+                }
+                else if (Regex.Match(strVariable, @"Low Server Playtime Spawn Message Threshold Hours").Success)
+                {
+                    Int32 minPlaytimeHours = Int32.Parse(strValue);
+                    if (_LowPlaytimeSpawnMessageHours != minPlaytimeHours)
+                    {
+                        if (minPlaytimeHours < 0)
+                        {
+                            Log.Error("Low Server Playtime Spawn Message Threshold Hours cannot be negative.");
+                            return;
+                        }
+                        _LowPlaytimeSpawnMessageHours = minPlaytimeHours;
+                        //Once setting has been changed, upload the change to database
+                        QueueSettingForUpload(new CPluginVariable(@"Low Server Playtime Spawn Message Threshold Hours", typeof(Int32), _LowPlaytimeSpawnMessageHours));
+                    }
+                }
+                else if (Regex.Match(strVariable, @"Low Server Playtime Spawn Message Text").Success)
+                {
+                    if (_LowPlaytimeSpawnMessage != strValue)
+                    {
+                        _LowPlaytimeSpawnMessage = strValue;
+                        //Once setting has been changed, upload the change to database
+                        QueueSettingForUpload(new CPluginVariable(@"Low Server Playtime Spawn Message Text", typeof(String), _LowPlaytimeSpawnMessage));
                     }
                 }
                 else if (Regex.Match(strVariable, @"Use First Spawn Reputation and Infraction Message").Success)
@@ -40292,6 +40336,9 @@ namespace PRoConEvents
                 QueueSettingForUpload(new CPluginVariable(@"Require Use of Pre-Messages", typeof(Boolean), _RequirePreMessageUse));
                 QueueSettingForUpload(new CPluginVariable(@"Use first spawn message", typeof(Boolean), _UseFirstSpawnMessage));
                 QueueSettingForUpload(new CPluginVariable(@"First spawn message text", typeof(String), _FirstSpawnMessage));
+                QueueSettingForUpload(new CPluginVariable(@"Enable Alternative Spawn Message for Low Server Playtime", typeof(Boolean), _EnableLowPlaytimeSpawnMessage));
+                QueueSettingForUpload(new CPluginVariable(@"Low Server Playtime Spawn Message Threshold Hours", typeof(Int32), _LowPlaytimeSpawnMessageHours));
+                QueueSettingForUpload(new CPluginVariable(@"Low Server Playtime Spawn Message Text", typeof(String), _LowPlaytimeSpawnMessage));
                 QueueSettingForUpload(new CPluginVariable(@"Use First Spawn Reputation and Infraction Message", typeof(Boolean), _useFirstSpawnRepMessage));
                 QueueSettingForUpload(new CPluginVariable(@"Use Perk Expiration Notification", typeof(Boolean), _UsePerkExpirationNotify));
                 QueueSettingForUpload(new CPluginVariable(@"Perk Expiration Notify Days Remaining", typeof(Int32), _PerkExpirationNotifyDays));
