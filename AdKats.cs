@@ -19050,7 +19050,7 @@ namespace PRoConEvents
 
         public Boolean OnlineNonWhitelistSayMessage(String message, Boolean displayProconChat)
         {
-            Boolean nonAdminsTold = false;
+            Boolean nonWhitelistedTold = false;
             try
             {
                 Dictionary<String, APlayer> whitelistedPlayers = GetOnlinePlayerDictionaryOfGroup("whitelist_spambot");
@@ -19058,11 +19058,12 @@ namespace PRoConEvents
                 {
                     if (!whitelistedPlayers.ContainsKey(aPlayer.player_name))
                     {
-                        if ((aPlayer.player_reputation >= _reputationThresholdGood && !PlayerIsAdmin(aPlayer)) ||
+                        // Hedius: Remove !PlayerIsAdmin(aPlayer)? This blocks this exclusion for admins hmmm
+                        if ((_spamBotExcludeHighReputation && aPlayer.player_reputation >= _reputationThresholdGood && !PlayerIsAdmin(aPlayer)) ||
                             (message.ToLower().Contains("donat") && aPlayer.player_serverplaytime.TotalHours <= 5.0) ||
                             (message.ToLower().Contains("reserve") && _populationStatus != PopulationState.High) ||
-                            _TeamspeakPlayers.ContainsKey(aPlayer.player_name) ||
-                            _DiscordPlayers.ContainsKey(aPlayer.player_name))
+                            (_spamBotExcludeTeamspeakDiscord && (_TeamspeakPlayers.ContainsKey(aPlayer.player_name) || _DiscordPlayers.ContainsKey(aPlayer.player_name))) ||
+                             aPlayer.player_serverplaytime.TotalHours <= (double)_spamBotMinPlaytimeHours)
                         {
                             whitelistedPlayers[aPlayer.player_name] = aPlayer;
                         }
@@ -19084,11 +19085,11 @@ namespace PRoConEvents
                 {
                     whitelistedPlayers.Clear();
                 }
-                if (FetchOnlineAdminSoldiers().Any() || whitelistedPlayers.Any())
+                if (whitelistedPlayers.Any())
                 {
                     Thread nonAdminSayThread = new Thread(new ThreadStart(delegate
                     {
-                        Log.Debug(() => "Starting an online non-admin say thread.", 8);
+                        Log.Debug(() => "Starting an online non-whitelist say thread.", 8);
                         try
                         {
                             Thread.CurrentThread.Name = "OnlineNonAdminSay";
@@ -19100,25 +19101,25 @@ namespace PRoConEvents
                             }
                             if (displayProconChat)
                             {
-                                ProconChatWrite(((spambotMessage) ? (Log.FBold(Log.CPink("SpamBot")) + " ") : ("")) + "Say (Admins " + ((whitelistedPlayers.Any()) ? ("& " + whitelistedPlayers.Count + " Others ") : ("")) + "Whitelisted) > " + message);
+                                ProconChatWrite(((spambotMessage) ? (Log.FBold(Log.CPink("SpamBot")) + " ") : ("")) + "Say (" + (!_spamBotExcludeAdmins ? "Admins & " : "")  + whitelistedPlayers.Count + " Whitelisted Players) > " + message);
                             }
                             //Process will take ~2 seconds for a full server
-                            foreach (APlayer aPlayer in FetchOnlineNonAdminSoldiers())
+                            foreach (APlayer aPlayer in _PlayerDictionary.Values.ToList())
                             {
                                 if (whitelistedPlayers.ContainsKey(aPlayer.player_name))
                                 {
                                     continue;
                                 }
-                                nonAdminsTold = true;
+                                nonWhitelistedTold = true;
                                 aPlayer.Say(message, false, 1);
                                 Thread.Sleep(30);
                             }
                         }
                         catch (Exception)
                         {
-                            Log.HandleException(new AException("Error while running online non-admin say."));
+                            Log.HandleException(new AException("Error while running online non-whitelist say."));
                         }
-                        Log.Debug(() => "Exiting an online non-admin say thread.", 8);
+                        Log.Debug(() => "Exiting an online non-whitelist say thread.", 8);
                         Threading.StopWatchdog();
                     }));
                     Threading.StartWatchdog(nonAdminSayThread);
@@ -19132,7 +19133,7 @@ namespace PRoConEvents
             {
                 Log.HandleException(new AException("Error running non-whitelist admin say.", e));
             }
-            return nonAdminsTold;
+            return nonWhitelistedTold;
         }
 
         public Boolean OnlineNonWhitelistYellMessage(String message)
@@ -19142,7 +19143,7 @@ namespace PRoConEvents
 
         public Boolean OnlineNonWhitelistYellMessage(String message, Boolean displayProconChat)
         {
-            Boolean nonAdminsTold = false;
+            Boolean nonWhitelistedTold = false;
             try
             {
                 Dictionary<String, APlayer> whitelistedPlayers = GetOnlinePlayerDictionaryOfGroup("whitelist_spambot");
@@ -19150,11 +19151,11 @@ namespace PRoConEvents
                 {
                     if (!whitelistedPlayers.ContainsKey(aPlayer.player_name))
                     {
-                        if ((aPlayer.player_reputation >= _reputationThresholdGood && !PlayerIsAdmin(aPlayer)) ||
+                        if ((_spamBotExcludeHighReputation && aPlayer.player_reputation >= _reputationThresholdGood && !PlayerIsAdmin(aPlayer)) ||
                             (message.ToLower().Contains("donat") && aPlayer.player_serverplaytime.TotalHours <= 50.0) ||
                             (message.ToLower().Contains("reserve") && _populationStatus != PopulationState.High) ||
-                            _TeamspeakPlayers.ContainsKey(aPlayer.player_name) ||
-                            _DiscordPlayers.ContainsKey(aPlayer.player_name))
+                            (_spamBotExcludeTeamspeakDiscord && (_TeamspeakPlayers.ContainsKey(aPlayer.player_name) || _DiscordPlayers.ContainsKey(aPlayer.player_name))) ||
+                            aPlayer.player_serverplaytime.TotalHours <= (double)_spamBotMinPlaytimeHours)
                         {
                             whitelistedPlayers[aPlayer.player_name] = aPlayer;
                         }
@@ -19176,11 +19177,11 @@ namespace PRoConEvents
                 {
                     whitelistedPlayers.Clear();
                 }
-                if (FetchOnlineAdminSoldiers().Any() || whitelistedPlayers.Any())
+                if (whitelistedPlayers.Any())
                 {
                     Thread nonAdminYellThread = new Thread(new ThreadStart(delegate
                     {
-                        Log.Debug(() => "Starting an online non-admin yell thread.", 8);
+                        Log.Debug(() => "Starting an online non-whitelist yell thread.", 8);
                         try
                         {
                             Thread.CurrentThread.Name = "OnlineNonAdminYell";
@@ -19192,25 +19193,25 @@ namespace PRoConEvents
                             }
                             if (displayProconChat)
                             {
-                                ProconChatWrite(((spambotMessage) ? (Log.FBold(Log.CPink("SpamBot")) + " ") : ("")) + "Yell[" + _YellDuration + "s] (Admins " + ((whitelistedPlayers.Any()) ? ("& " + whitelistedPlayers.Count + " Others ") : ("")) + "Whitelisted) > " + message);
+                                ProconChatWrite(((spambotMessage) ? (Log.FBold(Log.CPink("SpamBot")) + " ") : ("")) + "Yell[" + _YellDuration + "s] (" + (!_spamBotExcludeAdmins ? "Admins & " : "")  + whitelistedPlayers.Count + " Whitelisted Players) > " + message);
                             }
                             //Process will take ~2 seconds for a full server
-                            foreach (APlayer aPlayer in FetchOnlineNonAdminSoldiers())
+                            foreach (APlayer aPlayer in _PlayerDictionary.Values.ToList())
                             {
                                 if (whitelistedPlayers.ContainsKey(aPlayer.player_name))
                                 {
                                     continue;
                                 }
-                                nonAdminsTold = true;
+                                nonWhitelistedTold = true;
                                 PlayerYellMessage(aPlayer.player_name, message, false, 1);
                                 Thread.Sleep(30);
                             }
                         }
                         catch (Exception)
                         {
-                            Log.HandleException(new AException("Error while running online non-admin yell."));
+                            Log.HandleException(new AException("Error while running online non-whitelist yell."));
                         }
-                        Log.Debug(() => "Exiting an online non-admin yell thread.", 8);
+                        Log.Debug(() => "Exiting an online non-whitelist yell thread.", 8);
                         Threading.StopWatchdog();
                     }));
                     Threading.StartWatchdog(nonAdminYellThread);
@@ -19224,7 +19225,7 @@ namespace PRoConEvents
             {
                 Log.HandleException(new AException("Error running non-whitelist admin yell.", e));
             }
-            return nonAdminsTold;
+            return nonWhitelistedTold;
         }
 
         public Boolean OnlineNonWhitelistTellMessage(String message)
@@ -19234,7 +19235,7 @@ namespace PRoConEvents
 
         public Boolean OnlineNonWhitelistTellMessage(String message, Boolean displayProconChat)
         {
-            Boolean nonAdminsTold = false;
+            Boolean nonWhitelistedTold = false;
             try
             {
                 Dictionary<String, APlayer> whitelistedPlayers = GetOnlinePlayerDictionaryOfGroup("whitelist_spambot");
@@ -19242,11 +19243,11 @@ namespace PRoConEvents
                 {
                     if (!whitelistedPlayers.ContainsKey(aPlayer.player_name))
                     {
-                        if ((aPlayer.player_reputation >= _reputationThresholdGood && !PlayerIsAdmin(aPlayer)) ||
+                        if ((_spamBotExcludeHighReputation && aPlayer.player_reputation >= _reputationThresholdGood && !PlayerIsAdmin(aPlayer)) ||
                             (message.ToLower().Contains("donat") && aPlayer.player_serverplaytime.TotalHours <= 50.0) ||
                             (message.ToLower().Contains("reserve") && _populationStatus != PopulationState.High) ||
-                            _TeamspeakPlayers.ContainsKey(aPlayer.player_name) ||
-                            _DiscordPlayers.ContainsKey(aPlayer.player_name))
+                            (_spamBotExcludeTeamspeakDiscord && (_TeamspeakPlayers.ContainsKey(aPlayer.player_name) || _DiscordPlayers.ContainsKey(aPlayer.player_name))) ||
+                             aPlayer.player_serverplaytime.TotalHours <= (double)_spamBotMinPlaytimeHours)
                         {
                             whitelistedPlayers[aPlayer.player_name] = aPlayer;
                         }
@@ -19272,7 +19273,7 @@ namespace PRoConEvents
                 {
                     Thread nonAdminTellThread = new Thread(new ThreadStart(delegate
                     {
-                        Log.Debug(() => "Starting an online non-admin tell thread.", 8);
+                        Log.Debug(() => "Starting an online non-whitelist tell thread.", 8);
                         try
                         {
                             Thread.CurrentThread.Name = "OnlineNonAdminTell";
@@ -19284,25 +19285,25 @@ namespace PRoConEvents
                             }
                             if (displayProconChat)
                             {
-                                ProconChatWrite(((spambotMessage) ? (Log.FBold(Log.CPink("SpamBot")) + " ") : ("")) + "Tell[" + _YellDuration + "s] (Admins " + ((whitelistedPlayers.Any()) ? ("& " + whitelistedPlayers.Count + " Others ") : ("")) + "Whitelisted) > " + message);
+                                ProconChatWrite(((spambotMessage) ? (Log.FBold(Log.CPink("SpamBot")) + " ") : ("")) + "Tell[" + _YellDuration + "s] (" + (!_spamBotExcludeAdmins ? "Admins & " : "")  + whitelistedPlayers.Count + " Whitelisted Players) > " + message);
                             }
                             //Process will take ~2 seconds for a full server
-                            foreach (APlayer aPlayer in FetchOnlineNonAdminSoldiers())
+                            foreach (APlayer aPlayer in _PlayerDictionary.Values.ToList())
                             {
                                 if (whitelistedPlayers.ContainsKey(aPlayer.player_name))
                                 {
                                     continue;
                                 }
-                                nonAdminsTold = true;
+                                nonWhitelistedTold = true;
                                 PlayerTellMessage(aPlayer.player_name, message, false, 1);
                                 Thread.Sleep(30);
                             }
                         }
                         catch (Exception)
                         {
-                            Log.HandleException(new AException("Error while running online non-admin tell."));
+                            Log.HandleException(new AException("Error while running online non-whitelist tell."));
                         }
-                        Log.Debug(() => "Exiting an online non-admin tell thread.", 8);
+                        Log.Debug(() => "Exiting an online non-whitelist tell thread.", 8);
                         Threading.StopWatchdog();
                     }));
                     Threading.StartWatchdog(nonAdminTellThread);
@@ -19316,7 +19317,7 @@ namespace PRoConEvents
             {
                 Log.HandleException(new AException("Error running non-whitelist admin tell.", e));
             }
-            return nonAdminsTold;
+            return nonWhitelistedTold;
         }
 
         public Boolean OnlineAdminSayMessage(String message)
