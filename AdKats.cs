@@ -21,11 +21,11 @@
  * Work on fork by Hedius (Version >= 8.0.0.0)
  * 
  * AdKats.cs
- * Version 8.1.0.0
+ * Version 8.1.1.0
  * 13-FEB-2022
  * 
  * Automatic Update Information
- * <version_code>8.1.0.0</version_code>
+ * <version_code>8.1.1.0</version_code>
  */
 
 using System;
@@ -68,7 +68,7 @@ namespace PRoConEvents
     {
 
         //Current Plugin Version
-        private const String PluginVersion = "8.1.0.0";
+        private const String PluginVersion = "8.1.1.0";
 
         public enum GameVersionEnum
         {
@@ -48020,6 +48020,25 @@ namespace PRoConEvents
                                                     player_expiration = UtcNow().Add(TimeSpan.FromDays(7300))
                                                 });
                                             }
+                                        }
+                                    }
+                                    break;
+                                case "whitelist_spambot":
+                                    //Pull players from user list
+                                    if (_userCache.Count > 0 && _spamBotExcludeWhitelist && _spamBotExcludeAdmins)
+                                    {
+                                        foreach (APlayer aPlayer in FetchAdminSoldiers().Where(aPlayer => aPlayer.game_id == _serverInfo.GameID && !tempASPlayers.Any(asp => asp.player_object != null && asp.player_object.player_id == aPlayer.player_id)))
+                                        {
+                                            tempASPlayers.Add(new ASpecialPlayer(this)
+                                            {
+                                                player_game = (int)_serverInfo.GameID,
+                                                player_server = (int)_serverInfo.ServerID,
+                                                player_group = asGroup,
+                                                player_identifier = aPlayer.player_name,
+                                                player_object = aPlayer,
+                                                player_effective = UtcNow(),
+                                                player_expiration = UtcNow().Add(TimeSpan.FromDays(7300))
+                                            });
                                         }
                                     }
                                     break;
