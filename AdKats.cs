@@ -18,14 +18,14 @@
  * Discord report posting by jbrunink
  * 
  * Development by Daniel J. Gradinjan (ColColonCleaner)
- * Work on fork by Hedius
+ * Work on fork by Hedius (Version >= 8.0.0.0)
  * 
  * AdKats.cs
- * Version 8.0.1.6
- * 12-FEB-2022
+ * Version 8.1.0.0
+ * 13-FEB-2022
  * 
  * Automatic Update Information
- * <version_code>8.0.1.6</version_code>
+ * <version_code>8.1.0.0</version_code>
  */
 
 using System;
@@ -68,7 +68,7 @@ namespace PRoConEvents
     {
 
         //Current Plugin Version
-        private const String PluginVersion = "8.0.1.6";
+        private const String PluginVersion = "8.1.0.0";
 
         public enum GameVersionEnum
         {
