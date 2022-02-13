@@ -17251,7 +17251,14 @@ namespace PRoConEvents
                                     }
                                     else if (_UseFirstSpawnMessage)
                                     {
-                                        PlayerTellMessage(aPlayer.player_name, _FirstSpawnMessage);
+                                        if (_EnableLowPlaytimeSpawnMessage && aPlayer.player_serverplaytime.TotalHours < (double)_LowPlaytimeSpawnMessageHours)
+                                        {
+                                            PlayerTellMessage(aPlayer.player_name, _LowPlaytimeSpawnMessage);
+                                        }
+                                        else
+                                        {
+                                            PlayerTellMessage(aPlayer.player_name, _FirstSpawnMessage);
+                                        }
                                         Threading.Wait(TimeSpan.FromSeconds(_YellDuration));
                                     }
 
@@ -19107,7 +19114,7 @@ namespace PRoConEvents
                             (message.ToLower().Contains("donat") && aPlayer.player_serverplaytime.TotalHours <= 5.0) ||
                             (message.ToLower().Contains("reserve") && _populationStatus != PopulationState.High) ||
                             (_spamBotExcludeTeamspeakDiscord && (_TeamspeakPlayers.ContainsKey(aPlayer.player_name) || _DiscordPlayers.ContainsKey(aPlayer.player_name))) ||
-                             aPlayer.player_serverplaytime.TotalHours <= (double)_spamBotMinPlaytimeHours)
+                             aPlayer.player_serverplaytime.TotalHours < (double)_spamBotMinPlaytimeHours)
                         {
                             whitelistedPlayers[aPlayer.player_name] = aPlayer;
                         }
@@ -19199,7 +19206,7 @@ namespace PRoConEvents
                             (message.ToLower().Contains("donat") && aPlayer.player_serverplaytime.TotalHours <= 50.0) ||
                             (message.ToLower().Contains("reserve") && _populationStatus != PopulationState.High) ||
                             (_spamBotExcludeTeamspeakDiscord && (_TeamspeakPlayers.ContainsKey(aPlayer.player_name) || _DiscordPlayers.ContainsKey(aPlayer.player_name))) ||
-                            aPlayer.player_serverplaytime.TotalHours <= (double)_spamBotMinPlaytimeHours)
+                            aPlayer.player_serverplaytime.TotalHours < (double)_spamBotMinPlaytimeHours)
                         {
                             whitelistedPlayers[aPlayer.player_name] = aPlayer;
                         }
@@ -19291,7 +19298,7 @@ namespace PRoConEvents
                             (message.ToLower().Contains("donat") && aPlayer.player_serverplaytime.TotalHours <= 50.0) ||
                             (message.ToLower().Contains("reserve") && _populationStatus != PopulationState.High) ||
                             (_spamBotExcludeTeamspeakDiscord && (_TeamspeakPlayers.ContainsKey(aPlayer.player_name) || _DiscordPlayers.ContainsKey(aPlayer.player_name))) ||
-                             aPlayer.player_serverplaytime.TotalHours <= (double)_spamBotMinPlaytimeHours)
+                             aPlayer.player_serverplaytime.TotalHours < (double)_spamBotMinPlaytimeHours)
                         {
                             whitelistedPlayers[aPlayer.player_name] = aPlayer;
                         }
