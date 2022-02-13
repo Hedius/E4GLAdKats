@@ -745,7 +745,11 @@ namespace PRoConEvents
         private readonly Queue<String> _spamBotTellQueue = new Queue<String>();
         private Int32 _spamBotTellDelaySeconds = 900;
         private DateTime _spamBotTellLastPost = DateTime.UtcNow - TimeSpan.FromSeconds(900);
-        private Boolean _spamBotExcludeAdminsAndWhitelist;
+        private Boolean _spamBotExcludeWhitelist = false;
+        private Boolean _spamBotExcludeAdmins = true;
+        private Boolean _spamBotExcludeTeamspeakDiscord = true;
+        private Boolean _spamBotExcludeHighReputation = true;
+        private Int32 _spamBotMinPlaytimeHours = 0;
         //Rules
         private Double _ServerRulesDelay = 0.5;
         private Double _ServerRulesInterval = 5;
@@ -1561,6 +1565,7 @@ namespace PRoConEvents
                                 {
                                     Random random = new Random();
                                     String rolePrefix = GetSettingSection("4-2") + t + "RLE" + aRole.role_id + s + ((RoleIsAdmin(aRole)) ? ("[A]") : ("")) + aRole.role_name + s;
+                                    // Hedius: the spam bot part is not clean here.... the spamBotExcludeAdmins setting is in A12-2 -> probably should be in the list section
                                     buildList.AddRange(from aGroup in _specialPlayerGroupKeyDictionary.Values
                                                        let allowed = aRole.RoleSetGroups.ContainsKey(aGroup.group_key)
                                                        let required =
@@ -1568,7 +1573,7 @@ namespace PRoConEvents
                                                         (aGroup.group_key == "slot_spectator" && _FeedServerSpectatorList && _FeedServerSpectatorList_Admins && RoleIsAdmin(aRole)) ||
                                                         (aGroup.group_key == "whitelist_multibalancer" && _FeedMultiBalancerWhitelist && _FeedMultiBalancerWhitelist_Admins && RoleIsAdmin(aRole)) ||
                                                         (aGroup.group_key == "whitelist_teamkill" && _FeedTeamKillTrackerWhitelist && _FeedTeamKillTrackerWhitelist_Admins && RoleIsAdmin(aRole)) ||
-                                                        (aGroup.group_key == "whitelist_spambot" && _spamBotExcludeAdminsAndWhitelist && RoleIsAdmin(aRole))
+                                                        (aGroup.group_key == "whitelist_spambot" && _spamBotExcludeWhitelist && _spamBotExcludeAdmins && RoleIsAdmin(aRole))
                                                        let blocked = (aGroup.group_key == "whitelist_adminassistant" && RoleIsAdmin(aRole))
                                                        let enumString = blocked ? "enum.roleSetGroupEnum_blocked(Blocked Based On Other Settings)" : (required ? "enum.roleSetGroupEnum_required(Required Based On Other Settings)" : "enum.roleSetGroupEnum(Assign|Ignore)")
                                                        let display = rolePrefix + "GPE" + aGroup.group_id + s + aGroup.group_name
@@ -1921,7 +1926,14 @@ namespace PRoConEvents
                     buildList.Add(new CPluginVariable(GetSettingSection("A12-2") + t + "SpamBot Yell Delay Seconds", typeof(Int32), _spamBotYellDelaySeconds));
                     buildList.Add(new CPluginVariable(GetSettingSection("A12-2") + t + "SpamBot Tell List", typeof(String[]), _spamBotTellList.ToArray()));
                     buildList.Add(new CPluginVariable(GetSettingSection("A12-2") + t + "SpamBot Tell Delay Seconds", typeof(Int32), _spamBotTellDelaySeconds));
-                    buildList.Add(new CPluginVariable(GetSettingSection("A12-2") + t + "Exclude Admins and Whitelist from Spam", typeof(Boolean), _spamBotExcludeAdminsAndWhitelist));
+                    buildList.Add(new CPluginVariable(GetSettingSection("A12-2") + t + "Exclude Whitelist from Spam", typeof(Boolean), _spamBotExcludeWhitelist));
+                    if (_spamBotExcludeWhitelist)
+                    {
+                        buildList.Add(new CPluginVariable(GetSettingSection("A12-2") + t + "Exclude Admins from Spam", typeof(Boolean), _spamBotExcludeAdmins));
+                        buildList.Add(new CPluginVariable(GetSettingSection("A12-2") + t + "Exclude Teamspeak and Discord Players from Spam", typeof(Boolean), _spamBotExcludeTeamspeakDiscord));
+                        buildList.Add(new CPluginVariable(GetSettingSection("A12-2") + t + "Exclude High Reputation Players from Spam", typeof(Boolean), _spamBotExcludeHighReputation));
+                        buildList.Add(new CPluginVariable(GetSettingSection("A12-2") + t + "Minimum Server Playtime in Hours for Receiving Spam", typeof(Int32), _spamBotMinPlaytimeHours));
+                    }
                 }
                 lstReturn.AddRange(buildList);
             }
@@ -8372,14 +8384,59 @@ namespace PRoConEvents
                         QueueSettingForUpload(new CPluginVariable(@"SpamBot Tell Delay Seconds", typeof(Int32), _spamBotTellDelaySeconds));
                     }
                 }
-                else if (Regex.Match(strVariable, @"Exclude Admins and Whitelist from Spam").Success)
+                else if (Regex.Match(strVariable, @"Exclude Whitelist from Spam").Success)
+                {
+                    Boolean spamBotExcludeWhitelist = Boolean.Parse(strValue);
+                    if (spamBotExcludeWhitelist != _spamBotExcludeWhitelist)
+                    {
+                        _spamBotExcludeWhitelist = spamBotExcludeWhitelist;
+                        //Once setting has been changed, upload the change to database
+                        QueueSettingForUpload(new CPluginVariable(@"Exclude Whitelist from Spam", typeof(Boolean), _spamBotExcludeWhitelist));
+                    }
+                }
+                else if (Regex.Match(strVariable, @"Exclude Admins from Spam").Success)
                 {
                     Boolean spamBotExcludeAdmins = Boolean.Parse(strValue);
-                    if (spamBotExcludeAdmins != _spamBotExcludeAdminsAndWhitelist)
+                    if (spamBotExcludeAdmins != _spamBotExcludeAdmins)
                     {
-                        _spamBotExcludeAdminsAndWhitelist = spamBotExcludeAdmins;
+                        _spamBotExcludeAdmins = spamBotExcludeAdmins;
                         //Once setting has been changed, upload the change to database
-                        QueueSettingForUpload(new CPluginVariable(@"Exclude Admins and Whitelist from Spam", typeof(Boolean), _spamBotExcludeAdminsAndWhitelist));
+                        QueueSettingForUpload(new CPluginVariable(@"Exclude Admins from Spam", typeof(Boolean), _spamBotExcludeAdmins));
+                    }
+                }
+                else if (Regex.Match(strVariable, @"Exclude Teamspeak and Discord Players from Spam").Success)
+                {
+                    Boolean spamBotExcludeTeamspeakDiscord = Boolean.Parse(strValue);
+                    if (spamBotExcludeTeamspeakDiscord != _spamBotExcludeTeamspeakDiscord)
+                    {
+                        _spamBotExcludeTeamspeakDiscord = spamBotExcludeTeamspeakDiscord;
+                        //Once setting has been changed, upload the change to database
+                        QueueSettingForUpload(new CPluginVariable(@"Exclude Teamspeak and Discord Players from Spam", typeof(Boolean), _spamBotExcludeTeamspeakDiscord));
+                    }
+                }
+                else if (Regex.Match(strVariable, @"Exclude High Reputation Players from Spam").Success)
+                {
+                    Boolean spamBotExcludeHighReputation = Boolean.Parse(strValue);
+                    if (spamBotExcludeHighReputation != _spamBotExcludeHighReputation)
+                    {
+                        _spamBotExcludeHighReputation = spamBotExcludeHighReputation;
+                        //Once setting has been changed, upload the change to database
+                        QueueSettingForUpload(new CPluginVariable(@"Exclude High Reputation Players from Spam", typeof(Boolean), _spamBotExcludeHighReputation));
+                    }
+                }
+                else if (Regex.Match(strVariable, @"Minimum Server Playtime in Hours for Receiving Spam").Success)
+                {
+                    Int32 spamBotMinPlaytimeHours = Int32.Parse(strValue);
+                    if (_spamBotMinPlaytimeHours  != spamBotMinPlaytimeHours)
+                    {
+                        if (spamBotMinPlaytimeHours < 0)
+                        {
+                            Log.Error("Minimum Server Playtime in Hours for Receiving Spam cannot be less than 0 hours.");
+                            spamBotMinPlaytimeHours = 0;
+                        }
+                        _spamBotMinPlaytimeHours = spamBotMinPlaytimeHours ;
+                        //Once setting has been changed, upload the change to database
+                        QueueSettingForUpload(new CPluginVariable(@"Minimum Server Playtime in Hours for Receiving Spam", typeof(Int32), _spamBotMinPlaytimeHours));
                     }
                 }
                 else if (Regex.Match(strVariable, @"Player Battlecry Volume").Success)
@@ -9774,7 +9831,7 @@ namespace PRoConEvents
                             {
                                 message = ReplaceSpambotEventInfo(message);
                                 message = "[SpamBotMessage]" + message;
-                                if (_spamBotExcludeAdminsAndWhitelist)
+                                if (_spamBotExcludeWhitelist)
                                 {
                                     OnlineNonWhitelistSayMessage(message, playerCount > 5);
                                 }
@@ -9800,7 +9857,7 @@ namespace PRoConEvents
                             {
                                 message = ReplaceSpambotEventInfo(message);
                                 message = "[SpamBotMessage]" + message;
-                                if (_spamBotExcludeAdminsAndWhitelist)
+                                if (_spamBotExcludeWhitelist)
                                 {
                                     OnlineNonWhitelistYellMessage(message, playerCount > 5);
                                 }
@@ -9826,7 +9883,7 @@ namespace PRoConEvents
                             {
                                 message = ReplaceSpambotEventInfo(message);
                                 message = "[SpamBotMessage]" + message;
-                                if (_spamBotExcludeAdminsAndWhitelist)
+                                if (_spamBotExcludeWhitelist)
                                 {
                                     OnlineNonWhitelistTellMessage(message, playerCount > 5);
                                 }
@@ -22936,9 +22993,9 @@ namespace PRoConEvents
                             //Remove previous commands awaiting confirmation
                             CancelSourcePendingAction(record);
 
-                            if (!_spamBotExcludeAdminsAndWhitelist)
+                            if (!_spamBotExcludeWhitelist)
                             {
-                                SendMessageToSource(record, "'Exclude Admins and Whitelist from Spam' must be enabled to use this command.");
+                                SendMessageToSource(record, "'Exclude Whitelist from Spam' must be enabled to use this command.");
                                 FinalizeRecord(record);
                                 return;
                             }
@@ -27169,9 +27226,9 @@ namespace PRoConEvents
                             //Remove previous commands awaiting confirmation
                             CancelSourcePendingAction(record);
 
-                            if (!_spamBotExcludeAdminsAndWhitelist)
+                            if (!_spamBotExcludeWhitelist)
                             {
-                                SendMessageToSource(record, "'Exclude Admins and Whitelist from Spam' must be enabled to use this command.");
+                                SendMessageToSource(record, "'Exclude Whitelist from Spam' must be enabled to use this command.");
                                 FinalizeRecord(record);
                                 return;
                             }
@@ -40244,7 +40301,11 @@ namespace PRoConEvents
                 QueueSettingForUpload(new CPluginVariable(@"SpamBot Yell Delay Seconds", typeof(Int32), _spamBotYellDelaySeconds));
                 QueueSettingForUpload(new CPluginVariable(@"SpamBot Tell List", typeof(String), CPluginVariable.EncodeStringArray(_spamBotTellList.ToArray())));
                 QueueSettingForUpload(new CPluginVariable(@"SpamBot Tell Delay Seconds", typeof(Int32), _spamBotTellDelaySeconds));
-                QueueSettingForUpload(new CPluginVariable(@"Exclude Admins and Whitelist from Spam", typeof(Boolean), _spamBotExcludeAdminsAndWhitelist));
+                QueueSettingForUpload(new CPluginVariable(@"Exclude Whitelist from Spam", typeof(Boolean), _spamBotExcludeWhitelist));
+                QueueSettingForUpload(new CPluginVariable(@"Exclude Admins from Spam", typeof(Boolean), _spamBotExcludeAdmins));
+                QueueSettingForUpload(new CPluginVariable(@"Exclude Teamspeak and Discord Players from Spam", typeof(Boolean), _spamBotExcludeTeamspeakDiscord));
+                QueueSettingForUpload(new CPluginVariable(@"Exclude High Reputation Players from Spam", typeof(Boolean), _spamBotExcludeHighReputation));
+                QueueSettingForUpload(new CPluginVariable(@"Minimum Server Playtime in Hours for Receiving Spam", typeof(Int32), _spamBotMinPlaytimeHours));
                 QueueSettingForUpload(new CPluginVariable(@"Player Battlecry Volume", typeof(String), _battlecryVolume.ToString()));
                 QueueSettingForUpload(new CPluginVariable(@"Player Battlecry Max Length", typeof(Int32), _battlecryMaxLength));
                 QueueSettingForUpload(new CPluginVariable(@"Player Battlecry Denied Words", typeof(String), CPluginVariable.EncodeStringArray(_battlecryDeniedWords)));
