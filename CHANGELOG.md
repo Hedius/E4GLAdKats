@@ -1371,7 +1371,7 @@ Added small improvements to fuzzy player match response text.</li>
     <li><b>No upgrade SQL required.</b></li>
 </ul>
 
-<h4>8.0.1.6 (12-FEB-2021)</h4>
+<h4>8.0.1.6 (12-FEB-2022)</h4>
 <b>Enhancements</b><br/>
 <ul>
 	<li>None</li>
@@ -1389,7 +1389,7 @@ Added small improvements to fuzzy player match response text.</li>
     <li><b>No upgrade SQL required.</b></li>
 </ul>
 
-<h4>8.1.0.0 (13-FEB-2021)</h4>
+<h4>8.1.0.0 (13-FEB-2022)</h4>
 <b>Enhancements</b><br/>
 <ul>
 	<li>Alternative spawn message for players with a low server playtime</li>
@@ -1408,7 +1408,7 @@ Added small improvements to fuzzy player match response text.</li>
     <li><b>No upgrade SQL required.</b></li>
 </ul>
 
-<h4>8.1.1.0 (13-FEB-2021)</h4>
+<h4>8.1.1.0 (13-FEB-2022)</h4>
 <b>Enhancements</b><br/>
 <ul>
 	<li>None</li>
@@ -1426,7 +1426,7 @@ Added small improvements to fuzzy player match response text.</li>
     <li><b>No upgrade SQL required.</b></li>
 </ul>
 
-<h4>8.1.2.0 (21-APR-2021)</h4>
+<h4>8.1.2.0 (21-APR-2022)</h4>
 <b>Enhancements</b><br/>
 <ul>
 	<li>Add a first spawn tell message to warn temp and perma muted players. (See Section A11) for the settings.</li>
