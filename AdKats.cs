@@ -17247,7 +17247,8 @@ namespace PRoConEvents
 
                         if (_UseFirstSpawnMessage ||
                             (_battlecryVolume != BattlecryVolume.Disabled && !String.IsNullOrEmpty(aPlayer.player_battlecry)) ||
-                            _UsePerkExpirationNotify)
+                            _UsePerkExpirationNotify ||
+                            _UseFirstSpawnMutedMessage)
                         {
                             Thread spawnPrinter = new Thread(new ThreadStart(delegate
                             {
@@ -17256,10 +17257,17 @@ namespace PRoConEvents
                                 {
                                     Thread.CurrentThread.Name = "SpawnPrinter";
 
-                                    //Wait 2 seconds
+                                    // Wait 2 seconds
                                     Threading.Wait(2000);
+                                    
+                                    // Send warning to player if the player is muted.
+                                    if (_UseFirstSpawnMutedMessage && GetMatchingVerboseASPlayersOfGroup("persistent_mute", aPlayer).Any())
+                                    {
+                                        PlayerTellMessage(aPlayer.player_name, _FirstSpawnMutedMessage);
+                                        Threading.Wait(TimeSpan.FromSeconds(_YellDuration));
+                                    }
 
-                                    //Send perk expiration notification
+                                    // Send perk expiration notification
                                     if (_UsePerkExpirationNotify)
                                     {
                                         var groups = GetMatchingVerboseASPlayers(aPlayer);
@@ -17270,7 +17278,8 @@ namespace PRoConEvents
                                             Threading.Wait(TimeSpan.FromSeconds(_YellDuration));
                                         }
                                     }
-
+                                    
+                                    // Battlecry
                                     if (_battlecryVolume != BattlecryVolume.Disabled &&
                                         !String.IsNullOrEmpty(aPlayer.player_battlecry))
                                     {
