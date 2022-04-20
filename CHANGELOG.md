@@ -1371,7 +1371,7 @@ Added small improvements to fuzzy player match response text.</li>
     <li><b>No upgrade SQL required.</b></li>
 </ul>
 
-<h4>8.0.1.6 (12-FEB-2021)</h4>
+<h4>8.0.1.6 (12-FEB-2022)</h4>
 <b>Enhancements</b><br/>
 <ul>
 	<li>None</li>
@@ -1389,7 +1389,7 @@ Added small improvements to fuzzy player match response text.</li>
     <li><b>No upgrade SQL required.</b></li>
 </ul>
 
-<h4>8.1.0.0 (13-FEB-2021)</h4>
+<h4>8.1.0.0 (13-FEB-2022)</h4>
 <b>Enhancements</b><br/>
 <ul>
 	<li>Alternative spawn message for players with a low server playtime</li>
@@ -1408,7 +1408,7 @@ Added small improvements to fuzzy player match response text.</li>
     <li><b>No upgrade SQL required.</b></li>
 </ul>
 
-<h4>8.1.1.0 (13-FEB-2021)</h4>
+<h4>8.1.1.0 (13-FEB-2022)</h4>
 <b>Enhancements</b><br/>
 <ul>
 	<li>None</li>
@@ -1420,6 +1420,25 @@ Added small improvements to fuzzy player match response text.</li>
 <b>Bugs Fixed</b><br/>
 <ul>
 	<li>Add admins to the verbose spambot whitelist if needed.</li>
+</ul>
+<b>Upgrade SQL from 4.0.0.0 - Current</b><br/>
+<ul>
+    <li><b>No upgrade SQL required.</b></li>
+</ul>
+
+<h4>8.1.2.0 (21-APR-2022)</h4>
+<b>Enhancements</b><br/>
+<ul>
+	<li>Add a first spawn tell message to warn temp and perma muted players. (See Section A11) for the settings.</li>
+	<li>Add a dedicated mute chances counter for temp and perma muted players. (E.G. 5 chances for round mutes before kick / 2 chances for temp / perma muted players.)</li>
+</ul>
+<b>Changes</b><br/>
+<ul>
+        <li>None</li>
+</ul>
+<b>Bugs Fixed</b><br/>
+<ul>
+	<li>None</li>
 </ul>
 <b>Upgrade SQL from 4.0.0.0 - Current</b><br/>
 <ul>

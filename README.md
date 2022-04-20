@@ -133,7 +133,7 @@
         <b>Player Muting.</b>
         Players can be muted if necessary, giving warnings and kicks if they talk. 
         Automatic mute in specific cases like language can be orchestrated by other plugins like Insane limits.
-        Furthermore, /pmute can be used to issue permanent and temp mutes.
+        Furthermore, /pmute can be used to issue permanent and temp mutes and /unmute can be used to revert a mute.
     </li>
     <li>
         <b>Player Joining.</b>
@@ -3296,8 +3296,18 @@ plugin.CallOtherPlugin("AdKats", "IssueCommand", command);
         The number of chances players get to talk after being muted before they are kicked. 
         After testing, 4 appears to be the perfect number, but change as desired.
     </li>
+    <li><b>'# Chances to give persistent muted player before kicking'</b> - 
+        The number of chances players with a temp or perma mute get to talk after being muted before they are kicked.
+	Default is 5. However, lowering this value is recommended.
+    </li>
     <li><b>'Ignore commands for mute enforcement'</b> - 
         Whether to ignore commands when enforcing mute status on a player.
+    </li>
+    <li><b>'Send first spawn warning for persistent muted players'</b> - 
+        Whether to send a first spawn message / warning as a tell to perma or temp muted players.
+    </li>
+    <li><b>'First spawn persistent muted warning text'</b> - 
+        The message given to players on first spawn when they are perma or temp muted.
     </li>
 </ul>
 <h3>A12. Messaging Settings:</h3>
