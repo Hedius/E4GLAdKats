@@ -531,6 +531,8 @@ namespace PRoConEvents
         private String _MutedPlayerMuteMessage = "You have been muted by an admin, talking will cause punishment. You can speak again next round.";
         private String _UnMutePlayerMessage = "You have been unmuted by an admin.";
         private Boolean _MutedPlayerIgnoreCommands = true;
+        private Boolean _UseFirstSpawnMutedMessage = true;
+        private String _FirstSpawnMutedMessage = "You are perma or temp muted! Talking will cause punishment!";
 
         //Surrender
         private Boolean _surrenderVoteEnable;
@@ -1863,6 +1865,11 @@ namespace PRoConEvents
                     buildList.Add(new CPluginVariable(GetSettingSection("A11") + t + "# Chances to give player before kicking", typeof(int), _MutedPlayerChances));
                     buildList.Add(new CPluginVariable(GetSettingSection("A11") + t + "# Chances to give persistent muted player before kicking", typeof(int), _PersistentMutedPlayerChances));
                     buildList.Add(new CPluginVariable(GetSettingSection("A11") + t + "Ignore commands for mute enforcement", typeof(Boolean), _MutedPlayerIgnoreCommands));
+                    buildList.Add(new CPluginVariable(GetSettingSection("A11") + t + "Send first spawn warning for persistent muted players", typeof(Boolean), _UseFirstSpawnMutedMessage));
+                    if (_UseFirstSpawnMutedMessage)
+                    {
+                        buildList.Add(new CPluginVariable(GetSettingSection("A11") + t + "First spawn persistent muted warning text", typeof(String), _FirstSpawnMutedMessage));
+                    }
                 }
                 lstReturn.AddRange(buildList);
             }
@@ -8127,6 +8134,25 @@ namespace PRoConEvents
                         _MutedPlayerIgnoreCommands = ignoreCommands;
                         //Once setting has been changed, upload the change to database
                         QueueSettingForUpload(new CPluginVariable(@"Ignore commands for mute enforcement", typeof(Boolean), _MutedPlayerIgnoreCommands));
+                    }
+                }
+                else if (Regex.Match(strVariable, @"Send first spawn warning for persistent muted players").Success)
+                {
+                    Boolean useFirstSpawnMutedMessage = Boolean.Parse(strValue);
+                    if (_UseFirstSpawnMutedMessage != useFirstSpawnMutedMessage)
+                    {
+                        _UseFirstSpawnMutedMessage = useFirstSpawnMutedMessage;
+                        //Once setting has been changed, upload the change to database
+                        QueueSettingForUpload(new CPluginVariable(@"Send first spawn warning for persistent muted players", typeof(Boolean), _UseFirstSpawnMutedMessage));
+                    }
+                }
+                else if (Regex.Match(strVariable, @"First spawn persistent muted warning text").Success)
+                {
+                    if (_FirstSpawnMutedMessage != strValue)
+                    {
+                        _FirstSpawnMutedMessage = strValue;
+                        //Once setting has been changed, upload the change to database
+                        QueueSettingForUpload(new CPluginVariable(@"First spawn persistent muted warning text", typeof(String), _FirstSpawnMutedMessage));
                     }
                 }
                 else if (Regex.Match(strVariable, @"Ticket Window High").Success)
@@ -40348,6 +40374,8 @@ namespace PRoConEvents
                 QueueSettingForUpload(new CPluginVariable(@"# Chances to give player before kicking", typeof(Int32), _MutedPlayerChances));
                 QueueSettingForUpload(new CPluginVariable(@"# Chances to give persistent muted player before kicking", typeof(Int32), _PersistentMutedPlayerChances));
                 QueueSettingForUpload(new CPluginVariable(@"Ignore commands for mute enforcement", typeof(Boolean), _MutedPlayerIgnoreCommands));
+                QueueSettingForUpload(new CPluginVariable(@"Send first spawn warning for persistent muted players", typeof(Boolean), _UseFirstSpawnMutedMessage));
+                QueueSettingForUpload(new CPluginVariable(@"First spawn persistent muted warning text", typeof(String), _FirstSpawnMutedMessage));
                 QueueSettingForUpload(new CPluginVariable(@"Ticket Window High", typeof(Int32), _TeamSwapTicketWindowHigh));
                 QueueSettingForUpload(new CPluginVariable(@"Ticket Window Low", typeof(Int32), _TeamSwapTicketWindowLow));
                 QueueSettingForUpload(new CPluginVariable(@"Enable Admin Assistants", typeof(Boolean), _EnableAdminAssistants));
