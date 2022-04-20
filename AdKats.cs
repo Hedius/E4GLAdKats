@@ -523,6 +523,7 @@ namespace PRoConEvents
 
         //Muting
         private Int32 _MutedPlayerChances = 5;
+        private Int32 _PersistentMutedPlayerChances = 5;
         private String _MutedPlayerKickMessage = "Talking excessively while muted.";
         private String _MutedPlayerKillMessage = "Do not talk while muted. You can speak again next round.";
         private String _PersistentMutedPlayerKickMessage = "Talking excessively while muted.";  
@@ -1860,6 +1861,7 @@ namespace PRoConEvents
                     buildList.Add(new CPluginVariable(GetSettingSection("A11") + t + "Persistent On-Player-Kicked Message", typeof(String), _PersistentMutedPlayerKickMessage));
                     buildList.Add(new CPluginVariable(GetSettingSection("A11") + t + "On-Player-Unmuted Message", typeof(String), _UnMutePlayerMessage));
                     buildList.Add(new CPluginVariable(GetSettingSection("A11") + t + "# Chances to give player before kicking", typeof(int), _MutedPlayerChances));
+                    buildList.Add(new CPluginVariable(GetSettingSection("A11") + t + "# Chances to give persistent muted player before kicking", typeof(int), _PersistentMutedPlayerChances));
                     buildList.Add(new CPluginVariable(GetSettingSection("A11") + t + "Ignore commands for mute enforcement", typeof(Boolean), _MutedPlayerIgnoreCommands));
                 }
                 lstReturn.AddRange(buildList);
@@ -8095,7 +8097,7 @@ namespace PRoConEvents
                         QueueSettingForUpload(new CPluginVariable(@"On-Player-Unmuted Message", typeof(String), _UnMutePlayerMessage));
                     }
                 }
-                if (Regex.Match(strVariable, @"# Chances to give player before kicking").Success)
+                else if (Regex.Match(strVariable, @"# Chances to give player before kicking").Success)
                 {
                     Int32 tmp = 5;
                     int.TryParse(strValue, out tmp);
@@ -8104,6 +8106,17 @@ namespace PRoConEvents
                         _MutedPlayerChances = tmp;
                         //Once setting has been changed, upload the change to database
                         QueueSettingForUpload(new CPluginVariable(@"# Chances to give player before kicking", typeof(Int32), _MutedPlayerChances));
+                    }
+                }
+                else if (Regex.Match(strVariable, @"# Chances to give persistent muted player before kicking").Success)
+                {
+                    Int32 tmp = 5;
+                    int.TryParse(strValue, out tmp);
+                    if (_PersistentMutedPlayerChances != tmp)
+                    {
+                        _PersistentMutedPlayerChances = tmp;
+                        //Once setting has been changed, upload the change to database
+                        QueueSettingForUpload(new CPluginVariable(@"# Chances to give persistent muted player before kicking", typeof(Int32), _PersistentMutedPlayerChances));
                     }
                 }
                 else if (Regex.Match(strVariable, @"Ignore commands for mute enforcement").Success)
@@ -40332,6 +40345,7 @@ namespace PRoConEvents
                 QueueSettingForUpload(new CPluginVariable(@"Persistent On-Player-Kicked Message", typeof(String), _PersistentMutedPlayerKickMessage));
                 QueueSettingForUpload(new CPluginVariable(@"On-Player-Unmuted Message", typeof(String), _UnMutePlayerMessage));
                 QueueSettingForUpload(new CPluginVariable(@"# Chances to give player before kicking", typeof(Int32), _MutedPlayerChances));
+                QueueSettingForUpload(new CPluginVariable(@"# Chances to give persistent muted player before kicking", typeof(Int32), _PersistentMutedPlayerChances));
                 QueueSettingForUpload(new CPluginVariable(@"Ignore commands for mute enforcement", typeof(Boolean), _MutedPlayerIgnoreCommands));
                 QueueSettingForUpload(new CPluginVariable(@"Ticket Window High", typeof(Int32), _TeamSwapTicketWindowHigh));
                 QueueSettingForUpload(new CPluginVariable(@"Ticket Window Low", typeof(Int32), _TeamSwapTicketWindowLow));
