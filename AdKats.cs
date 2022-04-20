@@ -19949,7 +19949,8 @@ namespace PRoConEvents
                                             record.source_name = "PlayerMuteSystem";
                                             _PlayerDictionary.TryGetValue(messageObject.Speaker, out record.target_player);
                                             record.target_name = messageObject.Speaker;
-                                            if (_RoundMutedPlayers[messageObject.Speaker] > _MutedPlayerChances)
+                                            var chances = persistentMute ? _PersistentMutedPlayerChances : _MutedPlayerChances;
+                                            if (_RoundMutedPlayers[messageObject.Speaker] > chances)
                                             {
                                                 record.record_message = persistentMute ? _PersistentMutedPlayerKickMessage : _MutedPlayerKickMessage;
                                                 record.command_type = GetCommandByKey("player_kick");
