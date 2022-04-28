@@ -119,6 +119,11 @@
 			"group_id":23,
 			"group_key":"persistent_mute",
 			"group_name":"Persistent Mute"
+		},
+		{
+			"group_id":24,
+			"group_key":"watchlist",
+			"group_name":"Join Watchlist"
 		}
 	]
 }

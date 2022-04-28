@@ -322,6 +322,9 @@ REPLACE INTO `adkats_commands` VALUES(147, 'Active', 'player_whitelistbf4db', 'L
 REPLACE INTO `adkats_commands` VALUES(148, 'Active', 'player_whitelistbf4db_remove', 'Log', 'Remove BF4DB Whitelist', 'unbf4dbwhitelist', TRUE, 'AnyHidden');
 REPLACE INTO `adkats_commands` VALUES(149, 'Active', 'player_persistentmute', 'Log', 'Persistent Mute Player', 'pmute', TRUE, 'AnyHidden');
 REPLACE INTO `adkats_commands` VALUES(150, 'Active', 'player_persistentmute_remove', 'Log', 'Remove Persistent Mute', 'punmute', TRUE, 'AnyHidden');
+REPLACE INTO `adkats_commands` VALUES(151, 'Active', 'player_watchlist', 'Log', 'Add Player to Watchlist', 'watch', TRUE, 'AnyHidden');
+REPLACE INTO `adkats_commands` VALUES(152, 'Active', 'player_watchlist_remove', 'Log', 'Remove Player from Watchlist', 'rwatch', TRUE, 'AnyHidden');
+
 
 
 DROP TABLE IF EXISTS `adkats_infractions_global`;
@@ -635,6 +638,13 @@ REPLACE INTO `adkats_rolecommands` VALUES(2, 141);
 REPLACE INTO `adkats_rolecommands` VALUES(2, 142);
 REPLACE INTO `adkats_rolecommands` VALUES(2, 143);
 REPLACE INTO `adkats_rolecommands` VALUES(2, 146);
+REPLACE INTO `adkats_rolecommands` VALUES(2, 147);
+REPLACE INTO `adkats_rolecommands` VALUES(2, 148);
+REPLACE INTO `adkats_rolecommands` VALUES(2, 149);
+REPLACE INTO `adkats_rolecommands` VALUES(2, 150);
+REPLACE INTO `adkats_rolecommands` VALUES(2, 151);
+REPLACE INTO `adkats_rolecommands` VALUES(2, 152);
+
 
 
 DROP TABLE IF EXISTS `adkats_roles`;
