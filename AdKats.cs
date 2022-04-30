@@ -21,11 +21,11 @@
  * Work on fork by Hedius (Version >= 8.0.0.0)
  * 
  * AdKats.cs
- * Version 8.1.2.0
- * 21-APR-2022
+ * Version 8.1.3.0
+ * 30-APR-2022
  * 
  * Automatic Update Information
- * <version_code>8.1.2.0</version_code>
+ * <version_code>8.1.3.0</version_code>
  */
 
 using System;
@@ -68,7 +68,7 @@ namespace PRoConEvents
     {
 
         //Current Plugin Version
-        private const String PluginVersion = "8.1.2.0";
+        private const String PluginVersion = "8.1.3.0";
 
         public enum GameVersionEnum
         {
@@ -51273,7 +51273,7 @@ namespace PRoConEvents
                 Log.Debug(() => "Fetching reputation definitions...", 2);
                 try
                 {
-                    repInfo = Util.ClientDownloadTimer(client, "https://raw.github.com/Hedius/E4GLAdKats/test/adkatsreputationstats.json" + "?cacherand=" + Environment.TickCount);
+                    repInfo = Util.ClientDownloadTimer(client, "https://raw.github.com/Hedius/E4GLAdKats/main/adkatsreputationstats.json" + "?cacherand=" + Environment.TickCount);
                     Log.Debug(() => "Reputation definitions fetched.", 1);
                 }
                 catch (Exception)
@@ -51344,7 +51344,7 @@ namespace PRoConEvents
                 Log.Debug(() => "Fetching special group definitions...", 2);
                 try
                 {
-                    groupInfo = Util.ClientDownloadTimer(client, "https://raw.github.com/Hedius/E4GLAdKats/test/adkatsspecialgroups.json" + "?cacherand=" + Environment.TickCount);
+                    groupInfo = Util.ClientDownloadTimer(client, "https://raw.github.com/Hedius/E4GLAdKats/main/adkatsspecialgroups.json" + "?cacherand=" + Environment.TickCount);
                     Log.Debug(() => "Special group definitions fetched.", 1);
                 }
                 catch (Exception)
