@@ -33970,77 +33970,77 @@ namespace PRoConEvents
             Log.Debug(() => "Exiting TeamKillTrackerWhitelistRemoveTarget", 6);
         }
 
-         public void WatchlistTarget(ARecord record)
-         {
-             Log.Debug(() => "Entering WatchlistTarget", 6);
-             try
-             {
-                 record.record_action_executed = true;
-                 using (MySqlConnection connection = GetDatabaseConnection())
-                 {
-                     using (MySqlCommand command = connection.CreateCommand())
-                     {
-                         command.CommandText = @"
-                         DELETE FROM
-                             `adkats_specialplayers`
-                         WHERE `player_group` = @player_group
-                           AND (`player_id` = @player_id OR `player_identifier` = @player_name);
-                         INSERT INTO
-                             `adkats_specialplayers`
-                         (
-                             `player_group`,
-                             `player_id`,
-                             `player_identifier`,
-                             `player_effective`,
-                             `player_expiration`
-                         )
-                         VALUES
-                         (
-                             @player_group,
-                             @player_id,
-                             @player_name,
-                             UTC_TIMESTAMP(),
-                             DATE_ADD(UTC_TIMESTAMP(), INTERVAL @duration_minutes MINUTE)
-                         )";
-                         if (record.target_player.player_id <= 0)
-                         {
-                             Log.Error("Player ID invalid when assigning special player entry. Unable to complete.");
-                             SendMessageToSource(record, "Player ID invalid when assigning special player entry. Unable to complete.");
-                             FinalizeRecord(record);
-                             return;
-                         }
-                         if (record.command_numeric > 10518984)
-                         {
-                             record.command_numeric = 10518984;
-                         }
-                         command.Parameters.AddWithValue("@player_group", "watchlist");
-                         command.Parameters.AddWithValue("@player_id", record.target_player.player_id);
-                         command.Parameters.AddWithValue("@player_name", record.target_player.player_name);
-                         command.Parameters.AddWithValue("@duration_minutes", record.command_numeric);
+        public void WatchlistTarget(ARecord record)
+        {
+            Log.Debug(() => "Entering WatchlistTarget", 6);
+            try
+            {
+                record.record_action_executed = true;
+                using (MySqlConnection connection = GetDatabaseConnection())
+                {
+                    using (MySqlCommand command = connection.CreateCommand())
+                    {
+                        command.CommandText = @"
+                        DELETE FROM
+                            `adkats_specialplayers`
+                        WHERE `player_group` = @player_group
+                          AND (`player_id` = @player_id OR `player_identifier` = @player_name);
+                        INSERT INTO
+                            `adkats_specialplayers`
+                        (
+                            `player_group`,
+                            `player_id`,
+                            `player_identifier`,
+                            `player_effective`,
+                            `player_expiration`
+                        )
+                        VALUES
+                        (
+                            @player_group,
+                            @player_id,
+                            @player_name,
+                            UTC_TIMESTAMP(),
+                            DATE_ADD(UTC_TIMESTAMP(), INTERVAL @duration_minutes MINUTE)
+                        )";
+                        if (record.target_player.player_id <= 0)
+                        {
+                            Log.Error("Player ID invalid when assigning special player entry. Unable to complete.");
+                            SendMessageToSource(record, "Player ID invalid when assigning special player entry. Unable to complete.");
+                            FinalizeRecord(record);
+                            return;
+                        }
+                        if (record.command_numeric > 10518984)
+                        {
+                            record.command_numeric = 10518984;
+                        }
+                        command.Parameters.AddWithValue("@player_group", "watchlist");
+                        command.Parameters.AddWithValue("@player_id", record.target_player.player_id);
+                        command.Parameters.AddWithValue("@player_name", record.target_player.player_name);
+                        command.Parameters.AddWithValue("@duration_minutes", record.command_numeric);
  
-                         Int32 rowsAffected = SafeExecuteNonQuery(command);
-                         if (rowsAffected > 0)
-                         {
-                             String message = "Player " + record.GetTargetNames() + " given " + ((record.command_numeric == 10518984) ? ("permanent") : (FormatTimeString(TimeSpan.FromMinutes(record.command_numeric), 2))) + " watchlist entry for all servers.";
-                             SendMessageToSource(record, message);
-                             Log.Debug(() => message, 3);
-                             FetchAllAccess(true);
-                         }
-                         else
-                         {
-                             Log.Error("Unable to add player to watchlist. Error uploading.");
-                         }
-                     }
-                 }
-             }
-             catch (Exception e)
-             {
-                 record.record_exception = new AException("Error while taking action for watchlist record.", e);
-                 Log.HandleException(record.record_exception);
-                 FinalizeRecord(record);
-             }
-             Log.Debug(() => "Exiting WatchlistTarget", 6);
-         }
+                        Int32 rowsAffected = SafeExecuteNonQuery(command);
+                        if (rowsAffected > 0)
+                        {
+                            String message = "Player " + record.GetTargetNames() + " given " + ((record.command_numeric == 10518984) ? ("permanent") : (FormatTimeString(TimeSpan.FromMinutes(record.command_numeric), 2))) + " watchlist entry for all servers.";
+                            SendMessageToSource(record, message);
+                            Log.Debug(() => message, 3);
+                            FetchAllAccess(true);
+                        }
+                        else
+                        {
+                            Log.Error("Unable to add player to watchlist. Error uploading.");
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                record.record_exception = new AException("Error while taking action for watchlist record.", e);
+                Log.HandleException(record.record_exception);
+                FinalizeRecord(record);
+            }
+            Log.Debug(() => "Exiting WatchlistTarget", 6);
+        }
 
         public void WatchlistRemoveTarget(ARecord record)
         {
