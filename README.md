@@ -1,4 +1,4 @@
-[//]: # "<latest_stable_release>8.1.1.0</latest_stable_release>"
+[//]: # "<latest_stable_release>8.1.3.0</latest_stable_release>"
 <p>
     <a name=adkats />
     <img src="https://i.imgur.com/r9pwH3A.png" alt="AdKats Advanced In-Game Admin Tools">
@@ -192,6 +192,12 @@
         <b>Performance.</b>
         All actions, messaging, database communications, and command parsing take place on their own threads, minimizing performance impacts.
         However, AdKats is still almost the size of procon itself (logically anyway), and as such it's not suggested to run multiple instances of AdKats on a single procon layer.
+    </li>
+    <li>
+    	<b>Watchlist.</b>
+	The watchlist module allows admins to add and remove players from the watchlist. Players on the watchlist trigger a discord and a in-game notification if they
+	join or leave a server.
+	<img src="https://share.hedius.eu/i/e9f49e29-ce39-4524-ab12-9751206da16c.png" alt="Watchlist Module">
     </li>
 </ul>
 <p>
@@ -2202,6 +2208,30 @@ plugin.CallOtherPlugin("AdKats", "IssueCommand", command);
             The in-game command used for removing a player from All-Caps Chat Blacklist for all servers.
         </td>
     </tr>
+    <tr>
+        <td><b>Add Player to Watchlist</b></td>
+        <td>watch</td>
+        <td>
+            [duration or 'perm']<br/>
+            OR<br/>
+            [duration or 'perm'][player]<br/>
+            OR<br/>
+            [duration or 'perm'][player][reason]<br/>
+        </td>
+        <td>
+            The in-game command used for adding a player to the watchlist.
+        </td>
+    </tr>
+    <tr>
+        <td><b>Remove Player from Watchlist</b></td>
+        <td>!rwatch</td>
+        <td>
+            [player]
+        </td>
+        <td>
+            The in-game command used for removing a player from the watchlist.
+        </td>
+    </tr>
 </table>
 <h3>Reporting Commands</h3>
 <table>
@@ -4115,6 +4145,21 @@ plugin.CallOtherPlugin("AdKats", "IssueCommand", command);
     </li>
     <li><b>'Debug Display Discord Members'</b> - 
         Display console debug when relevant events happen.
+    </li>
+</ul>
+<h3>B30. Discord Watchlist Settings:</h3>
+<ul>
+    <li><b>'Send Watchlist Announcements to Discord WebHook'</b> - 
+    	Send watchlist announcements to discord.
+    </li>
+    <li><b>'Discord Watchlist WebHook URL'</b> - 
+    	A discord web hook URL.
+    </li>
+    <li><b>'Announce Watchlist Leaves on Discord'</b> - 
+    	Send watchlist announcements if a player leaves the server?
+    </li>
+    <li><b>'Discord Role IDs to Mention in Watchlist Announcements'</b> - 
+    	A list of discord role IDs (integers) to mention in announcements.
     </li>
 </ul>
 <h3>C30. Team Power Monitor:</h3>

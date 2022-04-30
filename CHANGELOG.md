@@ -1444,3 +1444,29 @@ Added small improvements to fuzzy player match response text.</li>
 <ul>
     <li><b>No upgrade SQL required.</b></li>
 </ul>
+
+<h4>8.1.3.0 (30-APR-2022)</h4>
+<b>Enhancements</b><br/>
+<ul>
+	<li>New setting in Section (8-3) for mentioning discord roles in reports.</li>
+	<li>Watchlist Module</li>
+	<ul>
+		<li>The watchlist module sends a notification to discord if a marked player joins or leaves a server.</li>
+		<li>New settings section B30. Check this section to activate the module.</li>
+		<li>New special group watchlist.</>
+		<li>New commands !watch and !rwatch for adding removing players from the watchlist</>
+	</ul>
+	<img src="https://share.hedius.eu/i/e9f49e29-ce39-4524-ab12-9751206da16c.png" alt="Watchlist Module">
+</ul>
+<b>Changes</b><br/>
+<ul>
+        <li>None</li>
+</ul>
+<b>Bugs Fixed</b><br/>
+<ul>
+	<li>None</li>
+</ul>
+<b>Upgrade SQL from 4.0.0.0 - Current</b><br/>
+<ul>
+    <li><b>No upgrade SQL required.</b></li>
+</ul>
