@@ -64195,12 +64195,12 @@ namespace PRoConEvents
                 if (isJoin) {
                     embed["title"] = "Watchlist Join Alert";
                     embed["description"] = "**" + aPlayer.GetVerboseName() + "** has joined the server **" + _plugin._shortServerName + "** as a **" + joinLocation + "**.";
-                    embed["color"] = 0xFF000; // Red
+                    embed["color"] = 0xFF0000; // Red
                 }
                 else {
                     embed["title"] = "Watchlist Leave Alert";
                     embed["description"] = "**" + aPlayer.GetVerboseName() + "** has left the server **" + _plugin._shortServerName + "**.";
-                    embed["color"] = 0x0000FF; // Green
+                    embed["color"] = 0x00FF00; // Green
                 }
 
                 embed["fields"] = new ArrayList {
