@@ -64185,7 +64185,7 @@ namespace PRoConEvents
             public void PostReportToDiscord(String body)
             {
                 // the names of both PostReport functions are a little bit confugsion :)
-                PostToWebhook(ReportWebhookUrl, body);
+                PostToWebhook(ReportWebhookUrl, body, null);
             }
 
             public void PostWatchListToDiscord(APlayer aPlayer, bool isJoin, String joinLocation)
@@ -64224,7 +64224,7 @@ namespace PRoConEvents
                 PostToWebhook(WatchlistWebhookUrl, (isJoin ? GetMentionString(RoleIDsToMentionWatchlist) : ""), embed);
             }
 
-            public void PostToWebhook(String url, String content, Hashtable embed = null)
+            public void PostToWebhook(String url, String content, Hashtable embed)
             {
                 try
                 {
