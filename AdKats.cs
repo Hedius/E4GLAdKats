@@ -52545,7 +52545,8 @@ namespace PRoConEvents
                 }
                 var data =  reader.ReadToEnd();
                 reader.Close();
-                decompressedStream?.Close();
+                if (decompressedStream != null)
+                    decompressedStream.Close();
                 stream.Close();
                 return data;
             }
