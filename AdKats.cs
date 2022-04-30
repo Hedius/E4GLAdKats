@@ -688,7 +688,11 @@ namespace PRoConEvents
         private Boolean _UseDiscordForReports;
         private Boolean _DiscordReportsOnlyWhenAdminless;
         private Boolean _DiscordReportsLeftWithoutAction;
-
+        
+        //Watchlist
+        private Boolean _UseDiscordForWatchlist = false;
+        private Boolean _DiscordWatchlistLeftEnabled = false;
+           
         //Challenge
         private AChallengeManager ChallengeManager;
 
@@ -949,6 +953,7 @@ namespace PRoConEvents
             AddSettingSection("B27", "Populator Monitor Settings - Thanks CMWGaming");
             AddSettingSection("B28", "Teamspeak Player Monitor Settings - Thanks CMWGaming");
             AddSettingSection("B29", "Discord Player Monitor Settings");
+            AddSettingSection("B30", "Discord Watchlist Settings");
             AddSettingSection("C30", "Team Power Monitor");
             AddSettingSection("C31", "Weapon Limiter Settings");
             AddSettingSection("C32", "Challenge Settings");
@@ -2630,6 +2635,31 @@ namespace PRoConEvents
                 lstReturn.Add(new CPluginVariable(GetSettingSection(discordMonitorSection) + t + "Failed to build setting section.", typeof(String), ""));
             }
         }
+        
+        public void BuildWatchlistSettings(List<CPluginVariable> lstReturn) {
+            var section = "B30";
+            List<CPluginVariable> buildList = new List<CPluginVariable>();
+            try
+            {
+                if (IsActiveSettingSection(section))
+                {
+                    //Discord Watchlist Settings
+                    buildList.Add(new CPluginVariable(GetSettingSection(section) + t + "Send Watchlist Announcements to Discord WebHook", typeof(Boolean), _UseDiscordForWatchlist));
+                    if (_UseDiscordForReports)
+                    {
+                        buildList.Add(new CPluginVariable(GetSettingSection(section) + t + "Discord Watchlist WebHook URL", typeof(String), _DiscordManager.WatchlistWebhookUrl));
+                        buildList.Add(new CPluginVariable(GetSettingSection(section) + t + "Announce Watchlist Leaves on Discord", typeof(Boolean), _DiscordWatchlistLeftEnabled));
+                        buildList.Add(new CPluginVariable(GetSettingSection(section) + t + "Discord Role IDs to Mention in Watchlist Announcements", typeof(String[]), _DiscordManager.RoleIDsToMentionWatchlist.ToArray()));
+                    }
+                }
+                lstReturn.AddRange(buildList);
+            }
+            catch (Exception e)
+            {
+                Log.HandleException(new AException("Error building Discord Watchlist setting section.", e));
+                lstReturn.Add(new CPluginVariable(GetSettingSection(section) + t + "Failed to build setting section.", typeof(String), ""));
+            }
+        }
 
         public void BuildTeamPowerSettings(List<CPluginVariable> lstReturn)
         {
@@ -3171,6 +3201,8 @@ namespace PRoConEvents
                     BuildTeamspeakSettings(lstReturn);
 
                     BuildDiscordSettings(lstReturn);
+
+                    BuildWatchlistSettings(lstReturn);
 
                     BuildTeamPowerSettings(lstReturn);
 
@@ -5918,6 +5950,40 @@ namespace PRoConEvents
                         QueueSettingForUpload(new CPluginVariable(@"Discord Player Perks - TeamKillTracker Whitelist", typeof(Boolean), _DiscordPlayerPerksTeamKillTrackerWhitelist));
                     }
                 }
+                // Discord Watchlist Settings
+                else if (Regex.Match(strVariable, @"Send Watchlist Announcements to Discord WebHook").Success)
+                {
+                    Boolean UseDiscordForWatchlist = Boolean.Parse(strValue);
+                    if (UseDiscordForWatchlist != _UseDiscordForWatchlist)
+                    {
+                        _UseDiscordForWatchlist = UseDiscordForWatchlist;
+                        QueueSettingForUpload(new CPluginVariable(@"Send Watchlist Announcements to Discord WebHook", typeof(Boolean), _UseDiscordForWatchlist));
+                    }
+                }
+                else if (Regex.Match(strVariable, @"Discord Watchlist WebHook URL").Success)
+                {
+                    _DiscordManager.WatchlistWebhookUrl = strValue;
+                    if (_UseDiscordForWatchlist && _firstPlayerListComplete && String.IsNullOrEmpty(_shortServerName))
+                    {
+                        Log.Warn("The 'Short Server Name' setting must be filled in before posting discord announcements.");
+                    }
+                    QueueSettingForUpload(new CPluginVariable(@"Discord Watchlist WebHook URL", typeof(String), _DiscordManager.WatchlistWebhookUrl));
+                }
+                else if (Regex.Match(strVariable, @"Announce Watchlist Leaves on Discord").Success)
+                {
+                    Boolean DiscordWatchlistLeftEnabled = Boolean.Parse(strValue);
+                    if (DiscordWatchlistLeftEnabled != _DiscordWatchlistLeftEnabled)
+                    {
+                        _DiscordWatchlistLeftEnabled = DiscordWatchlistLeftEnabled;
+                        QueueSettingForUpload(new CPluginVariable(@"Announce Watchlist Leaves on Discord", typeof(Boolean), _DiscordWatchlistLeftEnabled));
+                    }
+                }               
+                 else if (Regex.Match(strVariable, @"Discord Role IDs to Mention in Watchlist Announcements").Success)
+                 {
+                     _DiscordManager.RoleIDsToMentionWatchlist = CPluginVariable.DecodeStringArray(strValue).ToList();
+                     //Once setting has been changed, upload the change to database
+                     QueueSettingForUpload(new CPluginVariable(@"Discord Role IDs to Mention in Watchlist Announcements", typeof(String), strValue));
+                 }
                 else if (Regex.Match(strVariable, @"Use Experimental Tools").Success)
                 {
                     Boolean useEXP = Boolean.Parse(strValue);
@@ -40597,6 +40663,11 @@ namespace PRoConEvents
                 QueueSettingForUpload(new CPluginVariable(@"Discord Player Perks - Ping Whitelist", typeof(Boolean), _DiscordPlayerPerksPingWhitelist));
                 QueueSettingForUpload(new CPluginVariable(@"Discord Player Perks - TeamKillTracker Whitelist", typeof(Boolean), _DiscordPlayerPerksTeamKillTrackerWhitelist));
                 QueueSettingForUpload(new CPluginVariable(@"Debug Display Discord Members", typeof(Boolean), _DiscordManager.DebugMembers));
+                // Discord Watchlist Settings
+                QueueSettingForUpload(new CPluginVariable(@"Send Watchlist Announcements to Discord WebHook", typeof(Boolean), _UseDiscordForWatchlist));
+                QueueSettingForUpload(new CPluginVariable(@"Discord Watchlist WebHook URL", typeof(String), _DiscordManager.WatchlistWebhookUrl));
+                QueueSettingForUpload(new CPluginVariable(@"Announce Watchlist Leaves on Discord", typeof(Boolean), _DiscordWatchlistLeftEnabled));
+                QueueSettingForUpload(new CPluginVariable(@"Discord Role IDs to Mention in Watchlist Announcements", typeof(String[]), _DiscordManager.RoleIDsToMentionWatchlist.ToArray()));
                 // Team Power Monitor
                 QueueSettingForUpload(new CPluginVariable(@"Team Power Active Influence", typeof(Double), _TeamPowerActiveInfluence));
                 QueueSettingForUpload(new CPluginVariable(@"Display Team Power In Procon Chat", typeof(Boolean), _UseTeamPowerDisplayBalance));
