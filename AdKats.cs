@@ -1785,9 +1785,10 @@ namespace PRoConEvents
                     buildList.Add(new CPluginVariable(GetSettingSection("8-3") + t + "Send Reports to Discord WebHook", typeof(Boolean), _UseDiscordForReports));
                     if (_UseDiscordForReports)
                     {
-                        buildList.Add(new CPluginVariable(GetSettingSection("8-3") + t + "Discord WebHook URL", typeof(String), _DiscordManager.URL));
+                        buildList.Add(new CPluginVariable(GetSettingSection("8-3") + t + "Discord WebHook URL", typeof(String), _DiscordManager.ReportWebhookUrl));
                         buildList.Add(new CPluginVariable(GetSettingSection("8-3") + t + "Only Send Discord Reports When Admins Offline", typeof(Boolean), _DiscordReportsOnlyWhenAdminless));
                         buildList.Add(new CPluginVariable(GetSettingSection("8-3") + t + "Send update if reported players leave without action", typeof(Boolean), _DiscordReportsLeftWithoutAction));
+                        buildList.Add(new CPluginVariable(GetSettingSection("8-3") + t + "Discord Role IDs to Mention in Reports", typeof(String[]), _DiscordManager.RoleIDsToMentionReport.ToArray()));
                     }
                 }
                 lstReturn.AddRange(buildList);
@@ -8025,12 +8026,12 @@ namespace PRoConEvents
                 }
                 else if (Regex.Match(strVariable, @"Discord WebHook URL").Success)
                 {
-                    _DiscordManager.URL = strValue;
+                    _DiscordManager.ReportWebhookUrl = strValue;
                     if (_UseDiscordForReports && _firstPlayerListComplete && String.IsNullOrEmpty(_shortServerName))
                     {
                         Log.Warn("The 'Short Server Name' setting must be filled in before posting discord reports.");
                     }
-                    QueueSettingForUpload(new CPluginVariable(@"Discord WebHook URL", typeof(String), _DiscordManager.URL));
+                    QueueSettingForUpload(new CPluginVariable(@"Discord WebHook URL", typeof(String), _DiscordManager.ReportWebhookUrl));
                 }
                 else if (Regex.Match(strVariable, @"Only Send Discord Reports When Admins Offline").Success)
                 {
@@ -8049,6 +8050,12 @@ namespace PRoConEvents
                         Log.Warn("The 'Short Server Name' setting must be filled in before posting discord reports.");
                     }
                     QueueSettingForUpload(new CPluginVariable(@"Send update if reported players leave without action", typeof(Boolean), _DiscordReportsLeftWithoutAction));
+                }
+                else if (Regex.Match(strVariable, @"Discord Role IDs to Mention in Reports").Success)
+                {
+                    _DiscordManager.RoleIDsToMentionReport = CPluginVariable.DecodeStringArray(strValue).ToList();
+                    //Once setting has been changed, upload the change to database
+                    QueueSettingForUpload(new CPluginVariable(@"Discord Role IDs to Mention in Reports", typeof(String), strValue));
                 }
                 else if (Regex.Match(strVariable, @"On-Player-Muted Message").Success)
                 {
@@ -12753,7 +12760,7 @@ namespace PRoConEvents
                                             }
                                             if (activeReports.Any() && _UseDiscordForReports && _DiscordReportsLeftWithoutAction)
                                             {
-                                                _DiscordManager.PostToDiscord("Reported player " + aPlayer.GetVerboseName() + " left without being acted on.");
+                                                _DiscordManager.PostReportToDiscord("Reported player " + aPlayer.GetVerboseName() + " left without being acted on.");
                                             }
                                         }
                                     }
@@ -40687,9 +40694,10 @@ namespace PRoConEvents
                 QueueSettingForUpload(new CPluginVariable(@"PushBullet Channel Tag", typeof(String), _PushBulletHandler.DefaultChannelTag));
                 QueueSettingForUpload(new CPluginVariable(@"Only Send PushBullet Reports When Admins Offline", typeof(Boolean), _PushBulletReportsOnlyWhenAdminless));
                 QueueSettingForUpload(new CPluginVariable(@"Send Reports to Discord WebHook", typeof(Boolean), _UseDiscordForReports));
-                QueueSettingForUpload(new CPluginVariable(@"Discord WebHook URL", typeof(String), _DiscordManager.URL));
+                QueueSettingForUpload(new CPluginVariable(@"Discord WebHook URL", typeof(String), _DiscordManager.ReportWebhookUrl));
                 QueueSettingForUpload(new CPluginVariable(@"Only Send Discord Reports When Admins Offline", typeof(Boolean), _DiscordReportsOnlyWhenAdminless));
                 QueueSettingForUpload(new CPluginVariable(@"Send update if reported players leave without action", typeof(Boolean), _DiscordReportsLeftWithoutAction));
+                QueueSettingForUpload(new CPluginVariable(@"Discord Role IDs to Mention in Reports", typeof(String[]), _DiscordManager.RoleIDsToMentionReport.ToArray()));
                 QueueSettingForUpload(new CPluginVariable(@"On-Player-Muted Message", typeof(String), _MutedPlayerMuteMessage));
                 QueueSettingForUpload(new CPluginVariable(@"On-Player-Killed Message", typeof(String), _MutedPlayerKillMessage));
                 QueueSettingForUpload(new CPluginVariable(@"On-Player-Kicked Message", typeof(String), _MutedPlayerKickMessage));   
@@ -63618,7 +63626,10 @@ namespace PRoConEvents
             public VoipJoinDisplayType JoinDisplay = VoipJoinDisplayType.Disabled;
             public String JoinMessage = "%playerusername% joined discord! Welcome!";
             private TimeSpan _UpdateDuration = TimeSpan.FromSeconds(29);
-            public String URL;
+            public String ReportWebhookUrl;
+            public String WatchlistWebhookUrl;
+            public List<String> RoleIDsToMentionReport = new List<String>();
+            public List<String> RoleIDsToMentionWatchlist = new List<String>();
             //Vars
             public String ServerName;
             public String InstantInvite;
@@ -64074,36 +64085,95 @@ namespace PRoConEvents
                 bb.Append(blockCloser);
                 String body = bb.ToString();
 
-                PostToDiscord(body);
+                PostReportToDiscord(body + GetMentionString(RoleIDsToMentionReport));
             }
 
-            public void PostToDiscord(String body)
+            public Hashtable GetEmbed()
+            {
+                return new Hashtable {
+                    { "timestamp", DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ") },
+                    { "author", new Hashtable { { "name", "AdKats"}, {"icon_url", "https://avatars1.githubusercontent.com/u/9680130"}}}
+                };
+            }
+
+            public String GetMentionString(List<String> roles) {
+                String mentions = "";
+                foreach (var role in roles) {
+                    mentions += "<@&" + role + ">";
+                }
+                return mentions;
+            }
+
+            public void PostReportToDiscord(String body)
+            {
+                // the names of both PostReport functions are a little bit confugsion :)
+                PostToWebhook(ReportWebhookUrl, body);
+            }
+
+            public void PostWatchListToDiscord(APlayer aPlayer, bool isJoin = true)
+            {
+                // Build the watchlist embed and send it
+                var embed = GetEmbed();
+                if (isJoin) {
+                    embed["title"] = "Watchlist Join Alert";
+                    embed["description"] = aPlayer.GetVerboseName() + " has joined the server " + _plugin._shortServerName + ".";
+                    embed["color"] = 0xFF000; // Red
+                }
+                else {
+                    embed["title"] = "Watchlist Leave Alert";
+                    embed["description"] = aPlayer.GetVerboseName() + " has left the server " + _plugin._shortServerName + ".";
+                    embed["color"] = 0x0000FF; // Green
+                }
+
+                embed["fields"] = new ArrayList {
+                    new Hashtable {
+                        { "name", "Name"},
+                        { "value", aPlayer.GetVerboseName()},
+                        { "inline", true}
+                    },
+                    new Hashtable {
+                        { "name", "Event"},
+                        { "value", (isJoin ? "Server Join" : "Server Leave")},
+                        { "inline", true}
+                    },
+                    new Hashtable {
+                        { "name", "Server"},
+                        { "value", _plugin._shortServerName},
+                        { "inline", true}
+                    },
+                };
+
+                PostToWebhook(WatchlistWebhookUrl, (isJoin ? GetMentionString(RoleIDsToMentionWatchlist) : ""), embed);
+            }
+
+            public void PostToWebhook(String url, String content, Hashtable embed = null)
             {
                 try
                 {
-                    if (String.IsNullOrEmpty(URL))
+                    if (String.IsNullOrEmpty(url))
                     {
-                        _plugin.Log.Error("Discord WebHook URL empty! Unable to post report.");
-                        return;
-                    }
-                    if (String.IsNullOrEmpty(body))
-                    {
-                        _plugin.Log.Error("Discord note body empty! Unable to post report.");
+                        _plugin.Log.Error("Discord WebHook URL empty! Unable to post announcement. Check the URL settings!");
                         return;
                     }
                     if (String.IsNullOrEmpty(_plugin._shortServerName))
                     {
-                        _plugin.Log.Error("The 'Short Server Name' setting must be filled in before posting discord reports.");
+                        _plugin.Log.Error("The 'Short Server Name' setting must be filled in before posting watchlist announcements to discord.");
                         return;
                     }
 
-                    WebRequest request = WebRequest.Create(URL);
+                    // add embed to embeds if set
+                    ArrayList embeds = new ArrayList();
+                    if (embed != null)
+                        embeds.Add(embed);
+
+                    WebRequest request = WebRequest.Create(url);
                     request.Method = "POST";
                     request.ContentType = "application/json";
                     String jsonBody = JSON.JsonEncode(new Hashtable {
                         {"avatar_url", "https://avatars1.githubusercontent.com/u/9680130"},
                         {"username", "AdKats (" + _plugin._shortServerName + ")"},
-                        {"content", body}
+                        {"content", content},
+                        {"embeds", embeds}
                     });
                     byte[] byteArray = Encoding.UTF8.GetBytes(jsonBody);
                     request.ContentLength = byteArray.Length;
