@@ -4256,7 +4256,7 @@ namespace PRoConEvents
                     {
                         if (surrenderAutoMaxNukesEachRound < 0)
                         {
-                            Log.Error("Maxumim nuke count each round cannot be negative.");
+                            Log.Error("Maximum nuke count each round cannot be negative.");
                             return;
                         }
                         _surrenderAutoMaxNukesEachRound = surrenderAutoMaxNukesEachRound;
@@ -21169,6 +21169,15 @@ namespace PRoConEvents
                             }
                             Log.Debug(() => record.command_type.command_key + " record allowed to continue processing.", 5);
                             break;
+                        case "player_watchlist_remove":
+                            if (!GetMatchingASPlayersOfGroup("watchlist", record.target_player).Any())
+                            {
+                                SendMessageToSource(record, "Matching player not in the Watchlist.");
+                                FinalizeRecord(record);
+                                return;
+                            }
+                            Log.Debug(() => record.command_type.command_key + " record allowed to continue processing.", 5);
+                            break;
                     }
                     if (record.target_player != null)
                     {
@@ -27932,6 +27941,165 @@ namespace PRoConEvents
                             }
                         }
                         break;
+                    case "player_watchlist":
+                        {
+                            // Rant: GOD THIS IS SO REDUNDANT - .... same code in each case here...
+                            // MY EYES ARE BLEEDING :) Hedius.
+                            //Remove previous commands awaiting confirmation
+                            CancelSourcePendingAction(record);
+
+                            String defaultReason = "Adding Player to Watchlist";
+
+                            //Parse parameters using max param count
+                            String[] parameters = Util.ParseParameters(remainingMessage, 3);
+
+                            if (parameters.Length > 0)
+                            {
+                                String stringDuration = parameters[0].ToLower();
+                                Log.Debug(() => "Raw Duration: " + stringDuration, 6);
+                                if (stringDuration == "perm")
+                                {
+                                    //20 years in minutes
+                                    record.command_numeric = 10518984;
+                                    defaultReason = "Permanent " + defaultReason;
+                                }
+                                else
+                                {
+                                    //Default is minutes
+                                    Double recordDuration = 0.0;
+                                    Double durationMultiplier = 1.0;
+                                    if (stringDuration.EndsWith("s"))
+                                    {
+                                        stringDuration = stringDuration.TrimEnd('s');
+                                        durationMultiplier = (1.0 / 60.0);
+                                    }
+                                    else if (stringDuration.EndsWith("m"))
+                                    {
+                                        stringDuration = stringDuration.TrimEnd('m');
+                                        durationMultiplier = 1.0;
+                                    }
+                                    else if (stringDuration.EndsWith("h"))
+                                    {
+                                        stringDuration = stringDuration.TrimEnd('h');
+                                        durationMultiplier = 60.0;
+                                    }
+                                    else if (stringDuration.EndsWith("d"))
+                                    {
+                                        stringDuration = stringDuration.TrimEnd('d');
+                                        durationMultiplier = 1440.0;
+                                    }
+                                    else if (stringDuration.EndsWith("w"))
+                                    {
+                                        stringDuration = stringDuration.TrimEnd('w');
+                                        durationMultiplier = 10080.0;
+                                    }
+                                    else if (stringDuration.EndsWith("y"))
+                                    {
+                                        stringDuration = stringDuration.TrimEnd('y');
+                                        durationMultiplier = 525949.0;
+                                    }
+                                    if (!Double.TryParse(stringDuration, out recordDuration))
+                                    {
+                                        SendMessageToSource(record, "Invalid duration given, unable to submit.");
+                                        FinalizeRecord(record);
+                                        return;
+                                    }
+                                    record.command_numeric = (int)(recordDuration * durationMultiplier);
+                                    if (record.command_numeric <= 0)
+                                    {
+                                        SendMessageToSource(record, "Invalid duration given, unable to submit.");
+                                        FinalizeRecord(record);
+                                        return;
+                                    }
+                                    defaultReason = FormatTimeString(TimeSpan.FromMinutes(record.command_numeric), 2) + " " + defaultReason;
+                                }
+                            }
+
+                            switch (parameters.Length)
+                            {
+                                case 0:
+                                    //No parameters
+                                    SendMessageToSource(record, "No parameters given, unable to submit.");
+                                    FinalizeRecord(record);
+                                    return;
+                                case 1:
+                                    //time
+                                    if (record.record_source != ARecord.Sources.InGame)
+                                    {
+                                        SendMessageToSource(record, "You can't use a self-targeted command from outside the game.");
+                                        FinalizeRecord(record);
+                                        return;
+                                    }
+                                    record.target_name = record.source_name;
+                                    record.record_message = defaultReason;
+                                    CompleteTargetInformation(record, false, true, true);
+                                    break;
+                                case 2:
+                                    //time
+                                    //player
+                                    record.target_name = parameters[1];
+                                    record.record_message = defaultReason;
+                                    CompleteTargetInformation(record, false, true, true);
+                                    break;
+                                case 3:
+                                    //time
+                                    //player
+                                    //reason
+                                    record.target_name = parameters[1];
+                                    Log.Debug(() => "target: " + record.target_name, 6);
+                                    record.record_message = GetPreMessage(parameters[2], _RequirePreMessageUse);
+                                    if (record.record_message == null)
+                                    {
+                                        SendMessageToSource(record, "Invalid PreMessage ID, valid PreMessage IDs are 1-" + _PreMessageList.Count);
+                                        FinalizeRecord(record);
+                                        return;
+                                    }
+                                    Log.Debug(() => "" + record.record_message, 6);
+                                    CompleteTargetInformation(record, false, true, true);
+                                    break;
+                                default:
+                                    SendMessageToSource(record, "Invalid parameters, unable to submit.");
+                                    FinalizeRecord(record);
+                                    return;
+                            }
+                        }
+                        break;
+                    case "player_watchlist_remove":
+                        {
+                            //Remove previous commands awaiting confirmation
+                            CancelSourcePendingAction(record);
+
+                            //Parse parameters using max param count
+                            String[] parameters = Util.ParseParameters(remainingMessage, 1);
+                            switch (parameters.Length)
+                            {
+                                case 0:
+                                    if (record.record_source != ARecord.Sources.InGame)
+                                    {
+                                        SendMessageToSource(record, "You can't use a self-targeted command from outside the game.");
+                                        FinalizeRecord(record);
+                                        return;
+                                    }
+                                    record.record_message = "Removing Player from Watchlist";
+                                    record.target_name = record.source_name;
+                                    CompleteTargetInformation(record, true, true, false);
+                                    break;
+                                case 1:
+                                    record.record_message = "Removing Player from Watchlist";
+                                    record.target_name = parameters[0];
+                                    //Handle based on report ID if possible
+                                    if (!HandlePlayerReport(record))
+                                    {
+                                        CompleteTargetInformation(record, false, true, true);
+                                    }
+                                    break;
+                                default:
+                                    SendMessageToSource(record, "Invalid parameters, unable to submit.");
+                                    FinalizeRecord(record);
+                                    return;
+                            }
+                        }
+                        break;
                     case "plugin_restart":
                         {
                             //Remove previous commands awaiting confirmationf
@@ -30401,6 +30569,12 @@ namespace PRoConEvents
                         break;
                     case "player_whitelistteamkill_remove":
                         TeamKillTrackerWhitelistRemoveTarget(record);
+                        break;
+                    case "player_watchlist":
+                        WatchlistTarget(record);
+                        break;
+                    case "player_watchlist_remove":
+                        WatchlistRemoveTarget(record);
                         break;
                     case "player_log":
                         SendMessageToSource(record, "Log saved for " + record.GetTargetNames());
@@ -33794,6 +33968,138 @@ namespace PRoConEvents
                 FinalizeRecord(record);
             }
             Log.Debug(() => "Exiting TeamKillTrackerWhitelistRemoveTarget", 6);
+        }
+
+         public void WatchlistTarget(ARecord record)
+         {
+             Log.Debug(() => "Entering WatchlistTarget", 6);
+             try
+             {
+                 record.record_action_executed = true;
+                 using (MySqlConnection connection = GetDatabaseConnection())
+                 {
+                     using (MySqlCommand command = connection.CreateCommand())
+                     {
+                         command.CommandText = @"
+                         DELETE FROM
+                             `adkats_specialplayers`
+                         WHERE `player_group` = @player_group
+                           AND (`player_id` = @player_id OR `player_identifier` = @player_name);
+                         INSERT INTO
+                             `adkats_specialplayers`
+                         (
+                             `player_group`,
+                             `player_id`,
+                             `player_identifier`,
+                             `player_effective`,
+                             `player_expiration`
+                         )
+                         VALUES
+                         (
+                             @player_group,
+                             @player_id,
+                             @player_name,
+                             UTC_TIMESTAMP(),
+                             DATE_ADD(UTC_TIMESTAMP(), INTERVAL @duration_minutes MINUTE)
+                         )";
+                         if (record.target_player.player_id <= 0)
+                         {
+                             Log.Error("Player ID invalid when assigning special player entry. Unable to complete.");
+                             SendMessageToSource(record, "Player ID invalid when assigning special player entry. Unable to complete.");
+                             FinalizeRecord(record);
+                             return;
+                         }
+                         if (record.command_numeric > 10518984)
+                         {
+                             record.command_numeric = 10518984;
+                         }
+                         command.Parameters.AddWithValue("@player_group", "watchlist");
+                         command.Parameters.AddWithValue("@player_id", record.target_player.player_id);
+                         command.Parameters.AddWithValue("@player_name", record.target_player.player_name);
+                         command.Parameters.AddWithValue("@duration_minutes", record.command_numeric);
+ 
+                         Int32 rowsAffected = SafeExecuteNonQuery(command);
+                         if (rowsAffected > 0)
+                         {
+                             String message = "Player " + record.GetTargetNames() + " given " + ((record.command_numeric == 10518984) ? ("permanent") : (FormatTimeString(TimeSpan.FromMinutes(record.command_numeric), 2))) + " watchlist entry for all servers.";
+                             SendMessageToSource(record, message);
+                             Log.Debug(() => message, 3);
+                             FetchAllAccess(true);
+                         }
+                         else
+                         {
+                             Log.Error("Unable to add player to watchlist. Error uploading.");
+                         }
+                     }
+                 }
+             }
+             catch (Exception e)
+             {
+                 record.record_exception = new AException("Error while taking action for watchlist record.", e);
+                 Log.HandleException(record.record_exception);
+                 FinalizeRecord(record);
+             }
+             Log.Debug(() => "Exiting WatchlistTarget", 6);
+         }
+
+        public void WatchlistRemoveTarget(ARecord record)
+        {
+            Log.Debug(() => "Entering WatchlistRemoveTarget", 6);
+            try
+            {
+                //Case for multiple targets
+                if (record.target_player == null)
+                {
+                    SendMessageToSource(record, "WatchlistRemoveTarget not available for multiple targets.");
+                    Log.Error("WatchlistRemoveTarget not available for multiple targets.");
+                    FinalizeRecord(record);
+                    return;
+                }
+                List<ASpecialPlayer> matchingPlayers = GetMatchingASPlayersOfGroup("watchlist", record.target_player);
+                if (!matchingPlayers.Any())
+                {
+                    SendMessageToSource(record, "Matching player not in the watchlist.");
+                    FinalizeRecord(record);
+                    return;
+                }
+                record.record_action_executed = true;
+                using (MySqlConnection connection = GetDatabaseConnection())
+                {
+                    Boolean updated = false;
+                    foreach (ASpecialPlayer asPlayer in matchingPlayers)
+                    {
+                        using (MySqlCommand command = connection.CreateCommand())
+                        {
+                            command.CommandText = @"DELETE FROM `adkats_specialplayers` WHERE `specialplayer_id` = @sp_id";
+                            command.Parameters.AddWithValue("@sp_id", asPlayer.specialplayer_id);
+                            Int32 rowsAffected = SafeExecuteNonQuery(command);
+                            if (rowsAffected > 0)
+                            {
+                                String message = "Player " + record.GetTargetNames() + " removed from watchlist.";
+                                Log.Debug(() => message, 3);
+                                updated = true;
+                            }
+                            else
+                            {
+                                Log.Error("Unable to remove player from watchlist. Error uploading.");
+                            }
+                        }
+                    }
+                    if (updated)
+                    {
+                        String message = "Player " + record.GetTargetNames() + " removed from watchlist.";
+                        SendMessageToSource(record, message);
+                        FetchAllAccess(true);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                record.record_exception = new AException("Error while taking action for " + record.command_action.command_name + " record.", e);
+                Log.HandleException(record.record_exception);
+                FinalizeRecord(record);
+            }
+            Log.Debug(() => "Exiting WatchlistRemoveTarget", 6);
         }
 
         public void UpdatePlayerBattlecry(ARecord record)
@@ -50871,7 +51177,7 @@ namespace PRoConEvents
                 Log.Debug(() => "Fetching reputation definitions...", 2);
                 try
                 {
-                    repInfo = Util.ClientDownloadTimer(client, "https://raw.github.com/Hedius/E4GLAdKats/main/adkatsreputationstats.json" + "?cacherand=" + Environment.TickCount);
+                    repInfo = Util.ClientDownloadTimer(client, "https://raw.github.com/Hedius/E4GLAdKats/test/adkatsreputationstats.json" + "?cacherand=" + Environment.TickCount);
                     Log.Debug(() => "Reputation definitions fetched.", 1);
                 }
                 catch (Exception)
