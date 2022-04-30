@@ -12834,6 +12834,10 @@ namespace PRoConEvents
                                     {
                                         // Watched player left -> Announce leave.
                                         OnlineAdminSayMessage("Watched player " + aPlayer.GetVerboseName() + " has left the server.");
+                                        if (_UseDiscordForWatchlist && _DiscordWatchlistLeftEnabled)
+                                        {
+                                            _DiscordManager.PostWatchListToDiscord(aPlayer, false, null);
+                                        }
                                     }
                                     if (!toldAdmins && aPlayer.player_type == PlayerType.Spectator)
                                     {
@@ -13310,8 +13314,11 @@ namespace PRoConEvents
                                             }
                                             // Check Watchlist
                                             if (GetMatchingVerboseASPlayersOfGroup("watchlist", aPlayer).Any()) {
-                                                String msg = "Watched player " + aPlayer.GetVerboseName() + " has joined the server as a " + joinLocation + ".";
-                                                OnlineAdminSayMessage(msg);
+                                                OnlineAdminSayMessage("Watched player " + aPlayer.GetVerboseName() + " has joined the server as a " + joinLocation + ".");
+                                                if (_UseDiscordForWatchlist)
+                                                {
+                                                    _DiscordManager.PostWatchListToDiscord(aPlayer, true, joinLocation);
+                                                }
                                             }
                                             //If populating, add player
                                             if (_populationPopulating && _populationStatus == PopulationState.Low && aPlayer.player_type == PlayerType.Player && _populationPopulatingPlayers.Count < _lowPopulationPlayerCount)
@@ -64181,18 +64188,18 @@ namespace PRoConEvents
                 PostToWebhook(ReportWebhookUrl, body);
             }
 
-            public void PostWatchListToDiscord(APlayer aPlayer, bool isJoin = true)
+            public void PostWatchListToDiscord(APlayer aPlayer, bool isJoin, String joinLocation)
             {
                 // Build the watchlist embed and send it
                 var embed = GetEmbed();
                 if (isJoin) {
                     embed["title"] = "Watchlist Join Alert";
-                    embed["description"] = aPlayer.GetVerboseName() + " has joined the server " + _plugin._shortServerName + ".";
+                    embed["description"] = "**" + aPlayer.GetVerboseName() + "** has joined the server **" + _plugin._shortServerName + "** as a **" + joinLocation + "**.";
                     embed["color"] = 0xFF000; // Red
                 }
                 else {
                     embed["title"] = "Watchlist Leave Alert";
-                    embed["description"] = aPlayer.GetVerboseName() + " has left the server " + _plugin._shortServerName + ".";
+                    embed["description"] = "**" + aPlayer.GetVerboseName() + "** has left the server **" + _plugin._shortServerName + "**.";
                     embed["color"] = 0x0000FF; // Green
                 }
 
