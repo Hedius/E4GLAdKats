@@ -12757,6 +12757,11 @@ namespace PRoConEvents
                                             }
                                         }
                                     }
+                                    if (GetMatchingVerboseASPlayersOfGroup("watchlist", aPlayer).Any())
+                                    {
+                                        // Watched player left -> Announce leave.
+                                        OnlineAdminSayMessage("Watched player " + aPlayer.GetVerboseName() + " has left the server.");
+                                    }
                                     if (!toldAdmins && aPlayer.player_type == PlayerType.Spectator)
                                     {
                                         OnlineAdminSayMessage(((PlayerIsAdmin(aPlayer)) ? ("Admin ") : ("")) + aPlayer.GetVerboseName() + " stopped spectating.", aPlayer.player_name);
@@ -13229,6 +13234,11 @@ namespace PRoConEvents
                                             else if (aPlayer.player_type == PlayerType.Spectator)
                                             {
                                                 OnlineAdminSayMessage(((PlayerIsAdmin(aPlayer)) ? ("Admin ") : ("")) + aPlayer.GetVerboseName() + " is now spectating.");
+                                            }
+                                            // Check Watchlist
+                                            if (GetMatchingVerboseASPlayersOfGroup("watchlist", aPlayer).Any()) {
+                                                String msg = "Watched player " + aPlayer.GetVerboseName() + " has joined the server as a " + joinLocation + ".";
+                                                OnlineAdminSayMessage(msg);
                                             }
                                             //If populating, add player
                                             if (_populationPopulating && _populationStatus == PopulationState.Low && aPlayer.player_type == PlayerType.Player && _populationPopulatingPlayers.Count < _lowPopulationPlayerCount)
@@ -21172,7 +21182,7 @@ namespace PRoConEvents
                         case "player_watchlist_remove":
                             if (!GetMatchingASPlayersOfGroup("watchlist", record.target_player).Any())
                             {
-                                SendMessageToSource(record, "Matching player not in the Watchlist.");
+                                SendMessageToSource(record, "Matching player not in the watchlist.");
                                 FinalizeRecord(record);
                                 return;
                             }
@@ -51248,7 +51258,7 @@ namespace PRoConEvents
                 Log.Debug(() => "Fetching special group definitions...", 2);
                 try
                 {
-                    groupInfo = Util.ClientDownloadTimer(client, "https://raw.github.com/Hedius/E4GLAdKats/main/adkatsspecialgroups.json" + "?cacherand=" + Environment.TickCount);
+                    groupInfo = Util.ClientDownloadTimer(client, "https://raw.github.com/Hedius/E4GLAdKats/test/adkatsspecialgroups.json" + "?cacherand=" + Environment.TickCount);
                     Log.Debug(() => "Special group definitions fetched.", 1);
                 }
                 catch (Exception)
