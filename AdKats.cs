@@ -3406,7 +3406,7 @@ namespace PRoConEvents
                     {
                         return;
                     }
-                    using (GZipWebClient client = new GZipWebClient(compress:false))
+                    using (GZipWebClient client = new GZipWebClient(false))
                     {
                         try
                         {
@@ -9605,7 +9605,7 @@ namespace PRoConEvents
                     Thread.CurrentThread.Name = "DescFetching";
                     _pluginDescFetchProgress = "Started";
                     //Create web client
-                    GZipWebClient client = new GZipWebClient(compress:false);
+                    GZipWebClient client = new GZipWebClient(false);
                     //Download the readme and changelog
                     Log.Debug(() => "Fetching plugin links...", 2);
                     try
@@ -40036,7 +40036,7 @@ namespace PRoConEvents
                 {
                     using (MySqlCommand command = connection.CreateCommand())
                     {
-                        GZipWebClient client = new GZipWebClient(compress:false);
+                        GZipWebClient client = new GZipWebClient(false);
                         Log.Debug(() => "Fetching plugin changelog...", 2);
                         try
                         {
@@ -48791,7 +48791,7 @@ namespace PRoConEvents
         public Boolean GetGlobalUTCTimestamp(out DateTime globalUTCTime)
         {
             globalUTCTime = UtcNow();
-            using (GZipWebClient client = new GZipWebClient(compress:false))
+            using (GZipWebClient client = new GZipWebClient(false))
             {
                 try
                 {
@@ -51171,7 +51171,7 @@ namespace PRoConEvents
         {
             Log.Debug(() => "Entering FetchAdKatsReputationDefinitions", 7);
             ArrayList repTable = null;
-            using (GZipWebClient client = new GZipWebClient(compress:false))
+            using (GZipWebClient client = new GZipWebClient(false))
             {
                 String repInfo;
                 Log.Debug(() => "Fetching reputation definitions...", 2);
@@ -51242,7 +51242,7 @@ namespace PRoConEvents
         {
             Log.Debug(() => "Entering FetchASpecialGroupDefinitions", 7);
             List<ASpecialGroup> SpecialGroupsList = null;
-            using (GZipWebClient client = new GZipWebClient(compress:false))
+            using (GZipWebClient client = new GZipWebClient(false))
             {
                 String groupInfo;
                 Log.Debug(() => "Fetching special group definitions...", 2);
@@ -51450,7 +51450,7 @@ namespace PRoConEvents
         {
             Log.Debug(() => "Entering FetchSQLUpdates", 7);
             List<ASQLUpdate> SQLUpdates = new List<ASQLUpdate>();
-            using (GZipWebClient client = new GZipWebClient(compress:false))
+            using (GZipWebClient client = new GZipWebClient(false))
             {
                 try
                 {
@@ -52753,7 +52753,7 @@ namespace PRoConEvents
             if (false && _UseExperimentalTools && GameVersion == GameVersionEnum.BF4)
             {
                 String externalPluginSource;
-                using (GZipWebClient client = new GZipWebClient(compress:false))
+                using (GZipWebClient client = new GZipWebClient(false))
                 {
                     try
                     {
@@ -52867,7 +52867,7 @@ namespace PRoConEvents
             if (!String.IsNullOrEmpty(_AdKatsLRTExtensionToken))
             {
                 String extensionSource;
-                using (GZipWebClient client = new GZipWebClient(compress:false))
+                using (GZipWebClient client = new GZipWebClient(false))
                 {
                     try
                     {
@@ -53016,7 +53016,7 @@ namespace PRoConEvents
                                 Log.Info("Preparing to download plugin update to version " + _latestPluginVersion);
                             }
                             String pluginSource = null;
-                            using (GZipWebClient client = new GZipWebClient(compress:false))
+                            using (GZipWebClient client = new GZipWebClient(false))
                             {
                                 try
                                 {
@@ -54225,7 +54225,7 @@ namespace PRoConEvents
                 return;
             }
             IPAPILocation loc = new IPAPILocation(aPlayer.player_ip);
-            using (GZipWebClient client = new GZipWebClient(compress:false))
+            using (GZipWebClient client = new GZipWebClient(false))
             {
                 try
                 {
@@ -62895,7 +62895,7 @@ namespace PRoConEvents
             {
                 _plugin.Log.Debug(() => "Entering FetchAWeaponNames", 7);
                 Hashtable weaponNames = null;
-                using (GZipWebClient client = new GZipWebClient(compress:false))
+                using (GZipWebClient client = new GZipWebClient(false))
                 {
                     String downloadString;
                     _plugin.Log.Debug(() => "Fetching weapon names...", 2);
@@ -63530,7 +63530,7 @@ namespace PRoConEvents
             private Hashtable FetchWeaponDefinitions()
             {
                 Hashtable statTable = null;
-                using (GZipWebClient client = new GZipWebClient(compress:false))
+                using (GZipWebClient client = new GZipWebClient(false))
                 {
                     String weaponInfo;
                     Plugin.Log.Debug(() => "Fetching weapon statistic definitions...", 2);
@@ -63722,7 +63722,7 @@ namespace PRoConEvents
                     //Attempt to fetch and parse
                     if (!String.IsNullOrEmpty(widgetURL))
                     {
-                        using (GZipWebClient client = new GZipWebClient(compress:false))
+                        using (GZipWebClient client = new GZipWebClient(false))
                         {
                             try
                             {
