@@ -47285,6 +47285,8 @@ namespace PRoConEvents
             _CommandDescriptionDictionary["player_challenge_play_remove"] = "Removes a player from challenge playing status.";
             _CommandDescriptionDictionary["player_challenge_ignore_remove"] = "Removes a player from challenge ignoring status.";
             _CommandDescriptionDictionary["player_report_expire"] = "Invisible command. Assigned when a reported player leaves the server without the report being acted on.";
+            _CommandDescriptionDictionary["player_watchlist"] = "Adds the target player to the watchlist.";
+            _CommandDescriptionDictionary["player_watchlist_remove"] = "Removes the target player from the watchlist.";
         }
 
         private void FillReadableMapModeDictionaries()
