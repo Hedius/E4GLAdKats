@@ -64176,9 +64176,13 @@ namespace PRoConEvents
                 };
             }
 
-            public String GetMentionString(List<String> roles) {
+            public String GetMentionString(List<String> roles)
+            {
                 String mentions = "";
-                foreach (var role in roles) {
+                foreach (var role in roles)
+                {
+                    if (String.IsNullOrEmpty(role))
+                        continue;
                     mentions += "<@&" + role + ">";
                 }
                 return mentions;
