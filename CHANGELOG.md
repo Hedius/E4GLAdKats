@@ -1508,3 +1508,22 @@ Added small improvements to fuzzy player match response text.</li>
     <li><b>No upgrade SQL required.</b></li>
 </ul>
 
+<h4>8.1.4.0 (15-AUG-2022)</h4>
+<b>Enhancements</b><br/>
+<ul>
+	<li>None</li>
+</ul>
+<b>Changes</b><br/>
+<ul>
+	<li>Use adkats.e4gl.com as a backup source if GitHub is down. Otherwise, our plugin might be overwritten with an old release from myrcon.net.</li>
+        <li>Update Documentation to match the new repo.</li>
+</ul>
+<b>Bugs Fixed</b><br/>
+<ul>
+	<li>None</li>
+</ul>
+<b>Upgrade SQL from 4.0.0.0 - Current</b><br/>
+<ul>
+    <li><b>No upgrade SQL required.</b></li>
+</ul>
+
