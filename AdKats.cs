@@ -21,11 +21,11 @@
  * Work on fork by Hedius (Version >= 8.0.0.0)
  * 
  * AdKats.cs
- * Version 8.1.3.2
- * 06-MAY-2022
+ * Version 8.1.4.0
+ * 15-AUG-2022
  * 
  * Automatic Update Information
- * <version_code>8.1.3.2</version_code>
+ * <version_code>8.1.4.0</version_code>
  */
 
 using System;
@@ -68,7 +68,7 @@ namespace PRoConEvents
     {
 
         //Current Plugin Version
-        private const String PluginVersion = "8.1.3.2";
+        private const String PluginVersion = "8.1.4.0";
 
         public enum GameVersionEnum
         {
@@ -9690,7 +9690,7 @@ namespace PRoConEvents
                     {
                         try
                         {
-                            _pluginLinks = Util.ClientDownloadTimer(client, "https://api.myrcon.net/plugins/adkats/links?cacherand=" + Environment.TickCount);
+                            _pluginLinks = Util.ClientDownloadTimer(client, "https://adkats.e4gl.com/LINKS.md?cacherand=" + Environment.TickCount);
                             Log.Debug(() => "Plugin links fetched from backup location.", 1);
                         }
                         catch (Exception)
@@ -9709,7 +9709,7 @@ namespace PRoConEvents
                     {
                         try
                         {
-                            _pluginDescription = Util.ClientDownloadTimer(client, "https://api.myrcon.net/plugins/adkats/readme?cacherand=" + Environment.TickCount);
+                            _pluginDescription = Util.ClientDownloadTimer(client, "https://adkats.e4gl.com/README.md?cacherand=" + Environment.TickCount);
                             Log.Debug(() => "Plugin readme fetched from backup location.", 1);
                         }
                         catch (Exception)
@@ -9728,7 +9728,7 @@ namespace PRoConEvents
                     {
                         try
                         {
-                            _pluginChangelog = Util.ClientDownloadTimer(client, "https://api.myrcon.net/plugins/adkats/changelog?cacherand=" + Environment.TickCount);
+                            _pluginChangelog = Util.ClientDownloadTimer(client, "https://adkats.e4gl.com/CHANGELOG.md?cacherand=" + Environment.TickCount);
                             Log.Debug(() => "Plugin changelog fetched from backup location.", 1);
                         }
                         catch (Exception)
@@ -9765,7 +9765,7 @@ namespace PRoConEvents
                                     <h2 style='color:#DF0101;'>
                                         You are running an outdated version! Version " + latestStableVersion + @" is available for download!
                                     </h2>
-                                    <a href='https://myrcon.net/files/file/30-advanced-in-game-admin-and-ban-enforcer-adkats/' target='_blank'>
+                                    <a href='https://github.com/Hedius/E4GLAdKats/' target='_blank'>
                                         Download Version " + latestStableVersion + @"!
                                     </a><br/>
                                     Download link below.";
@@ -40137,7 +40137,7 @@ namespace PRoConEvents
                         {
                             try
                             {
-                                command.CommandText = Util.ClientDownloadTimer(client, "https://api.myrcon.net/plugins/adkats/sqlsetup?cacherand=" + Environment.TickCount);
+                                command.CommandText = Util.ClientDownloadTimer(client, "https://adkats.e4gl.com/adkats.sql?cacherand=" + Environment.TickCount);
                                 Log.Debug(() => "SQL setup script fetched from backup location.", 1);
                             }
                             catch (Exception)
@@ -51282,7 +51282,7 @@ namespace PRoConEvents
                 {
                     try
                     {
-                        repInfo = Util.ClientDownloadTimer(client, "https://api.myrcon.net/plugins/adkats/reputation" + "?cacherand=" + Environment.TickCount);
+                        repInfo = Util.ClientDownloadTimer(client, "https://adkats.e4gl.com/adkatsreputationstats.json" + "?cacherand=" + Environment.TickCount);
                         Log.Debug(() => "Reputation definitions fetched from backup location.", 1);
                     }
                     catch (Exception)
@@ -51353,7 +51353,7 @@ namespace PRoConEvents
                 {
                     try
                     {
-                        groupInfo = Util.ClientDownloadTimer(client, "https://api.myrcon.net/plugins/adkats/specialgroups" + "?cacherand=" + Environment.TickCount);
+                        groupInfo = Util.ClientDownloadTimer(client, "https://adkats.e4gl.com/adkatsspecialgroups.json" + "?cacherand=" + Environment.TickCount);
                         Log.Debug(() => "Special group definitions fetched from backup location.", 1);
                     }
                     catch (Exception)
@@ -51562,7 +51562,7 @@ namespace PRoConEvents
                     {
                         try
                         {
-                            updateInfo = Util.ClientDownloadTimer(client, "https://api.myrcon.net/plugins/adkats/sqlupdates" + "?cacherand=" + Environment.TickCount);
+                            updateInfo = Util.ClientDownloadTimer(client, "https://adkats.e4gl.com/adkatsupdates.json" + "?cacherand=" + Environment.TickCount);
                             Log.Debug(() => "SQL updates fetched from backup location.", 1);
                         }
                         catch (Exception)
@@ -53134,8 +53134,8 @@ namespace PRoConEvents
                                 {
                                     try
                                     {
-                                        string stableURL = "https://api.myrcon.net/plugins/adkats/branch/main" + "?cacherand=" + Environment.TickCount;
-                                        string testURL = "https://api.myrcon.net/plugins/adkats/branch/test" + "?cacherand=" + Environment.TickCount;
+                                        string stableURL = "https://adkats.e4gl.com/AdKats.cs" + "?cacherand=" + Environment.TickCount;
+                                        string testURL = "https://adkats.e4gl.com/test/AdKats.cs" + "?cacherand=" + Environment.TickCount;
                                         if (_pluginVersionStatus == VersionStatus.OutdatedBuild)
                                         {
                                             pluginSource = Util.ClientDownloadTimer(client, stableURL);
@@ -63007,7 +63007,7 @@ namespace PRoConEvents
                     {
                         try
                         {
-                            downloadString = _plugin.Util.ClientDownloadTimer(client, "https://api.myrcon.net/plugins/adkats/weaponnames" + "?cacherand=" + Environment.TickCount);
+                            downloadString = _plugin.Util.ClientDownloadTimer(client, "https://adkats.e4gl.com/adkatsweaponnames.json" + "?cacherand=" + Environment.TickCount);
                             _plugin.Log.Debug(() => "Weapon names fetched from backup location.", 1);
                         }
                         catch (Exception)
@@ -63642,7 +63642,7 @@ namespace PRoConEvents
                     {
                         try
                         {
-                            weaponInfo = Plugin.Util.ClientDownloadTimer(client, "https://api.myrcon.net/plugins/adkats/weapons" + "?cacherand=" + Environment.TickCount);
+                            weaponInfo = Plugin.Util.ClientDownloadTimer(client, "https://adkats.e4gl.com/adkatsblweaponstats.json" + "?cacherand=" + Environment.TickCount);
                             Plugin.Log.Debug(() => "Weapon statistic definitions fetched from backup location.", 1);
                         }
                         catch (Exception)

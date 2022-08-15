@@ -1,4 +1,4 @@
-[//]: # "<latest_stable_release>8.1.3.2</latest_stable_release>"
+[//]: # "<latest_stable_release>8.1.4.0</latest_stable_release>"
 <p>
     <a name=adkats />
     <img src="https://i.imgur.com/r9pwH3A.png" alt="AdKats Advanced In-Game Admin Tools">
@@ -8,7 +8,7 @@
 </p>
 <p>
     <a href="https://myrcon.net/files/file/32-on-spawn-loadout-enforcer-for-infantryvehicles-adkatslrt/" name=thread>
-        <img src="https://raw.githubusercontent.com/Hedius/E4GLAdKats/master/images/AdKats_Docs_Loadout.jpg" alt="AdKats Thread">
+        <img src="https://raw.githubusercontent.com/Hedius/E4GLAdKats/main/images/AdKats_Docs_Loadout.jpg" alt="AdKats Thread">
     </a>
 </p>
 <h2>Overview</h2>
@@ -202,7 +202,7 @@
 </ul>
 <p>
     <a href="https://myrcon.net/topic/459-advanced-in-game-admin-and-ban-enforcer-adkats/" name=thread>
-        <img src="https://raw.githubusercontent.com/ColColonCleaner/AdKats/master/images/AdKats_Docs_Thread.jpg" alt="AdKats Thread">
+        <img src="https://raw.githubusercontent.com/Hedius/E4GLAdKats/main/images/AdKats_Docs_Thread.jpg" alt="AdKats Thread">
     </a>
 </p>
 <p>
@@ -213,21 +213,18 @@
     Development by Daniel J. Gradinjan (ColColonCleaner)
 </p>
 <p>
-    If you find any bugs, please submit them <a href="https://github.com/ColColonCleaner/AdKats/issues?state=open" target="_blank">HERE</a> and they will be fixed ASAP.
-</p>
-<p>
-    <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=danielgradinjan%40gmail%2ecom&lc=US&item_name=AdKats%20-%20Advanced%20In-Game%20Admin%20for%20Procon%20Frostbite%20-%20Donation&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donate_LG%2egif%3aNonHosted" target="_blank"><img src="https://raw.githubusercontent.com/ColColonCleaner/AdKats/master/images/AdKats_Docs_Donate.jpg"></a>
+    If you find any bugs, please submit them <a href="https://github.com/Hedius/E4GLAdKats/issues?state=open" target="_blank">HERE</a> and they will be fixed ASAP.
 </p>
 <br/>
 <HR>
 <br/>
 <p>
     <a name=manual />
-    <img src="https://raw.githubusercontent.com/ColColonCleaner/AdKats/master/images/AdKats_Docs_UserManual.jpg" alt="AdKats User Manual">
+    <img src="https://raw.githubusercontent.com/Hedius/E4GLAdKats/main/images/AdKats_Docs_UserManual.jpg" alt="AdKats User Manual">
 </p>
 <p>
     <a name=dependencies />
-    <img src="https://raw.githubusercontent.com/ColColonCleaner/AdKats/master/images/AdKats_Docs_Dependencies.jpg" alt="AdKats User Manual">
+    <img src="https://raw.githubusercontent.com/Hedius/E4GLAdKats/main/images/AdKats_Docs_Dependencies.jpg" alt="AdKats User Manual">
 </p>
 <h4><b>1. A MySQL Database</b></h4>
 <p>
@@ -265,7 +262,7 @@
 <HR>
 <p>
     <a name=install />
-    <img src="https://raw.githubusercontent.com/ColColonCleaner/AdKats/master/images/AdKats_Docs_Install.jpg" alt="AdKats User Manual">
+    <img src="https://raw.githubusercontent.com/Hedius/E4GLAdKats/main/images/AdKats_Docs_Install.jpg" alt="AdKats User Manual">
 </p>
 <p>
     <b>WARNINGS. Read these before install.</b>
@@ -296,7 +293,7 @@
     </li>
     <li>
         <b>Set up the database.</b>
-        Run the contents of the <a href="https://raw.github.com/ColColonCleaner/AdKats/master/adkats.sql" target="_blank">AdKats Database Setup Script</a> on your database, on the same schema stat logger uses. You can do this via PHPMyAdmin or through a client such as MySQL Workbench, either will work just fine. You can use the same database/schema for all of your servers, you don't need a separate database for each server.
+        Run the contents of the <a href="https://raw.github.com/Hedius/E4GLAdKats/main/adkats.sql" target="_blank">AdKats Database Setup Script</a> on your database, on the same schema stat logger uses. You can do this via PHPMyAdmin or through a client such as MySQL Workbench, either will work just fine. You can use the same database/schema for all of your servers, you don't need a separate database for each server.
         <b><u>WARNING: If you already have AdKats installed and running this script will completely wipe your existing data for the plugin and all of your settings.</u></b>
         The script must be run by an account with permissions to create <b>tables, triggers, and stored procedures</b>.
     </li>
@@ -333,7 +330,7 @@
 <HR>
 <p>
     <a name=faq />
-    <img src="https://raw.githubusercontent.com/ColColonCleaner/AdKats/master/images/AdKats_Docs_FAQ.jpg" alt="AdKats User Manual">
+    <img src="https://raw.githubusercontent.com/Hedius/E4GLAdKats/main/images/AdKats_Docs_FAQ.jpg" alt="AdKats User Manual">
 </p>
 <ul>
     <li>
@@ -364,7 +361,7 @@
 <HR>
 <p>
     <a name=features />
-    <img src="https://raw.githubusercontent.com/ColColonCleaner/AdKats/master/images/AdKats_Docs_Features.jpg" alt="AdKats User Manual">
+    <img src="https://raw.githubusercontent.com/Hedius/E4GLAdKats/main/images/AdKats_Docs_Features.jpg" alt="AdKats User Manual">
 </p>
 <h3>User Ranks and Roles</h3>
 <p>
@@ -1289,7 +1286,7 @@ plugin.CallOtherPlugin("AdKats", "IssueCommand", command);
 <HR>
 <p>
     <a name=commands />
-    <img src="https://raw.githubusercontent.com/ColColonCleaner/AdKats/master/images/AdKats_Docs_Commands.jpg" alt="AdKats User Manual">
+    <img src="https://raw.githubusercontent.com/Hedius/E4GLAdKats/main/images/AdKats_Docs_Commands.jpg" alt="AdKats User Manual">
 </p>
 <p>
     <u><b>You can edit the text for each command to suit your needs in plugin settings.</b></u>
@@ -2769,7 +2766,7 @@ plugin.CallOtherPlugin("AdKats", "IssueCommand", command);
 <HR>
 <p>
     <a name=webrequests />
-    <img src="https://raw.githubusercontent.com/ColColonCleaner/AdKats/master/images/AdKats_Docs_Web.jpg" alt="AdKats User Manual">
+    <img src="https://raw.githubusercontent.com/Hedius/E4GLAdKats/main/images/AdKats_Docs_Web.jpg" alt="AdKats User Manual">
 </p>
 <p>
     Some layer providers require whitelisting of connections through their firewall.
@@ -2800,7 +2797,7 @@ plugin.CallOtherPlugin("AdKats", "IssueCommand", command);
         <td>Source updates.</td>
     </tr>
     <tr>
-        <td>api.myrcon.net</td>
+        <td>adkats.e4gl.com</td>
         <td>Version management, and backup source for definition files.</td>
     </tr>
     <tr>
@@ -2826,19 +2823,19 @@ plugin.CallOtherPlugin("AdKats", "IssueCommand", command);
         <td><b>Usage</b></td>
     </tr>
     <tr>
-        <td><a href="https://raw.githubusercontent.com/ColColonCleaner/AdKats/master/adkatsreputationstats.json" target="_blank">adkatsreputationstats.json</a></td>
+        <td><a href="https://raw.githubusercontent.com/Hedius/E4GLAdKats/main/adkatsreputationstats.json" target="_blank">adkatsreputationstats.json</a></td>
         <td>Command Reputation Constants</td>
     </tr>
     <tr>
-        <td><a href="https://raw.githubusercontent.com/ColColonCleaner/AdKats/master/adkatsspecialgroups.json" target="_blank">adkatsspecialgroups.json</a></td>
+        <td><a href="https://raw.githubusercontent.com/Hedius/E4GLAdKats/main/adkatsspecialgroups.json" target="_blank">adkatsspecialgroups.json</a></td>
         <td>Special Player Group Definitions</td>
     </tr>
     <tr>
-        <td><a href="https://raw.githubusercontent.com/ColColonCleaner/AdKats/master/adkatsupdates.json" target="_blank">adkatsupdates.json</a></td>
+        <td><a href="https://raw.githubusercontent.com/Hedius/E4GLAdKats/main/adkatsupdates.json" target="_blank">adkatsupdates.json</a></td>
         <td>Database Updates</td>
     </tr>
     <tr>
-        <td><a href="https://raw.githubusercontent.com/ColColonCleaner/AdKats/master/adkatsblweaponstats.json" target="_blank">adkatsblweaponstats.json</a></td>
+        <td><a href="https://raw.githubusercontent.com/Hedius/E4GLAdKats/main/adkatsblweaponstats.json" target="_blank">adkatsblweaponstats.json</a></td>
         <td>Battlefield Weapon Stats (Damages)</td>
     </tr>
 </table>
@@ -2846,7 +2843,7 @@ plugin.CallOtherPlugin("AdKats", "IssueCommand", command);
 <HR>
 <p>
     <a name=servercommands />
-    <img src="https://raw.githubusercontent.com/ColColonCleaner/AdKats/master/images/AdKats_Docs_Server.jpg" alt="AdKats User Manual">
+    <img src="https://raw.githubusercontent.com/Hedius/E4GLAdKats/main/images/AdKats_Docs_Server.jpg" alt="AdKats User Manual">
 </p>
 <p>
     AdKats issues specific server commands to execute its functions, and run properly. Below are their listings, usages, and intervals of usage.
@@ -2998,7 +2995,7 @@ plugin.CallOtherPlugin("AdKats", "IssueCommand", command);
 <HR>
 <p>
     <a name=settings />
-    <img src="https://raw.githubusercontent.com/ColColonCleaner/AdKats/master/images/AdKats_Docs_Settings.jpg" alt="AdKats User Manual">
+    <img src="https://raw.githubusercontent.com/Hedius/E4GLAdKats/main/images/AdKats_Docs_Settings.jpg" alt="AdKats User Manual">
 </p>
 <h3>0. Instance Settings:</h3>
 <ul>
