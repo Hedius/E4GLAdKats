@@ -21192,7 +21192,7 @@ namespace PRoConEvents
                             }
                             Log.Debug(() => record.command_type.command_key + " record allowed to continue processing.", 5);
                             break; 
-                        case "player_peristentmute_remove":
+                        case "player_persistentmute_remove":
                             if (!GetMatchingASPlayersOfGroup("persistent_mute", record.target_player).Any() && !GetMatchingASPlayersOfGroup("persistent_mute_force", record.target_player).Any())
                             {
                                 SendMessageToSource(record, "Matching player not perma/temp muted.");
