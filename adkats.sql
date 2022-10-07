@@ -324,6 +324,7 @@ REPLACE INTO `adkats_commands` VALUES(149, 'Active', 'player_persistentmute', 'L
 REPLACE INTO `adkats_commands` VALUES(150, 'Active', 'player_persistentmute_remove', 'Log', 'Remove Persistent Mute', 'punmute', TRUE, 'AnyHidden');
 REPLACE INTO `adkats_commands` VALUES(151, 'Active', 'player_watchlist', 'Log', 'Add Player to Watchlist', 'watch', TRUE, 'AnyHidden');
 REPLACE INTO `adkats_commands` VALUES(152, 'Active', 'player_watchlist_remove', 'Log', 'Remove Player from Watchlist', 'rwatch', TRUE, 'AnyHidden');
+REPLACE INTO `adkats_commands` VALUES(153, 'Active', 'player_persistentmute_force', 'Log', 'Persistent Force Mute Player', 'fmute', TRUE, 'AnyHidden');
 
 
 
