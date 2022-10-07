@@ -134,6 +134,7 @@
         Players can be muted if necessary, giving warnings and kicks if they talk. 
         Automatic mute in specific cases like language can be orchestrated by other plugins like Insane limits.
         Furthermore, /pmute can be used to issue permanent and temp mutes and /unmute can be used to revert a mute.
+	The command /fmute can be used to issue force mutes. Force mutes trigger an instant temp ban as soon as a muted players uses the server chat.
     </li>
     <li>
         <b>Player Joining.</b>
@@ -711,7 +712,7 @@
     Players who talk in chat after being muted will be killed each time they talk (up through X chat messages).
     On the (X+1)th chat message they are kicked from the server.
     A player coming back during the same round is kicked again on their first chat message.
-    No action other than kill or kick is used by this system.
+    The command /fmute can be used to issue force mutes. Force mutes trigger an instant temp ban as soon as a muted players uses the server chat.
     Admins cannot mute other admins.
 </p>
 <h3>Player Joining</h3>
@@ -1524,6 +1525,21 @@ plugin.CallOtherPlugin("AdKats", "IssueCommand", command);
         </td>
         <td>
             The in-game command used for perma/temp muting players.
+            Admins cannot be muted.
+        </td>
+    </tr>
+    <tr>
+        <td><b>Persistent Force Mute Player</b></td>
+        <td>fmute</td>
+        <td>
+            [duration or 'perm']<br/>
+            OR<br/>
+            [duration or 'perm'][player][reason]<br/>
+            OR<br/>
+            [duration or 'perm'][reportID][reason]
+        </td>
+        <td>
+            The in-game command used for force perma/temp muting players.
             Admins cannot be muted.
         </td>
     </tr>
@@ -3335,6 +3351,9 @@ plugin.CallOtherPlugin("AdKats", "IssueCommand", command);
     </li>
     <li><b>'First spawn persistent muted warning text'</b> - 
         The message given to players on first spawn when they are perma or temp muted.
+    </li>
+    <li><b>'Persistent force mute temp-ban duration minutes'</b> - 
+        The duration of force mute temp-bans in minutes.
     </li>
 </ul>
 <h3>A12. Messaging Settings:</h3>

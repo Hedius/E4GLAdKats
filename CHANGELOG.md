@@ -1527,3 +1527,23 @@ Added small improvements to fuzzy player match response text.</li>
     <li><b>No upgrade SQL required.</b></li>
 </ul>
 
+<h4>8.1.5.0 (07-OCT-2022)</h4>
+<b>Enhancements</b><br/>
+<ul>
+	<li>New Command !fmute for force muting players. Similar to tmute, but player gets instantly temp banned for sending a message.</li>
+	<li>New setting "Persistent force mute temp-ban duration minutes" for defining how long a force muted player should be banned.</li>
+</ul>
+<b>Changes</b><br/>
+<ul>
+	<li>None</li>
+</ul>
+<b>Bugs Fixed</b><br/>
+<ul>
+	<li>None</li>
+</ul>
+<b>Upgrade SQL from 4.0.0.0 - Current</b><br/>
+<ul>
+    <li><b>No upgrade SQL required.</b></li>
+</ul>
+
+
