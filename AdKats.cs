@@ -20813,7 +20813,7 @@ namespace PRoConEvents
                                         target_name = record.source_name,
                                         target_player = record.source_player,
                                         source_name = "AutoAdmin",
-                                        record_message = "Report war blocked bwetween " + record.GetSourceName() + " and " + record.GetTargetNames(),
+                                        record_message = "Report war blocked between " + record.GetSourceName() + " and " + record.GetTargetNames(),
                                         record_time = UtcNow()
                                     });
                                     FinalizeRecord(record);
