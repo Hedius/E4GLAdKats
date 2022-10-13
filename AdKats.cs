@@ -683,7 +683,7 @@ namespace PRoConEvents
         private int _TeamspeakOnlinePlayersMaxPlayersToList = 5;
         private string _TeamspeakOnlinePlayersAloneMessage = "%players% is in voice on our TeamSpeak. Check out our TeamSpeak and join them.";
         private string _TeamspeakOnlinePlayersMessage = "%count% players are in voice on our TeamSpeak. Check out our TeamSpeak and join them. Online: %players%";
-        private DateTime _LastTeamspeakOnlinePlayersCheck = DateTime.UtcNow - TimeSpan.FromSeconds(60);
+        private DateTime _LastTeamspeakOnlinePlayersCheck = DateTime.UtcNow - TimeSpan.FromSeconds(70);
 
         //Discord
         private readonly DiscordManager _DiscordManager;
@@ -706,7 +706,7 @@ namespace PRoConEvents
         private int _DiscordOnlinePlayersMaxPlayersToList = 5;
         private string _DiscordOnlinePlayersAloneMessage = "%players% is in voice on our Discord. Check out our Discord and join them.";
         private string _DiscordOnlinePlayersMessage = "%count% players are in voice on our Discord. Check out our Discord and join them. Online: %players%";
-        private DateTime _LastDiscordOnlinePlayersCheck = DateTime.UtcNow - TimeSpan.FromSeconds(60);
+        private DateTime _LastDiscordOnlinePlayersCheck = DateTime.UtcNow - TimeSpan.FromSeconds(30);
 
         //Watchlist
         private Boolean _UseDiscordForWatchlist = false;
@@ -2598,6 +2598,14 @@ namespace PRoConEvents
                             buildList.Add(new CPluginVariable(GetSettingSection(tsMonitorSection) + t + "Teamspeak Player Perks - Ping Whitelist", typeof(Boolean), _TeamspeakPlayerPerksPingWhitelist));
                             buildList.Add(new CPluginVariable(GetSettingSection(tsMonitorSection) + t + "Teamspeak Player Perks - TeamKillTracker Whitelist", typeof(Boolean), _TeamspeakPlayerPerksTeamKillTrackerWhitelist));
                         }
+                        buildList.Add(new CPluginVariable(GetSettingSection(tsMonitorSection) + t + "Announce Online Teamspeak Players - Enable", typeof(Boolean), _TeamspeakOnlinePlayersEnable));
+                        if (_TeamspeakOnlinePlayersEnable)
+                        {
+                            buildList.Add(new CPluginVariable(GetSettingSection(tsMonitorSection) + t + "Announce Online Teamspeak Players - Interval Minutes", typeof(Int32), _TeamspeakOnlinePlayersInterval));
+                            buildList.Add(new CPluginVariable(GetSettingSection(tsMonitorSection) + t + "Announce Online Teamspeak Players - Max Players to List", typeof(Int32), _TeamspeakOnlinePlayersMaxPlayersToList));
+                            buildList.Add(new CPluginVariable(GetSettingSection(tsMonitorSection) + t + "Announce Online Teamspeak Players - Single Player Message", typeof(String), _TeamspeakOnlinePlayersAloneMessage));
+                            buildList.Add(new CPluginVariable(GetSettingSection(tsMonitorSection) + t + "Announce Online Teamspeak Players - Multi Player Message", typeof(String), _TeamspeakOnlinePlayersMessage));
+                        }
                     }
                 }
                 lstReturn.AddRange(buildList);
@@ -2643,6 +2651,14 @@ namespace PRoConEvents
                             buildList.Add(new CPluginVariable(GetSettingSection(discordMonitorSection) + t + "Discord Player Perks - Autobalance Whitelist", typeof(Boolean), _DiscordPlayerPerksBalanceWhitelist));
                             buildList.Add(new CPluginVariable(GetSettingSection(discordMonitorSection) + t + "Discord Player Perks - Ping Whitelist", typeof(Boolean), _DiscordPlayerPerksPingWhitelist));
                             buildList.Add(new CPluginVariable(GetSettingSection(discordMonitorSection) + t + "Discord Player Perks - TeamKillTracker Whitelist", typeof(Boolean), _DiscordPlayerPerksTeamKillTrackerWhitelist));
+                        }
+                        buildList.Add(new CPluginVariable(GetSettingSection(discordMonitorSection) + t + "Announce Online Discord Players - Enable", typeof(Boolean), _DiscordOnlinePlayersEnable));
+                        if (_DiscordOnlinePlayersEnable)
+                        {
+                            buildList.Add(new CPluginVariable(GetSettingSection(discordMonitorSection) + t + "Announce Online Discord Players - Interval Minutes", typeof(Int32), _DiscordOnlinePlayersInterval));
+                            buildList.Add(new CPluginVariable(GetSettingSection(discordMonitorSection) + t + "Announce Online Discord Players - Max Players to List", typeof(Int32), _DiscordOnlinePlayersMaxPlayersToList));
+                            buildList.Add(new CPluginVariable(GetSettingSection(discordMonitorSection) + t + "Announce Online Discord Players - Single Player Message", typeof(String), _DiscordOnlinePlayersAloneMessage));
+                            buildList.Add(new CPluginVariable(GetSettingSection(discordMonitorSection) + t + "Announce Online Discord Players - Multi Player Message", typeof(String), _DiscordOnlinePlayersMessage));
                         }
                         buildList.Add(new CPluginVariable(GetSettingSection(discordMonitorSection) + t + "Debug Display Discord Members", typeof(Boolean), _DiscordManager.DebugMembers));
                     }
@@ -5755,8 +5771,74 @@ namespace PRoConEvents
                             }
                             FetchAllAccess(true);
                         }
-                        //Upload change to database  
+                        //Upload change to database
                         QueueSettingForUpload(new CPluginVariable(@"Teamspeak Player Perks - TeamKillTracker Whitelist", typeof(Boolean), _TeamspeakPlayerPerksTeamKillTrackerWhitelist));
+                    }
+                }
+                else if (Regex.Match(strVariable, @"Announce Online Teamspeak Players - Enable").Success)
+                {
+                    //Initial parse
+                    Boolean TeamspeakOnlinePlayersEnable = Boolean.Parse(strValue);
+                    //Check for changed value
+                    if (TeamspeakOnlinePlayersEnable != _TeamspeakOnlinePlayersEnable)
+                    {
+                        //Assignment
+                        _TeamspeakOnlinePlayersEnable = TeamspeakOnlinePlayersEnable;
+                        //Upload change to database
+                        QueueSettingForUpload(new CPluginVariable(@"Announce Online Teamspeak Players - Enable", typeof(Boolean), _TeamspeakOnlinePlayersEnable));
+                    }
+                }
+                else if (Regex.Match(strVariable, @"Announce Online Teamspeak Players - Interval Minutes").Success)
+                {
+                    //Initial parse
+                    Int32 TeamspeakOnlinePlayersInterval = Int32.Parse(strValue);
+                    //Check for changed value
+                    if (_TeamspeakOnlinePlayersInterval != TeamspeakOnlinePlayersInterval)
+                    {
+                        if (TeamspeakOnlinePlayersInterval < 2)
+                        {
+                            TeamspeakOnlinePlayersInterval = 2;
+                        }
+                        //Assignment
+                        _TeamspeakOnlinePlayersInterval = TeamspeakOnlinePlayersInterval;
+                        //Upload change to database
+                        QueueSettingForUpload(new CPluginVariable(@"Announce Online Teamspeak Players - Interval Minutes", typeof(Int32), _TeamspeakOnlinePlayersInterval));
+                    }
+                }
+                else if (Regex.Match(strVariable, @"Announce Online Teamspeak Players - Max Players to List").Success)
+                {
+                    //Initial parse
+                    Int32 TeamspeakOnlinePlayersMaxPlayersToList = Int32.Parse(strValue);
+                    //Check for changed value
+                    if (_TeamspeakOnlinePlayersMaxPlayersToList != TeamspeakOnlinePlayersMaxPlayersToList)
+                    {
+                        if (TeamspeakOnlinePlayersMaxPlayersToList < 1)
+                        {
+                            TeamspeakOnlinePlayersMaxPlayersToList = 1;
+                        } else if (TeamspeakOnlinePlayersMaxPlayersToList > 8)
+                        {
+                            TeamspeakOnlinePlayersMaxPlayersToList = 8;
+                        }
+                        //Assignment
+                        _TeamspeakOnlinePlayersMaxPlayersToList = TeamspeakOnlinePlayersMaxPlayersToList;
+                        //Upload change to database
+                        QueueSettingForUpload(new CPluginVariable(@"Announce Online Teamspeak Players - Max Players to List", typeof(Int32), _TeamspeakOnlinePlayersMaxPlayersToList));
+                    }
+                }
+                else if (Regex.Match(strVariable, @"Announce Online Teamspeak Players - Single Player Message").Success)
+                {
+                    if (_TeamspeakOnlinePlayersAloneMessage != strValue)
+                    {
+                        _TeamspeakOnlinePlayersAloneMessage = strValue;
+                        QueueSettingForUpload(new CPluginVariable(@"Announce Online Teamspeak Players - Single Player Message", typeof(String), _TeamspeakOnlinePlayersAloneMessage));
+                    }
+                }
+                else if (Regex.Match(strVariable, @"Announce Online Teamspeak Players - Multi Player Message").Success)
+                {
+                    if (_TeamspeakOnlinePlayersMessage != strValue)
+                    {
+                        _TeamspeakOnlinePlayersMessage = strValue;
+                        QueueSettingForUpload(new CPluginVariable(@"Announce Online Teamspeak Players - Multi Player Message", typeof(String), _TeamspeakOnlinePlayersMessage));
                     }
                 }
                 else if (Regex.Match(strVariable, @"Monitor Discord Players").Success)
@@ -5970,6 +6052,72 @@ namespace PRoConEvents
                         QueueSettingForUpload(new CPluginVariable(@"Discord Player Perks - TeamKillTracker Whitelist", typeof(Boolean), _DiscordPlayerPerksTeamKillTrackerWhitelist));
                     }
                 }
+                else if (Regex.Match(strVariable, @"Announce Online Discord Players - Enable").Success)
+                {
+                    //Initial parse
+                    Boolean DiscordOnlinePlayersEnable = Boolean.Parse(strValue);
+                    //Check for changed value
+                    if (DiscordOnlinePlayersEnable != _DiscordOnlinePlayersEnable)
+                    {
+                        //Assignment
+                        _DiscordOnlinePlayersEnable = DiscordOnlinePlayersEnable;
+                        //Upload change to database
+                        QueueSettingForUpload(new CPluginVariable(@"Announce Online Discord Players - Enable", typeof(Boolean), _DiscordOnlinePlayersEnable));
+                    }
+                }
+                else if (Regex.Match(strVariable, @"Announce Online Discord Players - Interval Minutes").Success)
+                {
+                    //Initial parse
+                    Int32 DiscordOnlinePlayersInterval = Int32.Parse(strValue);
+                    //Check for changed value
+                    if (_DiscordOnlinePlayersInterval != DiscordOnlinePlayersInterval)
+                    {
+                        if (DiscordOnlinePlayersInterval < 2)
+                        {
+                            DiscordOnlinePlayersInterval = 2;
+                        }
+                        //Assignment
+                        _DiscordOnlinePlayersInterval = DiscordOnlinePlayersInterval;
+                        //Upload change to database
+                        QueueSettingForUpload(new CPluginVariable(@"Announce Online Discord Players - Interval Minutes", typeof(Int32), _DiscordOnlinePlayersInterval));
+                    }
+                }
+                else if (Regex.Match(strVariable, @"Announce Online Discord Players - Max Players to List").Success)
+                {
+                    //Initial parse
+                    Int32 DiscordOnlinePlayersMaxPlayersToList = Int32.Parse(strValue);
+                    //Check for changed value
+                    if (_DiscordOnlinePlayersMaxPlayersToList != DiscordOnlinePlayersMaxPlayersToList)
+                    {
+                        if (DiscordOnlinePlayersMaxPlayersToList < 1)
+                        {
+                            DiscordOnlinePlayersMaxPlayersToList = 1;
+                        } else if (DiscordOnlinePlayersMaxPlayersToList > 8)
+                        {
+                            DiscordOnlinePlayersMaxPlayersToList = 8;
+                        }
+                        //Assignment
+                        _DiscordOnlinePlayersMaxPlayersToList = DiscordOnlinePlayersMaxPlayersToList;
+                        //Upload change to database
+                        QueueSettingForUpload(new CPluginVariable(@"Announce Online Discord Players - Max Players to List", typeof(Int32), _DiscordOnlinePlayersMaxPlayersToList));
+                    }
+                }
+                else if (Regex.Match(strVariable, @"Announce Online Discord Players - Single Player Message").Success)
+                {
+                    if (_DiscordOnlinePlayersAloneMessage != strValue)
+                    {
+                        _DiscordOnlinePlayersAloneMessage = strValue;
+                        QueueSettingForUpload(new CPluginVariable(@"Announce Online Discord Players - Single Player Message", typeof(String), _DiscordOnlinePlayersAloneMessage));
+                    }
+                }
+                else if (Regex.Match(strVariable, @"Announce Online Discord Players - Multi Player Message").Success)
+                {
+                    if (_DiscordOnlinePlayersMessage != strValue)
+                    {
+                        _DiscordOnlinePlayersMessage = strValue;
+                        QueueSettingForUpload(new CPluginVariable(@"Announce Online Discord Players - Multi Player Message", typeof(String), _DiscordOnlinePlayersMessage));
+                    }
+                }
                 // Discord Watchlist Settings
                 else if (Regex.Match(strVariable, @"Send Watchlist Announcements to Discord WebHook").Success)
                 {
@@ -5997,7 +6145,7 @@ namespace PRoConEvents
                         _DiscordWatchlistLeftEnabled = DiscordWatchlistLeftEnabled;
                         QueueSettingForUpload(new CPluginVariable(@"Announce Watchlist Leaves on Discord", typeof(Boolean), _DiscordWatchlistLeftEnabled));
                     }
-                }               
+                }
                  else if (Regex.Match(strVariable, @"Discord Role IDs to Mention in Watchlist Announcements").Success)
                  {
                      _DiscordManager.RoleIDsToMentionWatchlist = CPluginVariable.DecodeStringArray(strValue).ToList();
@@ -40756,6 +40904,11 @@ namespace PRoConEvents
                 QueueSettingForUpload(new CPluginVariable(@"Teamspeak Player Perks - Autobalance Whitelist", typeof(Boolean), _TeamspeakPlayerPerksBalanceWhitelist));
                 QueueSettingForUpload(new CPluginVariable(@"Teamspeak Player Perks - Ping Whitelist", typeof(Boolean), _TeamspeakPlayerPerksPingWhitelist));
                 QueueSettingForUpload(new CPluginVariable(@"Teamspeak Player Perks - TeamKillTracker Whitelist", typeof(Boolean), _TeamspeakPlayerPerksTeamKillTrackerWhitelist));
+                QueueSettingForUpload(new CPluginVariable(@"Announce Online Teamspeak Players - Enable", typeof(Boolean), _TeamspeakOnlinePlayersEnable));
+                QueueSettingForUpload(new CPluginVariable(@"Announce Online Teamspeak Players - Interval Minutes", typeof(Int32), _TeamspeakOnlinePlayersInterval));
+                QueueSettingForUpload(new CPluginVariable(@"Announce Online Teamspeak Players - Max Players to List", typeof(Int32), _TeamspeakOnlinePlayersMaxPlayersToList));
+                QueueSettingForUpload(new CPluginVariable(@"Announce Online Teamspeak Players - Single Player Message", typeof(String), _TeamspeakOnlinePlayersAloneMessage));
+                QueueSettingForUpload(new CPluginVariable(@"Announce Online Teamspeak Players - Multi Player Message", typeof(String), _TeamspeakOnlinePlayersMessage));
                 // Discord Monitor
                 QueueSettingForUpload(new CPluginVariable(@"Monitor Discord Players", typeof(Boolean), _DiscordPlayerMonitorView));
                 QueueSettingForUpload(new CPluginVariable(@"Enable Discord Player Monitor", typeof(Boolean), _DiscordPlayerMonitorEnable));
@@ -40770,6 +40923,11 @@ namespace PRoConEvents
                 QueueSettingForUpload(new CPluginVariable(@"Discord Player Perks - Autobalance Whitelist", typeof(Boolean), _DiscordPlayerPerksBalanceWhitelist));
                 QueueSettingForUpload(new CPluginVariable(@"Discord Player Perks - Ping Whitelist", typeof(Boolean), _DiscordPlayerPerksPingWhitelist));
                 QueueSettingForUpload(new CPluginVariable(@"Discord Player Perks - TeamKillTracker Whitelist", typeof(Boolean), _DiscordPlayerPerksTeamKillTrackerWhitelist));
+                QueueSettingForUpload(new CPluginVariable(@"Announce Online Discord Players - Enable", typeof(Boolean), _DiscordOnlinePlayersEnable));
+                QueueSettingForUpload(new CPluginVariable(@"Announce Online Discord Players - Interval Minutes", typeof(Int32), _DiscordOnlinePlayersInterval));
+                QueueSettingForUpload(new CPluginVariable(@"Announce Online Discord Players - Max Players to List", typeof(Int32), _DiscordOnlinePlayersMaxPlayersToList));
+                QueueSettingForUpload(new CPluginVariable(@"Announce Online Discord Players - Single Player Message", typeof(String), _DiscordOnlinePlayersAloneMessage));
+                QueueSettingForUpload(new CPluginVariable(@"Announce Online Discord Players - Multi Player Message", typeof(String), _DiscordOnlinePlayersMessage));
                 QueueSettingForUpload(new CPluginVariable(@"Debug Display Discord Members", typeof(Boolean), _DiscordManager.DebugMembers));
                 // Discord Watchlist Settings
                 QueueSettingForUpload(new CPluginVariable(@"Send Watchlist Announcements to Discord WebHook", typeof(Boolean), _UseDiscordForWatchlist));
