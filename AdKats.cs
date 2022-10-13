@@ -679,7 +679,7 @@ namespace PRoConEvents
 
         // Announcer for online discord players
         private Boolean _TeamspeakOnlinePlayersEnable = true;
-        private int _TeamspeakOnlinePlayersInterval = 4;
+        private int _TeamspeakOnlinePlayersInterval = 5;
         private int _TeamspeakOnlinePlayersMaxPlayersToList = 5;
         private string _TeamspeakOnlinePlayersAloneMessage = "%players% is in voice on our TeamSpeak. Check out our TeamSpeak and join them.";
         private string _TeamspeakOnlinePlayersMessage = "%count% players are in voice on our TeamSpeak. Check out our TeamSpeak and join them. Online: %players%";
@@ -702,7 +702,7 @@ namespace PRoConEvents
 
         // Announcer for online discord players
         private Boolean _DiscordOnlinePlayersEnable = true;
-        private int _DiscordOnlinePlayersInterval = 4;
+        private int _DiscordOnlinePlayersInterval = 5;
         private int _DiscordOnlinePlayersMaxPlayersToList = 5;
         private string _DiscordOnlinePlayersAloneMessage = "%players% is in voice on our Discord. Check out our Discord and join them.";
         private string _DiscordOnlinePlayersMessage = "%count% players are in voice on our Discord. Check out our Discord and join them. Online: %players%";
