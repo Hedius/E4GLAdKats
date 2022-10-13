@@ -665,6 +665,7 @@ namespace PRoConEvents
         private Boolean _PopulatorPerksBalanceWhitelist;
         private Boolean _PopulatorPerksPingWhitelist;
         private Boolean _PopulatorPerksTeamKillTrackerWhitelist;
+
         //Teamspeak
         private readonly TeamSpeakClientViewer _TeamspeakManager;
         private Boolean _TeamspeakPlayerMonitorView;
@@ -675,6 +676,15 @@ namespace PRoConEvents
         private Boolean _TeamspeakPlayerPerksBalanceWhitelist;
         private Boolean _TeamspeakPlayerPerksPingWhitelist;
         private Boolean _TeamspeakPlayerPerksTeamKillTrackerWhitelist;
+
+        // Announcer for online discord players
+        private Boolean _TeamspeakOnlinePlayersEnable = true;
+        private int _TeamspeakOnlinePlayersInterval = 4;
+        private int _TeamspeakOnlinePlayersMaxPlayersToList = 5;
+        private string _TeamspeakOnlinePlayersAloneMessage = "%players% is in voice on our TeamSpeak. Check out our TeamSpeak and join them.";
+        private string _TeamspeakOnlinePlayersMessage = "%count% players are in voice on our TeamSpeak. Check out our TeamSpeak and join them. Online: %players%";
+        private DateTime _LastTeamspeakOnlinePlayersCheck = DateTime.UtcNow - TimeSpan.FromSeconds(60);
+
         //Discord
         private readonly DiscordManager _DiscordManager;
         private Boolean _DiscordPlayerMonitorView;
@@ -689,7 +699,15 @@ namespace PRoConEvents
         private Boolean _UseDiscordForReports;
         private Boolean _DiscordReportsOnlyWhenAdminless;
         private Boolean _DiscordReportsLeftWithoutAction;
-        
+
+        // Announcer for online discord players
+        private Boolean _DiscordOnlinePlayersEnable = true;
+        private int _DiscordOnlinePlayersInterval = 4;
+        private int _DiscordOnlinePlayersMaxPlayersToList = 5;
+        private string _DiscordOnlinePlayersAloneMessage = "%players% is in voice on our Discord. Check out our Discord and join them.";
+        private string _DiscordOnlinePlayersMessage = "%count% players are in voice on our Discord. Check out our Discord and join them. Online: %players%";
+        private DateTime _LastDiscordOnlinePlayersCheck = DateTime.UtcNow - TimeSpan.FromSeconds(60);
+
         //Watchlist
         private Boolean _UseDiscordForWatchlist = false;
         private Boolean _DiscordWatchlistLeftEnabled = false;
@@ -10720,6 +10738,13 @@ namespace PRoConEvents
                         _TeamspeakPlayers[removePlayer].TSClientObject = null;
                         _TeamspeakPlayers.Remove(removePlayer);
                     }
+
+                    if (_TeamspeakOnlinePlayersEnable && (UtcNow() - _LastTeamspeakOnlinePlayersCheck).TotalSeconds > _TeamspeakOnlinePlayersInterval * 60)
+                    {
+                        _LastTeamspeakOnlinePlayersCheck = UtcNow();
+                        PostOnlineVoicePlayers(onlineTeamspeakPlayers, _TeamspeakOnlinePlayersMaxPlayersToList,
+                            _TeamspeakOnlinePlayersAloneMessage, _TeamspeakOnlinePlayersMessage, _TeamspeakManager.JoinDisplay);
+                    }
                 }
 
                 if (_pluginEnabled &&
@@ -10812,6 +10837,13 @@ namespace PRoConEvents
                         _DiscordPlayers[removePlayer].DiscordObject = null;
                         _DiscordPlayers.Remove(removePlayer);
                     }
+
+                    if (_DiscordOnlinePlayersEnable && (UtcNow() - _LastDiscordOnlinePlayersCheck).TotalSeconds > _DiscordOnlinePlayersInterval * 60)
+                    {
+                        _LastDiscordOnlinePlayersCheck = UtcNow();
+                        PostOnlineVoicePlayers(onlineDiscordPlayers, _DiscordOnlinePlayersMaxPlayersToList,
+                            _DiscordOnlinePlayersAloneMessage, _DiscordOnlinePlayersMessage, _DiscordManager.JoinDisplay);
+                    }
                 }
                 if (accessUpdateRequired)
                 {
@@ -10821,6 +10853,36 @@ namespace PRoConEvents
             catch (Exception e)
             {
                 Log.HandleException(new AException("Error running voip monitor.", e));
+            }
+        }
+
+        /**
+         * Goes through playerList and sends a public admin say with online players.
+         * maxPlayersToList defines how many players should be names in %players%. %count% contains the total count.
+         * aloneMessage is sent if only one players is online. Otherwise, message is sent.
+         */
+        private void PostOnlineVoicePlayers(List<APlayer> playerList, int maxPlayersToList, string aloneMessage, string message, VoipJoinDisplayType sendType)
+        {
+            string players = string.Join(", ", playerList.Take(maxPlayersToList).Select(player => player.player_name).ToArray());
+            if (playerList.Count > maxPlayersToList)
+            {
+                players += " and " + (playerList.Count - maxPlayersToList) + " more";
+            }
+            string msg = (playerList.Count > 1 ? message : aloneMessage).Replace("%players%", players).Replace("%count%", playerList.Count.ToString());
+            if (playerList.Count > 0)
+            {
+                switch(sendType)
+                {
+                    case VoipJoinDisplayType.Say:
+                        AdminSayMessage(msg);
+                        break;
+                    case VoipJoinDisplayType.Yell:
+                        AdminYellMessage(msg);
+                        break;
+                    case VoipJoinDisplayType.Tell:
+                        AdminTellMessage(msg);
+                        break;
+                }
             }
         }
 
