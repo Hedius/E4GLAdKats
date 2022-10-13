@@ -1547,3 +1547,23 @@ Added small improvements to fuzzy player match response text.</li>
 </ul>
 
 
+<h4>8.1.6.0 (14-OCT-2022)</h4>
+<b>Enhancements</b><br/>
+<ul>
+	<li>Announce online voice chat players (Discord + TeamSpeak) regularly with a public message to animate people to join your voice channels.</li>
+	<li>The system is enabled by default.</li>
+	<li>10 new Settings for configuring the announcement. See the end of sections B28 and B29.</li>
+	<img src="https://share.hedius.eu/i/67a8b3b4-b2c8-4235-bcfc-35858974836d.jpg" alt="Online Player Announcement">
+</ul>
+<b>Changes</b><br/>
+<ul>
+	<li>None</li>
+</ul>
+<b>Bugs Fixed</b><br/>
+<ul>
+	<li>None</li>
+</ul>
+<b>Upgrade SQL from 4.0.0.0 - Current</b><br/>
+<ul>
+    <li><b>No upgrade SQL required.</b></li>
+</ul>

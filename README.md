@@ -1,4 +1,4 @@
-[//]: # "<latest_stable_release>8.1.5.0</latest_stable_release>"
+[//]: # "<latest_stable_release>8.1.6.0</latest_stable_release>"
 <p>
     <a name=adkats />
     <img src="https://i.imgur.com/r9pwH3A.png" alt="AdKats Advanced In-Game Admin Tools">
@@ -121,7 +121,8 @@
     </li>
     <li>
         <b>TeamSpeak and Discord Integration.</b>
-        AdKats can be connected to teamspeak or discord to apply perks and monitoring to players in VOIP.
+        AdKats can be connected to teamspeak or discord to apply perks and monitoring to players in VOIP. Furthermore, AdKats can announce online voice players regularly.
+	<img src="https://share.hedius.eu/i/67a8b3b4-b2c8-4235-bcfc-35858974836d.jpg" alt="Online Player Announcement">
     </li>
     <li>
         <b>Fuzzy Player Name Completion.</b>
@@ -4104,6 +4105,26 @@ plugin.CallOtherPlugin("AdKats", "IssueCommand", command);
     <li><b>'Teamspeak Player Perks - TeamKillTracker Whitelist'</b> - 
         When enabled, teamspeak players are given a whitelist in TeamKillTracker.
     </li>
+    <li><b>'Announce Online Teamspeak Players - Enable'</b> - 
+        When enabled, teamspeak players are regularly listed in the chat.
+	The messaging channel is the one defined by the "Join Announcement" setting.
+    </li>
+    <li><b>'Announce Online Teamspeak Players - Interval Minutes'</b> - 
+        How often to send the announcement to the chat.
+    </li>
+    <li><b>'Announce Online Teamspeak Players - Max Players to List'</b> - 
+        The maximum players to include in the list of the announcement. If there are more players online than defined
+	then AdKats will send a message in the format "Player1, Player2 and X more players".
+	The list can be referenced by using the string %player%.
+    </li>
+    <li><b>'Announce Online Teamspeak Players - Single Player Message'</b> - 
+    	The message to send in the announcement while only one player is online.
+	%players% can be used to access the name of the player.
+    </li>
+    <li><b>'Announce Online Teamspeak Players - Multi Player Message'</b> - 
+    	The message to send in the announcement while multiple players are online.
+	%players% can be used to access the names of the player. %count% can be used to access the count.
+    </li>
 </ul>
 <h3>B29. Discord Player Monitor Settings:</h3>
 <ul>
@@ -4158,6 +4179,26 @@ plugin.CallOtherPlugin("AdKats", "IssueCommand", command);
     </li>
     <li><b>'Discord Player Perks - TeamKillTracker Whitelist'</b> - 
         When enabled, discord players are given a whitelist in TeamKillTracker.
+    </li>
+    <li><b>'Announce Online Discord Players - Enable'</b> - 
+        When enabled, teamspeak players are regularly listed in the chat.
+	The messaging channel is the one defined by the "Join Announcement" setting.
+    </li>
+    <li><b>'Announce Online Discord Players - Interval Minutes'</b> - 
+        How often to send the announcement to the chat.
+    </li>
+    <li><b>'Announce Online Discord Players - Max Players to List'</b> - 
+        The maximum players to include in the list of the announcement. If there are more players online than defined
+	then AdKats will send a message in the format "Player1, Player2 and X more players".
+	The list can be referenced by using the string %player%.
+    </li>
+    <li><b>'Announce Online Discord Players - Single Player Message'</b> - 
+    	The message to send in the announcement while only one player is online.
+	%players% can be used to access the name of the player.
+    </li>
+    <li><b>'Announce Online Discord Players - Multi Player Message'</b> - 
+    	The message to send in the announcement while multiple players are online.
+	%players% can be used to access the names of the player. %count% can be used to access the count.
     </li>
     <li><b>'Debug Display Discord Members'</b> - 
         Display console debug when relevant events happen.
