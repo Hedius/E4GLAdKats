@@ -16793,7 +16793,8 @@ namespace PRoConEvents
                 {
                     //KPM check
                     Int32 lowCountRecent = aKill.killer.LiveKills.Count(dKill => 0 <= (DateTime.Now - dKill.TimeStamp).TotalSeconds
-                                                                                 && (DateTime.Now - dKill.TimeStamp).TotalSeconds < 60);
+                                                                                 && (DateTime.Now - dKill.TimeStamp).TotalSeconds < 60
+                                                                                 && dKill.weaponDamage != DamageTypes.VehicleAir);
                     int lowCountBan =
                         ((GameVersion == GameVersionEnum.BF3) ? (25) : (20)) -
                         ((aKill.killer.fbpInfo.Rank <= 15) ? (6) : (0));
@@ -16814,7 +16815,8 @@ namespace PRoConEvents
                         return;
                     }
                     Int32 highCountRecent = aKill.killer.LiveKills.Count(dKill => 0 <= (DateTime.Now - dKill.TimeStamp).TotalSeconds
-                                                                                  && (DateTime.Now - dKill.TimeStamp).TotalSeconds < 120);
+                                                                                  && (DateTime.Now - dKill.TimeStamp).TotalSeconds < 120
+                                                                                  && dKill.weaponDamage != DamageTypes.VehicleAir);
                     int highCountBan =
                         ((GameVersion == GameVersionEnum.BF3) ? (40) : (32)) -
                         ((aKill.killer.fbpInfo.Rank <= 15) ? (8) : (0));
