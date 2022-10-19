@@ -21,11 +21,11 @@
  * Work on fork by Hedius (Version >= 8.0.0.0)
  * 
  * AdKats.cs
- * Version 8.1.6.0
- * 14-OCT-2022
+ * Version 8.1.7.0
+ * 19-OCT-2022
  * 
  * Automatic Update Information
- * <version_code>8.1.6.0</version_code>
+ * <version_code>8.1.7.0</version_code>
  */
 
 using System;
@@ -68,7 +68,7 @@ namespace PRoConEvents
     {
 
         //Current Plugin Version
-        private const String PluginVersion = "8.1.6.0";
+        private const String PluginVersion = "8.1.7.0";
 
         public enum GameVersionEnum
         {
@@ -16792,7 +16792,9 @@ namespace PRoConEvents
                     !EventActive())
                 {
                     //KPM check
-                    Int32 lowCountRecent = aKill.killer.LiveKills.Count(dKill => (DateTime.Now - dKill.TimeStamp).TotalSeconds < 60);
+                    Int32 lowCountRecent = aKill.killer.LiveKills.Count(dKill => 0 <= (DateTime.Now - dKill.TimeStamp).TotalSeconds
+                                                                                 && (DateTime.Now - dKill.TimeStamp).TotalSeconds < 60
+                                                                                 && dKill.weaponDamage != DamageTypes.VehicleAir);
                     int lowCountBan =
                         ((GameVersion == GameVersionEnum.BF3) ? (25) : (20)) -
                         ((aKill.killer.fbpInfo.Rank <= 15) ? (6) : (0));
@@ -16812,7 +16814,9 @@ namespace PRoConEvents
                         });
                         return;
                     }
-                    Int32 highCountRecent = aKill.killer.LiveKills.Count(dKill => (DateTime.Now - dKill.TimeStamp).TotalSeconds < 120);
+                    Int32 highCountRecent = aKill.killer.LiveKills.Count(dKill => 0 <= (DateTime.Now - dKill.TimeStamp).TotalSeconds
+                                                                                  && (DateTime.Now - dKill.TimeStamp).TotalSeconds < 120
+                                                                                  && dKill.weaponDamage != DamageTypes.VehicleAir);
                     int highCountBan =
                         ((GameVersion == GameVersionEnum.BF3) ? (40) : (32)) -
                         ((aKill.killer.fbpInfo.Rank <= 15) ? (8) : (0));

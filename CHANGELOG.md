@@ -1567,3 +1567,23 @@ Added small improvements to fuzzy player match response text.</li>
 <ul>
     <li><b>No upgrade SQL required.</b></li>
 </ul>
+
+
+<h4>8.1.7.0 (19-OCT-2022)</h4>
+<b>Enhancements</b><br/>
+<ul>
+	<li>None</li>
+</ul>
+<b>Changes</b><br/>
+<ul>
+	<li>None</li>
+</ul>
+<b>Bugs Fixed</b><br/>
+<ul>
+	<li>Mass bans of KPM checker during switch from summer to winter time should be now fixed.</li>
+	<li>The KPM checker no longer counts kills of the category VehicleAir. This should prevent KPM bans for heli players on Shanghai. (Often above the limits)</li>
+</ul>
+<b>Upgrade SQL from 4.0.0.0 - Current</b><br/>
+<ul>
+    <li><b>No upgrade SQL required.</b></li>
+</ul>
