@@ -1587,3 +1587,19 @@ Added small improvements to fuzzy player match response text.</li>
 <ul>
     <li><b>No upgrade SQL required.</b></li>
 </ul>
+
+<h4>8.1.7.1 (15-DEC-2022)</h4>
+<b>Enhancements</b><br/>
+<ul>
+	<li>None</li>
+</ul>
+<b>Changes</b><br/>
+<ul>
+	<li>Merge upstream release 7.6.1.3 into E4GLAdKats</li>
+	<li>Only import active bans into the PRoCon ban list @Prophet731</li>
+</ul>
+<b>Bugs Fixed</b><br/>
+<ul>
+	<li>Updated github URLs to new domain (raw.githubusercontent.com) @Prophet731</li>
+</ul>
+
