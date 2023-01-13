@@ -129,6 +129,11 @@
 			"group_id":25,
 			"group_key":"persistent_mute_force",
 			"group_name":"Persistent Force Mute"
+		},
+		{
+			"group_id":26,
+			"group_key":"whitelist_move_protection",
+			"group_name":"Move Protection Whitelist"
 		}
 	]
 }
