@@ -1,4 +1,4 @@
-[//]: # "<latest_stable_release>8.1.7.1</latest_stable_release>"
+[//]: # "<latest_stable_release>8.1.8.0</latest_stable_release>"
 <p>
     <a name=adkats />
     <img src="https://i.imgur.com/r9pwH3A.png" alt="AdKats Advanced In-Game Admin Tools">
@@ -768,6 +768,8 @@
     current round.
     When a player is moved by admin, multibalancer unswitcher is disabled for a few seconds to remove the chance of
     autobalancer fighting admin moves.
+    Players can be added to a move protection whitelist. Members of this list cannot be moved by admins or players
+    with the pull command.
 </p>
 <h3>Requiring Reasons</h3>
 <p>
@@ -2238,12 +2240,36 @@ plugin.CallOtherPlugin("AdKats", "IssueCommand", command);
     </tr>
     <tr>
         <td><b>Remove Player from Watchlist</b></td>
-        <td>!rwatch</td>
+        <td>rwatch</td>
         <td>
             [player]
         </td>
         <td>
             The in-game command used for removing a player from the watchlist.
+        </td>
+    </tr>
+    <tr>
+        <td><b>Add Player to Move Protection Whitelist</b></td>
+        <td>movewhitelist</td>
+        <td>
+            [duration or 'perm']<br/>
+            OR<br/>
+            [duration or 'perm'][player]<br/>
+            OR<br/>
+            [duration or 'perm'][player][reason]<br/>
+        </td>
+        <td>
+            The in-game command used for adding a player to the move protection whitelist.
+        </td>
+    </tr>
+    <tr>
+        <td><b>Remove Player from Move Protection Whitelist</b></td>
+        <td>unmovewhitelist</td>
+        <td>
+            [player]
+        </td>
+        <td>
+            The in-game command used for removing a player from the move protection whitelist.
         </td>
     </tr>
 </table>
