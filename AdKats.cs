@@ -20866,6 +20866,12 @@ namespace PRoConEvents
                         FinalizeRecord(record);
                         return;
                     }
+                    // Move protection handling
+                    if (record.source_player != null && record.target_player != null && (record.command_type.command_key == "player_move" || record.command_type.command_key == "player_fmove" || record.command_type.command_key == "player_pull") && GetMatchingVerboseASPlayersOfGroup("whitelist_move_protection", record.target_player).Any()) {
+                         SendMessageToSource(record, record.target_player.GetVerboseName() + " is protected from being moved.");
+                         FinalizeRecord(record);
+                         return;
+                    }
                     //Command timeouts
                     if (record.command_action != null &&
                         _commandTimeoutDictionary.ContainsKey(record.command_action.command_key) &&
