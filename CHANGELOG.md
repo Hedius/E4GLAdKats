@@ -1603,3 +1603,19 @@ Added small improvements to fuzzy player match response text.</li>
 	<li>Updated github URLs to new domain (raw.githubusercontent.com) @Prophet731</li>
 </ul>
 
+
+<h4>8.1.8.0 (13-JAN-2023)</h4>
+<b>Enhancements</b><br/>
+<ul>
+	<li>New list: Move Protection Whitelist</li>
+	<li>New commands: !movewhitelist / !unmovewhitelist</li>
+	<li>Players/Groups on this list cannot be moved by admins. (Blocks fmove/move/pull). This has been implemented to ensure that VIPs are protected from admin moves.</li>
+</ul>
+<b>Changes</b><br/>
+<ul>
+	<liNone</li>
+</ul>
+<b>Bugs Fixed</b><br/>
+<ul>
+	<li>None</li>
+</ul>
