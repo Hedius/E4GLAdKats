@@ -549,6 +549,12 @@
     Direct temp-ban and ban are of course still available for hacking/glitching situations, but that is the ONLY time
     they should be used.
 </p>
+<h3>LanguageEnforcer Integration</h3>
+<p>
+    This plugin integrates with E4GLs LanguageEnforcer for issuing commands
+    from AdKats. Admins can use the commands !lpunish and !lreset to manually issue LanguageEnforcer punishments on players.
+    Furthermore, this custom version of the plugin comes with temp and perma mute support.
+</p>
 <h3>Player Reputation System</h3>
 <p>
     Reputation is a numeric for how helpful a player is to the server.
@@ -2746,6 +2752,48 @@ plugin.CallOtherPlugin("AdKats", "IssueCommand", command);
         </td>
     </tr>
 </table>
+<h3>LanguageEnforcer Integration Commands</h3>
+<table>
+    <tr>
+        <td><b>Command</b></td>
+        <td><b>Default Text</b></td>
+        <td><b>Params</b></td>
+        <td><b>Description</b></td>
+    </tr>
+    <tr>
+        <td><b>Issue Language Punish</b></td>
+        <td>lpunish</td>
+	<td>
+            None<br/>
+            OR<br/>
+            [player][reason]<br/>
+            OR<br/>
+            [reportID]<br/>
+            OR<br/>
+            [reportID][reason]
+        </td>
+        <td>
+	    The in-game command for issuing a language punishment over LanguageEnforcer. Requires LanguageEnforcer to be installed and enabled.
+        </td>
+    </tr>
+    <tr>
+        <td><b>Issue Language Reset</b></td>
+	 <td>lreset</td>
+	<td>
+            None<br/>
+            OR<br/>
+            [player][reason]<br/>
+            OR<br/>
+            [reportID]<br/>
+            OR<br/>
+            [reportID][reason]
+        </td>
+        <td>
+	    The in-game command for issuing a counter reset over LanguageEnforcer. Resets all points and sets the the player to a clean state.
+        </td>
+    </tr>
+</table>
+
 <h3>Maintenance Commands</h3>
 <table>
     <tr>
