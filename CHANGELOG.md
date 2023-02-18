@@ -1613,7 +1613,23 @@ Added small improvements to fuzzy player match response text.</li>
 </ul>
 <b>Changes</b><br/>
 <ul>
-	<liNone</li>
+	<li>None</li>
+</ul>
+<b>Bugs Fixed</b><br/>
+<ul>
+	<li>None</li>
+</ul>
+
+<h4>8.1.9.0 (18-FEB-2023)</h4>
+<b>Enhancements</b><br/>
+<ul>
+	<li>New commands: !lpunish and !lreset</li>
+	<li>These commands integrate together with E4GL's LanguageEnforcer fork to allow admins to issue language punishments and resets of the counter over the Language plugin.</li>
+	<li>This has been implemented to allow auditing of language punishments.</li>
+</ul>
+<b>Changes</b><br/>
+<ul>
+	<li>Report war responses tell people to join the discord now. (Instead of teamspeak).</li>
 </ul>
 <b>Bugs Fixed</b><br/>
 <ul>
