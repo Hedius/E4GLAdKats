@@ -36087,7 +36087,7 @@ namespace PRoConEvents
                 }
                 else {
                     if (record.record_source != ARecord.Sources.InGame && record.record_source != ARecord.Sources.Automated && record.record_source != ARecord.Sources.ServerCommand) {
-                        SendMessageToSource(record, "You issued a LANGUAGE PUNISH " + record.GetTargetNames() + " for " + record.record_message);
+                        SendMessageToSource(record, "You issued a LANGUAGE PUNISH on " + record.GetTargetNames() + " for " + record.record_message);
                     }
 
                     AdminSayMessage(Log.FBold(Log.CRed(record.GetTargetNames() + " LANGUAGE PUNISHED" + (_ShowAdminNameInAnnouncement ? (" by " + record.GetSourceName()) : ("")) + " for " + record.record_message)));
@@ -36120,7 +36120,7 @@ namespace PRoConEvents
                          record.record_source != ARecord.Sources.Automated &&
                          record.record_source != ARecord.Sources.ServerCommand)
                      {
-                         SendMessageToSource(record, "You issued a LANGUAGE RESET " + record.GetTargetNames() + " for " + record.record_message);
+                         SendMessageToSource(record, "You issued a LANGUAGE RESET on " + record.GetTargetNames() + " for " + record.record_message);
                      }
                      ExecuteCommand("procon.protected.plugins.call", "LanguageEnforcer", "RemoteManuallyResetPlayer", GetType().Name, record.target_player.player_name, record.target_player.player_guid);
                  }
