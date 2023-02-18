@@ -21023,7 +21023,7 @@ namespace PRoConEvents
                                         NowDuration(aRecord.record_time).TotalMinutes < 5 &&
                                         aRecord.command_action.command_key != "player_report_confirm") >= 1)
                                 {
-                                    SendMessageToSource(record, "Do not have report wars. If this is urgent please contact an admin in teamspeak; " + GetChatCommandByKey("self_voip") + " for the address.");
+                                    SendMessageToSource(record, "Do not have report wars. If this is urgent please contact an admin in Discord; " + GetChatCommandByKey("self_voip") + " for the address.");
                                     QueueRecordForProcessing(new ARecord
                                     {
                                         record_source = ARecord.Sources.Automated,
@@ -29511,6 +29511,77 @@ namespace PRoConEvents
                             }
                         }
                         break;
+                    // Hedius: REDUDANCY part 10k. :) This plugin is a mess.
+                     case "player_language_punish":
+                     case "player_language_reset":
+                         {
+                             //Remove previous commands awaiting confirmation
+                             CancelSourcePendingAction(record);
+ 
+                             if (_serverInfo.ServerType == "OFFICIAL")
+                             {
+                                 SendMessageToSource(record, record.command_type.command_name + " cannot be performed on official servers.");
+                                 FinalizeRecord(record);
+                                 return;
+                             }
+ 
+                             //Parse parameters using max param count
+                             String[] parameters = Util.ParseParameters(remainingMessage, 2);
+                             switch (parameters.Length)
+                             {
+                                 case 0:
+                                     if (record.record_source != ARecord.Sources.InGame)
+                                     {
+                                         SendMessageToSource(record, "You can't use a self-targeted command from outside the game.");
+                                         FinalizeRecord(record);
+                                         return;
+                                     }
+                                     record.record_message = "Issuing command on yourself";
+                                     record.target_name = record.source_name;
+                                     CompleteTargetInformation(record, false, false, false);
+                                     break;
+                                 case 1:
+                                     record.target_name = parameters[0];
+                                     //Handle based on report ID as only option
+                                     if (!HandlePlayerReport(record))
+                                     {
+                                         SendMessageToSource(record, "No reason given, unable to submit.");
+                                     }
+                                     FinalizeRecord(record);
+                                     return;
+                                 case 2:
+                                     record.target_name = parameters[0];
+ 
+                                     //attempt to handle via pre-message ID
+                                     record.record_message = GetPreMessage(parameters[1], _RequirePreMessageUse);
+                                     if (record.record_message == null)
+                                     {
+                                         SendMessageToSource(record, "Invalid PreMessage ID, valid PreMessage IDs are 1-" + _PreMessageList.Count);
+                                         FinalizeRecord(record);
+                                         return;
+                                     }
+ 
+                                     //Handle based on report ID if possible
+                                     if (!HandlePlayerReport(record))
+                                     {
+                                         if (record.record_message.Length >= _RequiredReasonLength)
+                                         {
+                                             CompleteTargetInformation(record, false, false, true);
+                                         }
+                                         else
+                                         {
+                                             SendMessageToSource(record, "Reason too short, unable to submit.");
+                                             FinalizeRecord(record);
+                                         }
+                                     }
+                                     break;
+                                 default:
+                                     SendMessageToSource(record, "Invalid parameters, unable to submit.");
+                                     FinalizeRecord(record);
+                                     return;
+                             }
+                         }
+                         break;
                     default:
                         Log.Error("Unable to complete record for " + record.command_type.command_key + ", handler not found.");
                         FinalizeRecord(record);
@@ -31168,6 +31239,12 @@ namespace PRoConEvents
                         break;
                     case "self_challenge":
                         SendChallengeInfo(record);
+                        break;
+                    case "player_language_punish":
+                        LanguagePunishTarget(record);
+                        break;
+                    case "player_language_reset":
+                        LanguageResetTarget(record);
                         break;
                     case "player_changename":
                     case "player_changetag":
@@ -35999,6 +36076,63 @@ namespace PRoConEvents
             }
             Log.Debug(() => "Exiting ChallengeAutoKillRemoveTarget", 6);
         }
+
+        public void LanguagePunishTarget(ARecord record) {
+            Log.Debug(() => "Entering LanguagePunishTarget", 6);
+            try {
+                record.record_action_executed = true;
+                //Perform actions
+                if (String.IsNullOrEmpty(record.target_player.player_name)) {
+                    Log.Error("Tried to issue an language punish on a null target.");
+                }
+                else {
+                    if (record.record_source != ARecord.Sources.InGame && record.record_source != ARecord.Sources.Automated && record.record_source != ARecord.Sources.ServerCommand) {
+                        SendMessageToSource(record, "You issued a LANGUAGE PUNISH " + record.GetTargetNames() + " for " + record.record_message);
+                    }
+
+                    AdminSayMessage(Log.FBold(Log.CRed(record.GetTargetNames() + " LANGUAGE PUNISHED" + (_ShowAdminNameInAnnouncement ? (" by " + record.GetSourceName()) : ("")) + " for " + record.record_message)));
+                    ExecuteCommand("procon.protected.plugins.call", "LanguageEnforcer", "RemoteManuallyPunishPlayer", GetType().Name, record.target_player.player_name, record.target_player.player_guid);
+                }
+            }
+            catch (Exception e) {
+                record.record_exception = new AException("Error while taking action for language punish record.", e);
+                Log.HandleException(record.record_exception);
+                FinalizeRecord(record);
+            }
+
+            Log.Debug(() => "Exiting LanguagePunishTarget", 6);
+        }
+
+        public void LanguageResetTarget(ARecord record)
+         {
+             Log.Debug(() => "Entering LanguageResetTarget", 6);
+             try
+             {
+                 record.record_action_executed = true;
+                 //Perform actions
+                 if (String.IsNullOrEmpty(record.target_player.player_name))
+                 {
+                     Log.Error("Tried to issue an language reset on a null target.");
+                 }
+                 else
+                 {
+                     if (record.record_source != ARecord.Sources.InGame &&
+                         record.record_source != ARecord.Sources.Automated &&
+                         record.record_source != ARecord.Sources.ServerCommand)
+                     {
+                         SendMessageToSource(record, "You issued a LANGUAGE RESET " + record.GetTargetNames() + " for " + record.record_message);
+                     }
+                     ExecuteCommand("procon.protected.plugins.call", "LanguageEnforcer", "RemoteManuallyResetPlayer", GetType().Name, record.target_player.player_name, record.target_player.player_guid);
+                 }
+             }
+             catch (Exception e)
+             {
+                 record.record_exception = new AException("Error while taking action for language reset record.", e);
+                 Log.HandleException(record.record_exception);
+                 FinalizeRecord(record);
+             }
+             Log.Debug(() => "Exiting LanguageResetTarget", 6);
+         }
 
         public void PurgeExtendedRoundStats()
         {
@@ -47712,6 +47846,16 @@ namespace PRoConEvents
                                     SendNonQuery("Adding command player_whitelistmoveprotection_remove", "INSERT INTO `adkats_commands` VALUES(155, 'Active', 'player_whitelistmoveprotection_remove', 'Log', 'Remove Move Protection Whitelist', 'unmovewhitelist', TRUE, 'Any')", true);
                                     newCommands = true;
                                 }
+                                if (!_CommandIDDictionary.ContainsKey(156))
+                                {
+                                    SendNonQuery("Adding command player_language_punish", "INSERT INTO `adkats_commands` VALUES(156, 'Active', 'player_language_punish', 'Log', 'Issue Language Punish', 'lpunish', TRUE, 'Any')", true);
+                                    newCommands = true;
+                                }
+                                if (!_CommandIDDictionary.ContainsKey(157))
+                                {
+                                    SendNonQuery("Adding command player_language_reset", "INSERT INTO `adkats_commands` VALUES(157, 'Active', 'player_language_reset', 'Log', 'Issue Language Counter Reset', 'lreset', TRUE, 'Any')", true);
+                                    newCommands = true;
+                                }
                                 if (newCommands)
                                 {
                                     FetchCommands();
@@ -47886,6 +48030,8 @@ namespace PRoConEvents
             _CommandDescriptionDictionary["player_watchlist_remove"] = "Removes the target player from the watchlist.";
             _CommandDescriptionDictionary["player_whitelistmoveprotection"] = "Adds the target player to the move protection whitelist. Preventing admins from moving them.";
             _CommandDescriptionDictionary["player_whitelistmoveprotection_remove"] = "Removes the target player from the move protection whitelist.";
+            _CommandDescriptionDictionary["player_language_punish"] = "Issue a LanguageEnforcer punishment. Requires LanguageEnforcer to be installed and active.";
+            _CommandDescriptionDictionary["player_language_reset"] = "Issue a LanguageEnforcer counter reset. Resetting the punishment counter to 0 on the server.";
         }
 
         private void FillReadableMapModeDictionaries()
