@@ -193,7 +193,7 @@ namespace PRoConEvents
         private Int32 _MemoryUsageRestartProcon = 2048;
 
         //Debug
-        private String _debugSoldierName = "H3dius";
+        private String _debugSoldierName = "Kim_Jong_H3dius";
         private Boolean _toldCol;
         private Boolean _debugDisplayPlayerFetches;
 
