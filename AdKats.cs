@@ -1127,7 +1127,7 @@ namespace PRoConEvents
 
         public String GetPluginAuthor()
         {
-            return "ColColonCleaner";
+            return "ColColonCleaner, Prophet731, Hedius, neonardo1";
         }
 
         public String GetPluginWebsite()
