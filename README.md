@@ -122,7 +122,7 @@
     <li>
         <b>TeamSpeak and Discord Integration.</b>
         AdKats can be connected to teamspeak or discord to apply perks and monitoring to players in VOIP. Furthermore, AdKats can announce online voice players regularly.
-	<img src="https://share.hedius.eu/i/67a8b3b4-b2c8-4235-bcfc-35858974836d.jpg" alt="Online Player Announcement">
+	<img src="https://raw.githubusercontent.com/Hedius/E4GLAdKats/main/images/discord_announcement.jpg" alt="Online Player Announcement">
     </li>
     <li>
         <b>Fuzzy Player Name Completion.</b>
@@ -199,7 +199,7 @@
     	<b>Watchlist.</b>
 	The watchlist module allows admins to add and remove players from the watchlist. Players on the watchlist trigger a discord and a in-game notification if they
 	join or leave a server.
-	<img src="https://share.hedius.eu/i/e9f49e29-ce39-4524-ab12-9751206da16c.png" alt="Watchlist Module">
+	<img src="https://raw.githubusercontent.com/Hedius/E4GLAdKats/main/images/watchlist.png" alt="Watchlist Module">
     </li>
 </ul>
 <p>

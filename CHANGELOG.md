@@ -1456,7 +1456,7 @@ Added small improvements to fuzzy player match response text.</li>
 		<li>New special group watchlist.</>
 		<li>New commands !watch and !rwatch for adding removing players from the watchlist</>
 	</ul>
-	<img src="https://share.hedius.eu/i/e9f49e29-ce39-4524-ab12-9751206da16c.png" alt="Watchlist Module">
+	<img src="https://raw.githubusercontent.com/Hedius/E4GLAdKats/main/images/watchlist.jpg" alt="Watchlist Module">
 </ul>
 <b>Changes</b><br/>
 <ul>
@@ -1553,7 +1553,7 @@ Added small improvements to fuzzy player match response text.</li>
 	<li>Announce online voice chat players (Discord + TeamSpeak) regularly with a public message to animate people to join your voice channels.</li>
 	<li>The system is enabled by default.</li>
 	<li>10 new Settings for configuring the announcement. See the end of sections B28 and B29.</li>
-	<img src="https://share.hedius.eu/i/67a8b3b4-b2c8-4235-bcfc-35858974836d.jpg" alt="Online Player Announcement">
+	<img src="https://raw.githubusercontent.com/Hedius/E4GLAdKats/main/images/discord_announcement.jpg" alt="Online Player Announcement">
 </ul>
 <b>Changes</b><br/>
 <ul>
