@@ -134,6 +134,11 @@
 			"group_id":26,
 			"group_key":"whitelist_move_protection",
 			"group_name":"Move Protection Whitelist"
+		},
+		{
+			"group_id":27,
+			"group_key":"whitelist_ba",
+			"group_name":"BattlefieldAgency Whitelist"
 		}
 	]
 }

@@ -329,7 +329,8 @@ REPLACE INTO `adkats_commands` VALUES(154, 'Active', 'player_whitelistmoveprotec
 REPLACE INTO `adkats_commands` VALUES(155, 'Active', 'player_whitelistmoveprotection_remove', 'Log', 'Remove Move Protection Whitelist', 'unmovewhitelist', TRUE, 'Any');
 REPLACE INTO `adkats_commands` VALUES(156, 'Active', 'player_language_punish', 'Log', 'Issue Language Punish', 'lpunish', TRUE, 'Any');
 REPLACE INTO `adkats_commands` VALUES(157, 'Active', 'player_language_reset', 'Log', 'Issue Language Counter Reset', 'lreset', TRUE, 'Any');
-
+REPLACE INTO `adkats_commands` VALUES(158, 'Active', 'player_whitelistba', 'Log', 'BattlefieldAgency Whitelist Player', 'bawhitelist', TRUE, 'AnyHidden');
+REPLACE INTO `adkats_commands` VALUES(159, 'Active', 'player_whitelistba_remove', 'Log', 'Remove BattlefieldAgency Whitelist', 'unbawhitelist', TRUE, 'AnyHidden');
 
 
 DROP TABLE IF EXISTS `adkats_infractions_global`;

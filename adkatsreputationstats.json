@@ -903,5 +903,15 @@
     "command_typeaction": "157|157",
     "target_weight": 8,
     "source_weight": 0.5
+  },
+  {
+    "command_typeaction": "158|158",
+    "target_weight": 0,
+    "source_weight": 0
+  },
+  {
+    "command_typeaction": "159|159",
+    "target_weight": 0,
+    "source_weight": 0
   }
 ] 
