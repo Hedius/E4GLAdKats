@@ -70,7 +70,7 @@
         Battlelog stats can be polled for players in the server, issuing automatic bans for damage mods, aimbots, magic bullet, and several others. 
         The LIVE system can detect damage mods and magic bullet from a single round of play. 
         DPS checks are enabled by default, with others available after a few clicks.
-        Furthermore, it is possible to send whitelists to the BF4DB plugin.
+        Furthermore, it is possible to send whitelists to the BF4DB and BattlefieldAgency plugins.
     </li>
     <li>
         <b>Surrender Vote System.</b>
@@ -2029,6 +2029,31 @@ plugin.CallOtherPlugin("AdKats", "IssueCommand", command);
         </td>
     </tr>
     <tr>
+        <td><b>BattlefieldAgency Whitelist Player</b></td>
+        <td>bawhitelist</td>
+        <td>
+            [duration or 'perm']<br/>
+            OR<br/>
+            [duration or 'perm'][player]<br/>
+            OR<br/>
+            [duration or 'perm'][player][reason]<br/>
+        </td>
+        <td>
+            The in-game command used for adding a player to the BA whitelist for all servers. The setting
+            "Feed BattlefieldAgency Whitelist" must be enabled to use this command.
+        </td>
+    </tr>
+    <tr>
+        <td><b>Remove BattlefieldAgency Whitelist</b></td>
+        <td>unbawhitelist</td>
+        <td>
+            [player]
+        </td>
+        <td>
+            The in-game command used for removing a player from the BA whitelist for all servers. "Feed BattlefieldAgency Whitelist" must be enabled to use this command.
+        </td>
+    </tr>
+    <tr>
         <td><b>Un-Spectator Blacklist Player</b></td>
         <td>unspecblacklist</td>
         <td>
@@ -3694,6 +3719,11 @@ plugin.CallOtherPlugin("AdKats", "IssueCommand", command);
     </li>
     <li><b>'Feed BF4DB Whitelist'</b> - 
         When enabled, the BF4DB whitelist special player group is used to feed BF4DB's player whitelist.
+    </li>
+    <li><b>'Feed BattlefieldAgency Whitelist'</b> - 
+        When enabled, the BattlefieldAgency whitelist special player group is used to feed BA's player whitelist.
+        This requires a modified version of the BA plugin.
+        Check:  <a href="https://github.com/Hedius/BAPlugin">Hedius/BAPlugin</a> 
     </li>
     <li><b>'Feed TeamKillTracker Whitelist'</b> - 
         When enabled, the TeamKillTracker whitelist special player group is used to feed TeamKillTracker's player whitelist.
