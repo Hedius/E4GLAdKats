@@ -1635,3 +1635,20 @@ Added small improvements to fuzzy player match response text.</li>
 <ul>
 	<li>None</li>
 </ul>
+
+<h4>8.2.0.0 (09-MAY-2023)</h4>
+<b>Enhancements</b><br/>
+<ul>
+	<li>Battlefield Agency Whitelist Support. This requires a modified BA plugin <a href="https://github.com/Hedius/BAPlugin">(Repo)</a></li>
+    <li>New setting 'Feed Battlefield Agency Whitelist'</li>
+    <li>New commands !bawhitelist !unbawhitelist </li>
+    <li>New list: whitelist_ba </li>
+</ul>
+<b>Changes</b><br/>
+<ul>
+	<li>None</li>
+</ul>
+<b>Bugs Fixed</b><br/>
+<ul>
+	<li>None</li>
+</ul>
