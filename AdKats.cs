@@ -21,11 +21,11 @@
  * Work on fork by Hedius (Version >= 8.0.0.0)
  *
  * AdKats.cs
- * Version 8.1.9.0
- * 18-FEB-2023
+ * Version 8.2.0.0
+ * 09-MAY-2023
  *
  * Automatic Update Information
- * <version_code>8.1.9.0</version_code>
+ * <version_code>8.2.0.0</version_code>
  */
 
 using System;
@@ -68,7 +68,7 @@ namespace PRoConEvents
     {
 
         //Current Plugin Version
-        private const String PluginVersion = "8.1.9.0";
+        private const String PluginVersion = "8.2.0.0";
 
         public enum GameVersionEnum
         {
@@ -613,6 +613,7 @@ namespace PRoConEvents
             "whitelist_populator",
             "whitelist_teamkill",
             "whitelist_bf4db",
+            "whitelist_ba"
         };
         private Boolean _UsePerkExpirationNotify = false;
         private Int32 _PerkExpirationNotifyDays = 7;
@@ -623,6 +624,7 @@ namespace PRoConEvents
         private Boolean _FeedMultiBalancerWhitelist_Admins = true;
         private Boolean _FeedMultiBalancerDisperseList;
         private Boolean _FeedBF4DBWhitelist;
+        private Boolean _FeedBAWhitelist;
         private Boolean _FeedTeamKillTrackerWhitelist;
         private Boolean _FeedTeamKillTrackerWhitelist_Admins;
         private Boolean _FeedServerReservedSlots;
@@ -2142,6 +2144,8 @@ namespace PRoConEvents
                     buildList.Add(new CPluginVariable(GetSettingSection("A16") + t + "Feed MULTIBalancer Even Dispersion List", typeof(Boolean), _FeedMultiBalancerDisperseList));
                     // BF4DB
                     buildList.Add(new CPluginVariable(GetSettingSection("A16") + t + "Feed BF4DB Whitelist", typeof(Boolean), _FeedBF4DBWhitelist));
+                    // BF4DB
+                    buildList.Add(new CPluginVariable(GetSettingSection("A16") + t + "Feed BattlefieldAgency Whitelist", typeof(Boolean), _FeedBAWhitelist));
                     //TeamKillTracker
                     buildList.Add(new CPluginVariable(GetSettingSection("A16") + t + "Feed TeamKillTracker Whitelist", typeof(Boolean), _FeedTeamKillTrackerWhitelist));
                     if (_FeedTeamKillTrackerWhitelist)
@@ -4793,7 +4797,24 @@ namespace PRoConEvents
                         _FeedBF4DBWhitelist = feedBF4DB;
                         FetchAllAccess(true);
                         //Once setting has been changed, upload the change to database
-                        QueueSettingForUpload(new CPluginVariable(@"Feed BF4DB Whitelist", typeof(Boolean), _FeedMultiBalancerWhitelist));
+                        QueueSettingForUpload(new CPluginVariable(@"Feed BF4DB Whitelist", typeof(Boolean), _FeedBF4DBWhitelist));
+                    }
+                }
+                else if (Regex.Match(strVariable, @"Feed BattlefieldAgency Whitelist").Success)
+                {
+                    if (_serverInfo.ServerType == "OFFICIAL" && Boolean.Parse(strValue) == true)
+                    {
+                        strValue = "False";
+                        Log.Error("'" + strVariable + "' cannot be enabled on official servers.");
+                        return;
+                    }
+                    Boolean feedBA = Boolean.Parse(strValue);
+                    if (feedBA != _FeedBAWhitelist)
+                    {
+                        _FeedBAWhitelist = feedBA;
+                        FetchAllAccess(true);
+                        //Once setting has been changed, upload the change to database
+                        QueueSettingForUpload(new CPluginVariable(@"Feed BattlefieldAgency Whitelist", typeof(Boolean), _FeedBAWhitelist));
                     }
                 }
                 else if (Regex.Match(strVariable, @"Feed TeamKillTracker Whitelist").Success)
@@ -21412,6 +21433,16 @@ namespace PRoConEvents
                             }
                             Log.Debug(() => record.command_type.command_key + " record allowed to continue processing.", 5);
                             break; 
+                        case "player_whitelistba_remove":
+                            // again redudant... ahhh this needs a redesign. NOW. Hedius.
+                            if (!GetMatchingASPlayersOfGroup("whitelist_ba", record.target_player).Any())
+                            {
+                                SendMessageToSource(record, "Matching player not in the BattlefieldAgency whitelist.");
+                                FinalizeRecord(record);
+                                return;
+                            }
+                            Log.Debug(() => record.command_type.command_key + " record allowed to continue processing.", 5);
+                            break;                            
                         case "player_persistentmute_remove":
                             if (!GetMatchingASPlayersOfGroup("persistent_mute", record.target_player).Any() && !GetMatchingASPlayersOfGroup("persistent_mute_force", record.target_player).Any())
                             {
@@ -27128,20 +27159,24 @@ namespace PRoConEvents
                         }
                         break;
                     case "player_whitelistbf4db":
+                    case "player_whitelistba":
                         {
                             // Rant: GOD THIS IS SO REDUNDANT - .... same code in each case here...
                             // MY EYES ARE BLEEDING :) Hedius.
                             //Remove previous commands awaiting confirmation
                             CancelSourcePendingAction(record);
+                            
+                            bool isBF4DB = record.command_type.command_key == "player_whitelistbf4db";
 
-                            if (!_FeedBF4DBWhitelist)
+                            if ((isBF4DB && !_FeedBF4DBWhitelist) || (!isBF4DB && !_FeedBAWhitelist))
                             {
-                                SendMessageToSource(record, "Enable 'Feed BF4DB Whitelist' to use this command.");
+                                SendMessageToSource(record,
+                                isBF4DB ? "Enable 'Feed BF4DB Whitelist' to use this command.": "Enable 'Feed BattlefieldAgency Whitelist' to use this command.");
                                 FinalizeRecord(record);
                                 return;
                             }
 
-                            String defaultReason = "BF4DB Whitelist";
+                            String defaultReason = isBF4DB ? "BF4DB Whitelist" : "BattlefieldAgency Whitelist";
 
                             //Parse parameters using max param count
                             String[] parameters = Util.ParseParameters(remainingMessage, 3);
@@ -28166,19 +28201,25 @@ namespace PRoConEvents
                         }
                         break;
                     case "player_whitelistbf4db_remove":
+                    case "player_whitelistba_remove":
                         {
                             //Remove previous commands awaiting confirmation
                             CancelSourcePendingAction(record);
+                            
+                            // A dirty try to no copy the code again...
+                            bool isBF4DB = record.command_type.command_key == "player_whitelistbf4db";
 
-                            if (!_FeedBF4DBWhitelist)
+                            if ((isBF4DB && !_FeedBF4DBWhitelist) || (!isBF4DB && !_FeedBAWhitelist))
                             {
-                                SendMessageToSource(record, "Enable 'Feed BF4DB Whitelist' to use this command.");
+                                SendMessageToSource(record,
+                                isBF4DB ? "Enable 'Feed BF4DB Whitelist' to use this command.": "Enable 'Feed BattlefieldAgency Whitelist' to use this command.");
                                 FinalizeRecord(record);
                                 return;
                             }
 
                             //Parse parameters using max param count
                             String[] parameters = Util.ParseParameters(remainingMessage, 1);
+                            String defaultMessage = isBF4DB ? "Removing BF4DB Whitelist" : "Removing BattlefieldAgency Whitelist";
                             switch (parameters.Length)
                             {
                                 case 0:
@@ -28188,12 +28229,12 @@ namespace PRoConEvents
                                         FinalizeRecord(record);
                                         return;
                                     }
-                                    record.record_message = "Removing BF4DB Whitelist";
+                                    record.record_message = defaultMessage;
                                     record.target_name = record.source_name;
                                     CompleteTargetInformation(record, true, true, false);
                                     break;
                                 case 1:
-                                    record.record_message = "Removing BF4DB Whitelist";
+                                    record.record_message = defaultMessage;
                                     record.target_name = parameters[0];
                                     //Handle based on report ID if possible
                                     if (!HandlePlayerReport(record))
@@ -31053,6 +31094,9 @@ namespace PRoConEvents
                     case "player_whitelistbf4db": 
                         BF4DBWhitelistTarget(record);
                         break;
+                    case "player_whitelistba": 
+                        BAWhitelistTarget(record);
+                        break;                       
                     case "player_slotreserved":
                         ReservedSlotTarget(record);
                         break;
@@ -31146,6 +31190,9 @@ namespace PRoConEvents
                     case "player_whitelistbf4db_remove": 
                         BF4DBWhitelistRemoveTarget(record);
                         break;
+                     case "player_whitelistba_remove": 
+                        BAWhitelistRemoveTarget(record);
+                        break;                       
                     case "player_whitelistpopulator":
                         PopulatorWhitelistTarget(record);
                         break;
@@ -32493,6 +32540,79 @@ namespace PRoConEvents
             }
             Log.Debug(() => "Exiting BF4DBWhitelistTarget", 6);
         }
+        
+        // Welcome to redundant code part 90k.
+        public void BAWhitelistTarget(ARecord record)
+        {
+            Log.Debug(() => "Entering BAWhitelistTarget", 6);
+            try
+            {
+                record.record_action_executed = true;
+                using (MySqlConnection connection = GetDatabaseConnection())
+                {
+                    using (MySqlCommand command = connection.CreateCommand())
+                    {
+                        command.CommandText = @"
+                        DELETE FROM
+                            `adkats_specialplayers`
+                        WHERE `player_group` = @player_group
+                          AND (`player_id` = @player_id OR `player_identifier` = @player_name);
+                        INSERT INTO
+                            `adkats_specialplayers`
+                        (
+                            `player_group`,
+                            `player_id`,
+                            `player_identifier`,
+                            `player_effective`,
+                            `player_expiration`
+                        )
+                        VALUES
+                        (
+                            @player_group,
+                            @player_id,
+                            @player_name,
+                            UTC_TIMESTAMP(),
+                            DATE_ADD(UTC_TIMESTAMP(), INTERVAL @duration_minutes MINUTE)
+                        )";
+                        if (record.target_player.player_id <= 0)
+                        {
+                            Log.Error("Player ID invalid when assigning special player entry. Unable to complete.");
+                            SendMessageToSource(record, "Player ID invalid when assigning special player entry. Unable to complete.");
+                            FinalizeRecord(record);
+                            return;
+                        }
+                        if (record.command_numeric > 10518984)
+                        {
+                            record.command_numeric = 10518984;
+                        }
+                        command.Parameters.AddWithValue("@player_group", "whitelist_ba");
+                        command.Parameters.AddWithValue("@player_id", record.target_player.player_id);
+                        command.Parameters.AddWithValue("@player_name", record.target_player.player_name);
+                        command.Parameters.AddWithValue("@duration_minutes", record.command_numeric);
+
+                        Int32 rowsAffected = SafeExecuteNonQuery(command);
+                        if (rowsAffected > 0)
+                        {
+                            String message = "Player " + record.GetTargetNames() + " given " + ((record.command_numeric == 10518984) ? ("permanent") : (FormatTimeString(TimeSpan.FromMinutes(record.command_numeric), 2))) + " BattlefiedAgency whitelist for all servers.";
+                            SendMessageToSource(record, message);
+                            Log.Debug(() => message, 3);
+                            FetchAllAccess(true);
+                        }
+                        else
+                        {
+                            Log.Error("Unable to add player to BattlefieldAgency whitelist. Error uploading.");
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                record.record_exception = new AException("Error while taking action for BattlefieldAgency Whitelist record.", e);
+                Log.HandleException(record.record_exception);
+                FinalizeRecord(record);
+            }
+            Log.Debug(() => "Exiting BattlefieldAgencyWhitelistTarget", 6);
+        }   
 
         public void ReservedSlotTarget(ARecord record)
         {
@@ -34231,6 +34351,67 @@ namespace PRoConEvents
                 FinalizeRecord(record);
             }
             Log.Debug(() => "Exiting BF4DBWhitelistRemoveTarget", 6);
+        }
+        
+        // Redundant :P
+        public void BAWhitelistRemoveTarget(ARecord record)
+        {
+            Log.Debug(() => "Entering BAWhitelistRemoveTarget", 6);
+            try
+            {
+                //Case for multiple targets
+                if (record.target_player == null)
+                {
+                    SendMessageToSource(record, "BAWhitelistRemoveTarget not available for multiple targets.");
+                    Log.Error("BAWhitelistRemoveTarget not available for multiple targets.");
+                    FinalizeRecord(record);
+                    return;
+                }
+                List<ASpecialPlayer> matchingPlayers = GetMatchingASPlayersOfGroup("whitelist_ba", record.target_player);
+                if (!matchingPlayers.Any())
+                {
+                    SendMessageToSource(record, "Matching player not in the BattlefieldAgency whitelist.");
+                    FinalizeRecord(record);
+                    return;
+                }
+                record.record_action_executed = true;
+                using (MySqlConnection connection = GetDatabaseConnection())
+                {
+                    Boolean updated = false;
+                    foreach (ASpecialPlayer asPlayer in matchingPlayers)
+                    {
+                        using (MySqlCommand command = connection.CreateCommand())
+                        {
+                            command.CommandText = @"DELETE FROM `adkats_specialplayers` WHERE `specialplayer_id` = @sp_id";
+                            command.Parameters.AddWithValue("@sp_id", asPlayer.specialplayer_id);
+                            Int32 rowsAffected = SafeExecuteNonQuery(command);
+                            if (rowsAffected > 0)
+                            {
+                                String message = "Player " + record.GetTargetNames() + " removed from BattlefieldAgency whitelist.";
+                                Log.Debug(() => message, 3);
+                                updated = true;
+                            }
+                            else
+                            {
+                                Log.Error("Unable to remove player from BattlefieldAgency whitelist. Error uploading.");
+                            }
+                        }
+                    }
+                    if (updated)
+                    {
+                        String message = "Player " + record.GetTargetNames() + " removed from BattlefieldAgency whitelist.";
+                        SendMessageToSource(record, message);
+                        FetchAllAccess(true);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                record.record_exception = new AException("Error while taking action for " + record.command_action.command_name + " record.", e);
+                Log.HandleException(record.record_exception);
+                FinalizeRecord(record);
+            }
+            Log.Debug(() => "Exiting BAWhitelistRemoveTarget", 6);
         }
 
         public void AllCapsBlacklistRemoveTarget(ARecord record)
@@ -41309,6 +41490,7 @@ namespace PRoConEvents
                 QueueSettingForUpload(new CPluginVariable(@"Feed MULTIBalancer Even Dispersion List", typeof(Boolean), _FeedMultiBalancerDisperseList));
                 QueueSettingForUpload(new CPluginVariable(@"Automatic MULTIBalancer Whitelist for Admins", typeof(Boolean), _FeedMultiBalancerWhitelist_Admins));
                 QueueSettingForUpload(new CPluginVariable(@"Feed BF4DB Whitelist", typeof(Boolean), _FeedBF4DBWhitelist));
+                QueueSettingForUpload(new CPluginVariable(@"Feed BattlefieldAgency Whitelist", typeof(Boolean), _FeedBAWhitelist));
                 QueueSettingForUpload(new CPluginVariable(@"Feed TeamKillTracker Whitelist", typeof(Boolean), _FeedTeamKillTrackerWhitelist));
                 QueueSettingForUpload(new CPluginVariable(@"Automatic TeamKillTracker Whitelist for Admins", typeof(Boolean), _FeedTeamKillTrackerWhitelist_Admins));
                 QueueSettingForUpload(new CPluginVariable(@"Automatic Reserved Slot for Admins", typeof(Boolean), _FeedServerReservedSlots_Admins));
@@ -47856,6 +48038,16 @@ namespace PRoConEvents
                                     SendNonQuery("Adding command player_language_reset", "INSERT INTO `adkats_commands` VALUES(157, 'Active', 'player_language_reset', 'Log', 'Issue Language Counter Reset', 'lreset', TRUE, 'Any')", true);
                                     newCommands = true;
                                 }
+                                if (!_CommandIDDictionary.ContainsKey(158))
+                                {
+                                    SendNonQuery("Adding command player_whitelistba", "INSERT INTO `adkats_commands` VALUES(158, 'Active', 'player_whitelistba', 'Log', 'BattlefieldAgency Whitelist Player', 'bawhitelist', TRUE, 'AnyHidden')", true);
+                                    newCommands = true;
+                                }
+                                if (!_CommandIDDictionary.ContainsKey(159))
+                                {
+                                    SendNonQuery("Adding command player_whitelistba_remove", "INSERT INTO `adkats_commands` VALUES(159, 'Active', 'player_whitelistba_remove', 'Log', 'Remove BattlefieldAgency Whitelist', 'unbawhitelist', TRUE, 'AnyHidden')", true);
+                                    newCommands = true;
+                                }
                                 if (newCommands)
                                 {
                                     FetchCommands();
@@ -47935,6 +48127,7 @@ namespace PRoConEvents
             _CommandDescriptionDictionary["player_blacklistdisperse"] = "Adds the target player to even dispersion for the server.";
             _CommandDescriptionDictionary["player_whitelistbalance"] = "Adds the target player to autobalance whitelist for the server.";
             _CommandDescriptionDictionary["player_whitelistbf4db"] = "Adds the target player to BF4DB whitelist for the server.";
+            _CommandDescriptionDictionary["player_whitelistba"] = "Adds the target player to BattlefieldAgency whitelist for the server.";
             _CommandDescriptionDictionary["player_slotreserved"] = "Adds the target player to reserved slots for the server.";
             _CommandDescriptionDictionary["player_slotspectator"] = "Adds the target player to spectator slots for the server.";
             _CommandDescriptionDictionary["player_changename"] = "Invisible command. Issued when a player changes their name.";
@@ -47985,7 +48178,8 @@ namespace PRoConEvents
             _CommandDescriptionDictionary["player_slotreserved_remove"] = "Removes a player from reserved slot list.";
             _CommandDescriptionDictionary["player_whitelistbalance_remove"] = "Removes a player from autobalance whitelist.";
             _CommandDescriptionDictionary["player_blacklistdisperse_remove"] = "Removes a player from autobalance dispersion.";
-            _CommandDescriptionDictionary["player_whitelistbfdb_remove"] = "Removes a player from BF4DB whitelist.";
+            _CommandDescriptionDictionary["player_whitelistbf4db_remove"] = "Removes a player from BF4DB whitelist.";
+            _CommandDescriptionDictionary["player_whitelistba_remove"] = "Removes a player from BattlefieldAgency whitelist.";
             _CommandDescriptionDictionary["player_whitelistpopulator"] = "Whitelists a player to be considered a populator.";
             _CommandDescriptionDictionary["player_whitelistpopulator_remove"] = "Removes a player from the populator whitelist.";
             _CommandDescriptionDictionary["player_whitelistteamkill"] = "Whitelists a player from being acted on by TeamKillTracker.";
@@ -49317,6 +49511,7 @@ namespace PRoConEvents
             UpdateMULTIBalancerDisperseList();
             UpdateTeamKillTrackerWhitelist();
             UpdateBF4DBWhitelist();
+            UpdateBAWhitelist();
             ExecuteCommand("procon.protected.send", "reservedSlotsList.list");
             Thread.Sleep(50);
             UpdateReservedSlots();
@@ -49918,6 +50113,49 @@ namespace PRoConEvents
             catch (Exception e)
             {
                 Log.HandleException(new AException("Error while updating BF4DB whitelist.", e));
+            }
+        }
+        
+        private void UpdateBAWhitelist()
+        {
+            try
+            {
+                if (_FeedBAWhitelist)
+                {
+                    List<string> baWhitelistedPlayers = new List<String>();
+                    //Pull players from special player cache
+                    List<ASpecialPlayer> whitelistedPlayers = GetVerboseASPlayersOfGroup("whitelist_ba");
+                    if (whitelistedPlayers.Any())
+                    {
+                        foreach (ASpecialPlayer asPlayer in whitelistedPlayers)
+                        {
+                            String playerIdentifier = null;
+                            if (asPlayer.player_object != null && !String.IsNullOrEmpty(asPlayer.player_object.player_guid))
+                            {
+                                playerIdentifier = asPlayer.player_object.player_guid;
+                            }
+                            else
+                            {
+                                playerIdentifier = asPlayer.player_identifier;
+                            }
+                            //Skip if no valid info found
+                            if (String.IsNullOrEmpty(playerIdentifier))
+                            {
+                                Log.Error("Player under whitelist_ba was not valid. Unable to add to BattlefieldAgency whitelist.");
+                                continue;
+                            }
+                            if (!baWhitelistedPlayers.Contains(playerIdentifier))
+                            {
+                                baWhitelistedPlayers.Add(playerIdentifier);
+                            }
+                        }
+                    }
+                    SetExternalPluginSetting("BattlefieldAgency", "Local Whitelist", CPluginVariable.EncodeStringArray(baWhitelistedPlayers.ToArray()));
+                }
+            }
+            catch (Exception e)
+            {
+                Log.HandleException(new AException("Error while updating BattlefieldAgency whitelist.", e));
             }
         }
 
