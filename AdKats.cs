@@ -49551,7 +49551,7 @@ namespace PRoConEvents
 
         private Boolean AssignPlayerRole(APlayer aPlayer)
         {
-            AUser matchingUser = _userCache.Values.FirstOrDefault(aUser => aUser.soldierDictionary.Values.Any(uPlayer => uPlayer.player_id == aPlayer.player_id));
+            AUser matchingUser = _userCache.Values.FirstOrDefault(aUser => aUser.soldierDictionary.Values.Any(uPlayer => uPlayer.player_id == aPlayer.player_id || (!String.IsNullOrEmpty(uPlayer.player_guid) && uPlayer.player_guid == aPlayer.player_guid)));
             ARole aRole = null;
             Boolean authorized = false;
             if (matchingUser != null)
