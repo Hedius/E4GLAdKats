@@ -44710,7 +44710,7 @@ namespace PRoConEvents
                         //Grab the matching players
                         while (reader.Read())
                         {
-                            APlayer aPlayer = FetchPlayer(false, true, false, null, reader.GetInt64("player_id"), null, null, null, null);
+                            APlayer aPlayer = FetchPlayer(false, false, false, null, reader.GetInt64("player_id"), null, null, null, null);
                             if (aPlayer != null)
                             {
                                 resultPlayers.Add(aPlayer);
@@ -45483,7 +45483,7 @@ namespace PRoConEvents
                             //Grab the matching players
                             while (reader.Read())
                             {
-                                APlayer aPlayer = FetchPlayer(false, true, false, null, reader.GetInt64("player_id"), null, null, null, null);
+                                APlayer aPlayer = FetchPlayer(false, false, false, null, reader.GetInt64("player_id"), null, null, null, null);
                                 if (aPlayer != null)
                                 {
                                     resultPlayers.Add(aPlayer);
