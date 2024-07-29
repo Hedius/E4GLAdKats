@@ -35225,7 +35225,7 @@ namespace PRoConEvents
                         command.CommandText = @"
                         DELETE FROM
                             `adkats_specialplayers`
-                        WHERE `player_group` IN ('persistent_mute', 'persistent_mute_force')
+                        WHERE `player_group` = @player_group
                           AND (`player_id` = @player_id OR `player_identifier` = @player_name);
                         INSERT INTO
                             `adkats_specialplayers`
