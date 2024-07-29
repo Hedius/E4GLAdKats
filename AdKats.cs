@@ -21,11 +21,11 @@
  * Work on fork by Hedius (Version >= 8.0.0.0)
  *
  * AdKats.cs
- * Version 8.2.0.0
- * 09-MAY-2023
+ * Version 8.2.0.1
+ * 30-JUL-2024
  *
  * Automatic Update Information
- * <version_code>8.2.0.0</version_code>
+ * <version_code>8.2.0.1</version_code>
  */
 
 using System;
@@ -68,7 +68,7 @@ namespace PRoConEvents
     {
 
         //Current Plugin Version
-        private const String PluginVersion = "8.2.0.0";
+        private const String PluginVersion = "8.2.0.1";
 
         public enum GameVersionEnum
         {
@@ -35225,7 +35225,7 @@ namespace PRoConEvents
                         command.CommandText = @"
                         DELETE FROM
                             `adkats_specialplayers`
-                        WHERE `player_group` IN ('persistent_mute', 'persistent_mute_force')
+                        WHERE `player_group` = @player_group
                           AND (`player_id` = @player_id OR `player_identifier` = @player_name);
                         INSERT INTO
                             `adkats_specialplayers`
@@ -44710,7 +44710,7 @@ namespace PRoConEvents
                         //Grab the matching players
                         while (reader.Read())
                         {
-                            APlayer aPlayer = FetchPlayer(false, true, false, null, reader.GetInt64("player_id"), null, null, null, null);
+                            APlayer aPlayer = FetchPlayer(false, false, false, null, reader.GetInt64("player_id"), null, null, null, null);
                             if (aPlayer != null)
                             {
                                 resultPlayers.Add(aPlayer);
@@ -45483,7 +45483,7 @@ namespace PRoConEvents
                             //Grab the matching players
                             while (reader.Read())
                             {
-                                APlayer aPlayer = FetchPlayer(false, true, false, null, reader.GetInt64("player_id"), null, null, null, null);
+                                APlayer aPlayer = FetchPlayer(false, false, false, null, reader.GetInt64("player_id"), null, null, null, null);
                                 if (aPlayer != null)
                                 {
                                     resultPlayers.Add(aPlayer);
@@ -49551,7 +49551,7 @@ namespace PRoConEvents
 
         private Boolean AssignPlayerRole(APlayer aPlayer)
         {
-            AUser matchingUser = _userCache.Values.FirstOrDefault(aUser => aUser.soldierDictionary.Values.Any(uPlayer => uPlayer.player_id == aPlayer.player_id || uPlayer.player_guid == aPlayer.player_guid));
+            AUser matchingUser = _userCache.Values.FirstOrDefault(aUser => aUser.soldierDictionary.Values.Any(uPlayer => uPlayer.player_id == aPlayer.player_id || (!String.IsNullOrEmpty(uPlayer.player_guid) && uPlayer.player_guid == aPlayer.player_guid)));
             ARole aRole = null;
             Boolean authorized = false;
             if (matchingUser != null)

@@ -900,6 +900,21 @@
     "source_weight": 0.5
   },
   {
+    "command_typeaction": "156|92",
+    "target_weight": -8,
+    "source_weight": 0.5
+  },
+  {
+    "command_typeaction": "156|11",
+    "target_weight": -9,
+    "source_weight": 0.5
+  },
+  {
+    "command_typeaction": "156|149",
+    "target_weight": -10,
+    "source_weight": 0.5
+  },
+  {
     "command_typeaction": "157|157",
     "target_weight": 8,
     "source_weight": 0.5
