@@ -22,7 +22,7 @@
  *
  * AdKats.cs
  * Version 8.2.0.1
- * 23-OCT-2023
+ * 30-JUL-2024
  *
  * Automatic Update Information
  * <version_code>8.2.0.1</version_code>

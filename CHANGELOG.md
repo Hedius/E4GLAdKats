@@ -1653,7 +1653,7 @@ Added small improvements to fuzzy player match response text.</li>
 	<li>None</li>
 </ul>
 
-<h4>8.2.0.1 (23-OCT-2023)</h4>
+<h4>8.2.0.1 (30-JUL-2024)</h4>
 <b>Enhancements</b><br/>
 <ul>
     <li>None</li>
@@ -1661,6 +1661,7 @@ Added small improvements to fuzzy player match response text.</li>
 <b>Changes</b><br/>
 <ul>
 	<li>Do not match players in searched by name if the matched player is from another game.</li>
+    <li>Do not overwrite force mutes with usual persistent mutes.</li>
 </ul>
 <b>Bugs Fixed</b><br/>
 <ul>
