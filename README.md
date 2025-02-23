@@ -4,6 +4,7 @@
     <img src="https://i.imgur.com/r9pwH3A.png" alt="AdKats Advanced In-Game Admin Tools">
 </p>
 <p>
+    <b>Requires PRoCo with MysqlConnecor lib!!!!</b>
     <b>New Extension! Click below to enforce BF4 loadouts on-spawn!</b>
 </p>
 <p>

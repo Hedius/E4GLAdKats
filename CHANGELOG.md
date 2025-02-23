@@ -1667,3 +1667,17 @@ Added small improvements to fuzzy player match response text.</li>
 <ul>
 	<li>Do not match players by their EA GUID if the EA guid is null.</li>
 </ul>
+
+<h4>9.0.0.0 (23-FEB-2025)</h4>
+<b>Enhancements</b><br/>
+<ul>
+    <li>None</li>
+</ul>
+<b>Changes</b><br/>
+<ul>
+	<li>Switch fro MySql.Data to MySqlConnector. First one is by Oracle and does not support newer MariaDB releases.</li>
+</ul>
+<b>Bugs Fixed</b><br/>
+<ul>
+	<li>None</li>
+</ul>
