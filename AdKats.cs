@@ -53,7 +53,7 @@ using System.Windows.Forms;
 
 using Microsoft.CSharp;
 
-using MySql.Data.MySqlClient;
+using MySqlConnector;
 
 using PRoCon.Core;
 using PRoCon.Core.Players;
@@ -55382,8 +55382,18 @@ namespace PRoConEvents
             compilerParameters.ReferencedAssemblies.Add("System.Data.dll");
             compilerParameters.ReferencedAssemblies.Add("System.Windows.Forms.dll");
             compilerParameters.ReferencedAssemblies.Add("System.Xml.dll");
-            compilerParameters.ReferencedAssemblies.Add("MySql.Data.dll");
             compilerParameters.ReferencedAssemblies.Add("PRoCon.Core.dll");
+            compilerParameters.ReferencedAssemblies.Add("Microsoft.Bcl.AsyncInterfaces.dll");
+            compilerParameters.ReferencedAssemblies.Add("System.Buffers.dll");
+            compilerParameters.ReferencedAssemblies.Add("System.Memory.dll");
+            compilerParameters.ReferencedAssemblies.Add("System.Numerics.Vectors.dll");
+            compilerParameters.ReferencedAssemblies.Add("System.Runtime.CompilerServices.Unsafe.dll");
+            compilerParameters.ReferencedAssemblies.Add("Microsoft.Extensions.Logging.Abstractions.dll");
+            compilerParameters.ReferencedAssemblies.Add("Microsoft.Extensions.DependencyInjection.Abstractions.dll");
+            compilerParameters.ReferencedAssemblies.Add("System.Diagnostics.DiagnosticSource.dll");
+            compilerParameters.ReferencedAssemblies.Add("System.Threading.Tasks.Extensions.dll");
+            compilerParameters.ReferencedAssemblies.Add("MysqlConnector.dll");
+
             compilerParameters.GenerateInMemory = true;
             compilerParameters.IncludeDebugInformation = false;
             compilerParameters.TempFiles = new TempFileCollection(pluginDirectory);
