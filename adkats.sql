@@ -371,7 +371,8 @@ CREATE TABLE IF NOT EXISTS `adkats_records_debug` (
   PRIMARY KEY (`record_id`),
   KEY `adkats_records_debug_fk_server_id` (`server_id`),
   KEY `adkats_records_debug_fk_command_type` (`command_type`),
-  KEY `adkats_records_debug_fk_command_action` (`command_action`)
+  KEY `adkats_records_debug_fk_command_action` (`command_action`),
+  KEY `adkats_records_debug_idx_record_time` (`record_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='AdKats - Debug Records';
 
 DROP TABLE IF EXISTS `adkats_records_main`;
@@ -394,7 +395,9 @@ CREATE TABLE IF NOT EXISTS `adkats_records_main` (
   KEY `adkats_records_main_fk_command_type` (`command_type`),
   KEY `adkats_records_main_fk_command_action` (`command_action`),
   KEY `adkats_records_main_fk_target_id` (`target_id`),
-  KEY `adkats_records_main_fk_source_id` (`source_id`)
+  KEY `adkats_records_main_fk_source_id` (`source_id`),
+  KEY `adkats_records_main_fk_record_time` (`record_time`),
+  KEY `adkats_records_main_idx_server_read` (`server_id`, `adkats_read`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='AdKats - Main Records';
 DROP TRIGGER IF EXISTS `adkats_infraction_point_delete`;
 DELIMITER $$
@@ -748,7 +751,9 @@ CREATE TABLE `tbl_extendedroundstats` (
 	`team2_tpm` double NOT NULL,
 	`roundstat_time` datetime NOT NULL,
 	`map` varchar(25) CHARACTER SET 'utf8' COLLATE 'utf8_general_ci' NULL DEFAULT NULL,
-	PRIMARY KEY (`roundstat_id`)
+	PRIMARY KEY (`roundstat_id`),
+	KEY `tbl_extendedroundstats_idx_server_round` (`server_id`, `round_id`),
+	KEY `tbl_extendedroundstats_idx_time` (`roundstat_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='AdKats - Extended Round Stats';
 
 DROP TABLE IF EXISTS `adkats_statistics`;

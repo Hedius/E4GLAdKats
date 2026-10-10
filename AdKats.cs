@@ -21,11 +21,11 @@
  * Work on fork by Hedius (Version >= 8.0.0.0)
  *
  * AdKats.cs
- * Version 9.0.0.0
- * 23-FEB-2025
+ * Version 9.0.0.1
+ * 03-OCT-2026
  *
  * Automatic Update Information
- * <version_code>9.0.0.0</version_code>
+ * <version_code>9.0.0.1</version_code>
  */
 
 using System;
@@ -68,7 +68,7 @@ namespace PRoConEvents
     {
 
         //Current Plugin Version
-        private const String PluginVersion = "9.0.0.0";
+        private const String PluginVersion = "9.0.0.1";
 
         public enum GameVersionEnum
         {
@@ -36315,23 +36315,43 @@ namespace PRoConEvents
              Log.Debug(() => "Exiting LanguageResetTarget", 6);
          }
 
+        private Int32 PurgeInBatches(String deleteSql)
+        {
+            //Delete in small batches so locks are only held briefly and inserts from the live server don't pile up behind one huge delete
+            const Int32 batchSize = 5000;
+            const Int32 maxBatches = 200;
+            Int32 total = 0;
+            for (Int32 batch = 0; batch < maxBatches && _pluginEnabled; batch++)
+            {
+                Int32 affectedRows;
+                using (MySqlConnection connection = GetDatabaseConnection())
+                {
+                    using (MySqlCommand command = connection.CreateCommand())
+                    {
+                        command.CommandText = deleteSql + " limit " + batchSize;
+                        affectedRows = SafeExecuteNonQuery(command);
+                    }
+                }
+                total += affectedRows;
+                if (affectedRows < batchSize)
+                {
+                    break;
+                }
+                Threading.Wait(250);
+            }
+            return total;
+        }
+
         public void PurgeExtendedRoundStats()
         {
             Log.Debug(() => "Entering PurgeExtendedRoundStats", 6);
             try
             {
                 //Purge all extended round stats older than two years
-                using (MySqlConnection connection = GetDatabaseConnection())
+                Int32 affectedRows = PurgeInBatches(@"delete from tbl_extendedroundstats where tbl_extendedroundstats.roundstat_time < date_sub(sysdate(), interval 2 year)");
+                if (affectedRows > 0)
                 {
-                    using (MySqlCommand command = connection.CreateCommand())
-                    {
-                        command.CommandText = @"delete from tbl_extendedroundstats where tbl_extendedroundstats.roundstat_time < date_sub(sysdate(), interval 2 year)";
-                        Int32 affectedRows = SafeExecuteNonQuery(command);
-                        if (affectedRows > 0)
-                        {
-                            Log.Debug(() => "Purged " + affectedRows + " extended round stats older than 2 years.", 5);
-                        }
-                    }
+                    Log.Debug(() => "Purged " + affectedRows + " extended round stats older than 2 years.", 5);
                 }
             }
             catch (Exception e)
@@ -36347,17 +36367,10 @@ namespace PRoConEvents
             try
             {
                 //Purge all Adkats statistics older than 180 days
-                using (MySqlConnection connection = GetDatabaseConnection())
+                Int32 affectedRows = PurgeInBatches(@"delete from adkats_statistics where adkats_statistics.stat_time < date_sub(sysdate(), interval 180 day)");
+                if (affectedRows > 0)
                 {
-                    using (MySqlCommand command = connection.CreateCommand())
-                    {
-                        command.CommandText = @"delete from adkats_statistics where adkats_statistics.stat_time < date_sub(sysdate(), interval 180 day)";
-                        Int32 affectedRows = SafeExecuteNonQuery(command);
-                        if (affectedRows > 0)
-                        {
-                            Log.Debug(() => "Purged " + affectedRows + " AdKats statistics older than 180 days.", 5);
-                        }
-                    }
+                    Log.Debug(() => "Purged " + affectedRows + " AdKats statistics older than 180 days.", 5);
                 }
             }
             catch (Exception e)
@@ -36373,17 +36386,10 @@ namespace PRoConEvents
             try
             {
                 //Purge all extended round stats older than 60 days
-                using (MySqlConnection connection = GetDatabaseConnection())
+                Int32 affectedRows = PurgeInBatches(@"delete from adkats_records_debug where record_time < '2017-10-12'");
+                if (affectedRows > 0)
                 {
-                    using (MySqlCommand command = connection.CreateCommand())
-                    {
-                        command.CommandText = @"delete from adkats_records_debug where record_time < '2017-10-12'";
-                        Int32 affectedRows = SafeExecuteNonQuery(command);
-                        if (affectedRows > 0)
-                        {
-                            Log.Debug(() => "Purged " + affectedRows + " debug records older than current stable version.", 5);
-                        }
-                    }
+                    Log.Debug(() => "Purged " + affectedRows + " debug records older than current stable version.", 5);
                 }
             }
             catch (Exception e)
@@ -41154,7 +41160,9 @@ namespace PRoConEvents
                         `team2_tpm` double NOT NULL,
                         `roundstat_time` datetime NOT NULL,
                         `map` varchar(25) CHARACTER SET 'utf8' COLLATE 'utf8_general_ci' NULL DEFAULT NULL,
-                        PRIMARY KEY (`roundstat_id`)
+                        PRIMARY KEY (`roundstat_id`),
+                        KEY `tbl_extendedroundstats_idx_server_round` (`server_id`, `round_id`),
+                        KEY `tbl_extendedroundstats_idx_time` (`roundstat_time`)
                     ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='AdKats - Extended Round Stats'", true);
             }
             if (!ConfirmTable("adkats_statistics"))
@@ -54372,8 +54380,12 @@ namespace PRoConEvents
         public void PrintPreparedCommand(MySqlCommand cmd)
         {
             String query = cmd.Parameters.Cast<MySqlParameter>()
+                .OrderByDescending(p => p.ParameterName.Length)
                 .Aggregate(cmd.CommandText, (current, p) =>
-                    current.Replace(p.ParameterName, (p.Value != null) ? ("\"" + p.Value.ToString() + "\"") : ("NULL")));
+                    current.Replace(
+                        //Parameters can be added with or without the @ prefix. Only replace the placeholder, never a column of the same name.
+                        p.ParameterName.StartsWith("@") ? p.ParameterName : "@" + p.ParameterName,
+                        (p.Value != null) ? ("\"" + p.Value.ToString() + "\"") : ("NULL")));
             Log.Write(query);
         }
 
@@ -54542,6 +54554,13 @@ namespace PRoConEvents
                 {
                     return aException;
                 }
+                //Lock wait timeouts (1205) and deadlocks (1213) are contention, not connection failures
+                if (aException.InternalException is MySqlException &&
+                    (((MySqlException)aException.InternalException).Number == 1205 ||
+                    ((MySqlException)aException.InternalException).Number == 1213))
+                {
+                    return aException;
+                }
                 //Check if the exception attributes to the database
                 if (aException.InternalException != null &&
                     (aException.InternalException is TimeoutException ||
@@ -54674,7 +54693,7 @@ namespace PRoConEvents
                 watch.Stop();
                 if (watch.Elapsed.TotalSeconds > 10 && watch.Elapsed.TotalSeconds > (50 * _DatabaseReadAverageDuration) && _firstPlayerListComplete)
                 {
-                    HandleDatabaseConnectionInteruption();
+                    HandleSlowDatabaseCall(command, watch.Elapsed.TotalSeconds, _DatabaseReadAverageDuration);
                 }
                 if (_DatabaseReaderDurations.Count < 25000)
                 {
@@ -54701,7 +54720,7 @@ namespace PRoConEvents
                         watch.Stop();
                         if (watch.Elapsed.TotalSeconds > 10 && watch.Elapsed.TotalSeconds > (50 * _DatabaseReadAverageDuration) && _firstPlayerListComplete)
                         {
-                            HandleDatabaseConnectionInteruption();
+                            HandleSlowDatabaseCall(command, watch.Elapsed.TotalSeconds, _DatabaseReadAverageDuration);
                         }
                         if (_DatabaseReaderDurations.Count < 25000)
                         {
@@ -54745,7 +54764,7 @@ namespace PRoConEvents
                 watch.Stop();
                 if (watch.Elapsed.TotalSeconds > 10 && watch.Elapsed.TotalSeconds > (50 * _DatabaseWriteAverageDuration) && _firstPlayerListComplete)
                 {
-                    HandleDatabaseConnectionInteruption();
+                    HandleSlowDatabaseCall(command, watch.Elapsed.TotalSeconds, _DatabaseWriteAverageDuration);
                 }
                 if (_DatabaseNonQueryDurations.Count < 25000)
                 {
@@ -54772,7 +54791,7 @@ namespace PRoConEvents
                         watch.Stop();
                         if (watch.Elapsed.TotalSeconds > 10 && watch.Elapsed.TotalSeconds > (50 * _DatabaseWriteAverageDuration) && _firstPlayerListComplete)
                         {
-                            HandleDatabaseConnectionInteruption();
+                            HandleSlowDatabaseCall(command, watch.Elapsed.TotalSeconds, _DatabaseWriteAverageDuration);
                         }
                         if (_DatabaseNonQueryDurations.Count < 25000)
                         {
@@ -54805,6 +54824,17 @@ namespace PRoConEvents
                 PrintPreparedCommand(command);
                 throw e;
             }
+        }
+
+        private void HandleSlowDatabaseCall(MySqlCommand command, Double elapsedSeconds, Double averageSeconds)
+        {
+            //Make the offending statement visible, otherwise the trigger warnings can't be traced to a query
+            if (_firstPlayerListComplete)
+            {
+                Log.Warn("Slow database call: " + Math.Round(elapsedSeconds, 2) + "s (average " + Math.Round(averageSeconds, 3) + "s).");
+                PrintPreparedCommand(command);
+            }
+            HandleDatabaseConnectionInteruption();
         }
 
         public void HandleDatabaseConnectionInteruption()

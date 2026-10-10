@@ -1681,3 +1681,20 @@ Added small improvements to fuzzy player match response text.</li>
 <ul>
 	<li>None</li>
 </ul>
+
+<h4>9.0.0.1 (03-OCT-2026)</h4>
+<b>Enhancements</b><br/>
+<ul>
+    <li>Log the offending statement and duration when a slow database call triggers the connection issue detection.</li>
+    <li>Fixed the logged prepared statement replacing column names that match a parameter name.</li>
+</ul>
+<b>Changes</b><br/>
+<ul>
+    <li>Purge jobs now delete in batches of 5000 rows instead of one huge statement, avoiding long table locks.</li>
+    <li>Added missing indexes to adkats.sql: adkats_records_main (server_id, adkats_read) and (record_time), adkats_records_debug (record_time), tbl_extendedroundstats (server_id, round_id) and (roundstat_time). Existing installs need to add them manually, see the SQL file.</li>
+    <li>Lock wait timeouts and deadlocks (MySQL errors 1205/1213) no longer count as database connection issues.</li>
+</ul>
+<b>Bugs Fixed</b><br/>
+<ul>
+	<li>None</li>
+</ul>

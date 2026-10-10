@@ -3175,6 +3175,9 @@ plugin.CallOtherPlugin("AdKats", "IssueCommand", command);
 <ul>
     <li><b>'MySQL Hostname'</b> to- 
         Hostname of the MySQL server AdKats should connect to.
+        If the database runs on the same machine, prefer <code>127.0.0.1</code> over <code>localhost</code>. On newer
+        distributions <code>localhost</code> can resolve to <code>::1</code> first, which MariaDB may not listen on,
+        causing connection delays that show up as database timeout warnings.
     </li>
     <li><b>'MySQL Port'</b> - 
         Port of the MySQL server AdKats should connect to.
