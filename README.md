@@ -552,8 +552,10 @@
 </p>
 <h3>LanguageEnforcer Integration</h3>
 <p>
-    This plugin integrates with E4GLs LanguageEnforcer for issuing commands
-    from AdKats. Admins can use the commands !lpunish and !lreset to manually issue LanguageEnforcer punishments on players.
+    AdKats has its own language punishment system. It works like the normal punishment system, but language infraction
+    points are always tracked globally across all servers (table adkats_language_infractions_global).
+    Admins can use !lpunish to issue a language punishment and !lreset to reset the language infraction points of a player to 0.
+    E4GLs LanguageEnforcer can trigger these language punishments automatically (LanguageEnforcer setting 'Use AdKats language punishment').
     Furthermore, this custom version of the plugin comes with temp and perma mute support.
 </p>
 <h3>Player Reputation System</h3>
@@ -2799,7 +2801,7 @@ plugin.CallOtherPlugin("AdKats", "IssueCommand", command);
             [reportID][reason]
         </td>
         <td>
-	    The in-game command for issuing a language punishment over LanguageEnforcer. Requires LanguageEnforcer to be installed and enabled.
+	    The in-game command for issuing a language punishment. Adds one global language infraction point and issues the matching action of the 'Language Punishment Hierarchy'.
         </td>
     </tr>
     <tr>
@@ -2815,7 +2817,7 @@ plugin.CallOtherPlugin("AdKats", "IssueCommand", command);
             [reportID][reason]
         </td>
         <td>
-	    The in-game command for issuing a counter reset over LanguageEnforcer. Resets all points and sets the the player to a clean state.
+	    The in-game command for issuing a language reset. Resets the global language infraction points of the player to 0.
         </td>
     </tr>
 </table>
@@ -3337,6 +3339,23 @@ plugin.CallOtherPlugin("AdKats", "IssueCommand", command);
     </li>
     <li><b>'IRO Punishment Infractions Required to Override'</b> - 
         Minimum number of infraction points a player must have for IRO punishments to override low population actions.
+    </li>
+    <li><b>'Language Punishment Hierarchy'</b> - 
+        List of language punishments in the order they are issued. Index in the list is the action taken at that number of global language infraction points.
+        Valid entries: warn, kill, kick, mute (round mute), tmute[minutes] (temp persistent mute, e.g. tmute90), pmute (permanent persistent mute), tfmute[minutes] (temp persistent force mute), fmute (permanent persistent force mute), tban[minutes] (e.g. tban10080), ban.
+        Default: warn, mute, mute, tmute90, tmute90, tmute1440, tmute4320, pmute, pmute, pmute, pmute, pmute, fmute.
+    </li>
+    <li><b>'Language Punish Duplicate Timeout Seconds'</b> - 
+        A player can only be language punished once within this many seconds (across all servers). 0 disables the check. Default is 20.
+    </li>
+    <li><b>'Language Automatic Forgives'</b> - 
+        Whether to automatically forgive one language infraction point after clean behaviour (manual !lreset clears all points). Default is true.
+    </li>
+    <li><b>'Language Automatic Forgive Days Since Punished'</b> - 
+        The number of days since the last language punishment ended required for an automatic language forgive. Default is 6 days.
+    </li>
+    <li><b>'Language Automatic Forgive Days Since Forgiven'</b> - 
+        The number of days since the last language forgive required for an automatic language forgive. Default is 6 days.
     </li>
 </ul>
 <h3>8. Email Settings:</h3>

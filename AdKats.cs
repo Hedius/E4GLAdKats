@@ -21,11 +21,11 @@
  * Work on fork by Hedius (Version >= 8.0.0.0)
  *
  * AdKats.cs
- * Version 9.0.0.1
- * 03-OCT-2026
+ * Version 9.1.0.0
+ * 16-OCT-2026
  *
  * Automatic Update Information
- * <version_code>9.0.0.1</version_code>
+ * <version_code>9.1.0.0</version_code>
  */
 
 using System;
@@ -68,7 +68,7 @@ namespace PRoConEvents
     {
 
         //Current Plugin Version
-        private const String PluginVersion = "9.0.0.1";
+        private const String PluginVersion = "9.1.0.0";
 
         public enum GameVersionEnum
         {
@@ -450,6 +450,13 @@ namespace PRoConEvents
         private Int32 _IROTimeout = 10;
         private Boolean _OnlyKillOnLowPop = true;
         private String[] _PunishmentHierarchy = { "kill", "kick", "tban120", "kill", "kick", "tbanday", "kick", "tbanweek", "kick", "tban2weeks", "kick", "tbanmonth", "kick", "ban" };
+        //Language punishment settings (always global, tracked in adkats_language_infractions_global)
+        private static readonly String[] _LanguagePunishmentHierarchyDefault = { "warn", "mute", "mute", "tmute90", "tmute90", "tmute1440", "tmute4320", "pmute", "pmute", "pmute", "pmute", "pmute", "fmute" };
+        private String[] _LanguagePunishmentHierarchy = _LanguagePunishmentHierarchyDefault;
+        private Int32 _LanguagePunishDuplicateTimeoutSeconds = 20;
+        private Boolean _LanguageAutomaticForgives = true;
+        private Int32 _LanguageAutomaticForgiveLastPunishDays = 6;
+        private Int32 _LanguageAutomaticForgiveLastForgiveDays = 6;
 
         //Teamswap
         private Int32 _TeamSwapTicketWindowHigh = 500000;
@@ -1729,6 +1736,14 @@ namespace PRoConEvents
                         {
                             buildList.Add(new CPluginVariable(GetSettingSection("7") + t + "IRO Punishment Infractions Required to Override", typeof(Int32), _IROOverridesLowPopInfractions));
                         }
+                    }
+                    buildList.Add(new CPluginVariable(GetSettingSection("7") + t + "Language Punishment Hierarchy", typeof(String[]), _LanguagePunishmentHierarchy));
+                    buildList.Add(new CPluginVariable(GetSettingSection("7") + t + "Language Punish Duplicate Timeout Seconds", typeof(Int32), _LanguagePunishDuplicateTimeoutSeconds));
+                    buildList.Add(new CPluginVariable(GetSettingSection("7") + t + "Language Automatic Forgives", typeof(Boolean), _LanguageAutomaticForgives));
+                    if (_LanguageAutomaticForgives)
+                    {
+                        buildList.Add(new CPluginVariable(GetSettingSection("7") + t + "Language Automatic Forgive Days Since Punished", typeof(Int32), _LanguageAutomaticForgiveLastPunishDays));
+                        buildList.Add(new CPluginVariable(GetSettingSection("7") + t + "Language Automatic Forgive Days Since Forgiven", typeof(Int32), _LanguageAutomaticForgiveLastForgiveDays));
                     }
                 }
                 lstReturn.AddRange(buildList);
@@ -7865,6 +7880,76 @@ namespace PRoConEvents
                     //Once setting has been changed, upload the change to database
                     QueueSettingForUpload(new CPluginVariable(@"Banned Tags", typeof(String), CPluginVariable.EncodeStringArray(_BannedTags)));
                 }
+                else if (Regex.Match(strVariable, @"Language Punishment Hierarchy").Success)
+                {
+                    String[] hierarchy = CPluginVariable.DecodeStringArray(strValue).Select(entry => entry.Trim().ToLower()).Where(entry => !String.IsNullOrEmpty(entry)).ToArray();
+                    String[] invalid = hierarchy.Where(entry => !IsValidLanguagePunishment(entry)).ToArray();
+                    if (invalid.Any())
+                    {
+                        Log.Error("Removed invalid language punishments: " + String.Join(", ", invalid) + ". Valid options: warn, kill, kick, mute, tmute<minutes>, pmute, tfmute<minutes>, fmute, tban<minutes>, ban.");
+                        hierarchy = hierarchy.Where(IsValidLanguagePunishment).ToArray();
+                    }
+                    if (!hierarchy.Any())
+                    {
+                        Log.Error("Language Punishment Hierarchy cannot be empty. Using the default hierarchy.");
+                        hierarchy = _LanguagePunishmentHierarchyDefault;
+                    }
+                    _LanguagePunishmentHierarchy = hierarchy;
+                    //Once setting has been changed, upload the change to database
+                    QueueSettingForUpload(new CPluginVariable(@"Language Punishment Hierarchy", typeof(String), CPluginVariable.EncodeStringArray(_LanguagePunishmentHierarchy)));
+                }
+                else if (Regex.Match(strVariable, @"Language Punish Duplicate Timeout Seconds").Success)
+                {
+                    Int32 timeout = Int32.Parse(strValue);
+                    if (timeout < 0)
+                    {
+                        timeout = 0;
+                    }
+                    if (timeout != _LanguagePunishDuplicateTimeoutSeconds)
+                    {
+                        _LanguagePunishDuplicateTimeoutSeconds = timeout;
+                        //Once setting has been changed, upload the change to database
+                        QueueSettingForUpload(new CPluginVariable(@"Language Punish Duplicate Timeout Seconds", typeof(Int32), _LanguagePunishDuplicateTimeoutSeconds));
+                    }
+                }
+                else if (Regex.Match(strVariable, @"Language Automatic Forgives").Success)
+                {
+                    Boolean languageAutomaticForgives = Boolean.Parse(strValue);
+                    if (_LanguageAutomaticForgives != languageAutomaticForgives)
+                    {
+                        _LanguageAutomaticForgives = languageAutomaticForgives;
+                        //Once setting has been changed, upload the change to database
+                        QueueSettingForUpload(new CPluginVariable(@"Language Automatic Forgives", typeof(Boolean), _LanguageAutomaticForgives));
+                    }
+                }
+                else if (Regex.Match(strVariable, @"Language Automatic Forgive Days Since Punished").Success)
+                {
+                    Int32 days = Int32.Parse(strValue);
+                    if (days < 1)
+                    {
+                        days = 1;
+                    }
+                    if (days != _LanguageAutomaticForgiveLastPunishDays)
+                    {
+                        _LanguageAutomaticForgiveLastPunishDays = days;
+                        //Once setting has been changed, upload the change to database
+                        QueueSettingForUpload(new CPluginVariable(@"Language Automatic Forgive Days Since Punished", typeof(Int32), _LanguageAutomaticForgiveLastPunishDays));
+                    }
+                }
+                else if (Regex.Match(strVariable, @"Language Automatic Forgive Days Since Forgiven").Success)
+                {
+                    Int32 days = Int32.Parse(strValue);
+                    if (days < 1)
+                    {
+                        days = 1;
+                    }
+                    if (days != _LanguageAutomaticForgiveLastForgiveDays)
+                    {
+                        _LanguageAutomaticForgiveLastForgiveDays = days;
+                        //Once setting has been changed, upload the change to database
+                        QueueSettingForUpload(new CPluginVariable(@"Language Automatic Forgive Days Since Forgiven", typeof(Int32), _LanguageAutomaticForgiveLastForgiveDays));
+                    }
+                }
                 else if (Regex.Match(strVariable, @"Punishment Hierarchy").Success)
                 {
                     _PunishmentHierarchy = CPluginVariable.DecodeStringArray(strValue).Where(punishType => _PunishmentSeverityIndex.Contains(punishType)).ToArray();
@@ -13402,6 +13487,21 @@ namespace PRoConEvents
                                         {
                                             aPlayer.LastForgive = forgives.FirstOrDefault();
                                         }
+                                        //Global language infraction points
+                                        FetchLanguagePoints(aPlayer);
+                                        if (_LanguageAutomaticForgives && aPlayer.player_languagePoints > 0)
+                                        {
+                                            List<ARecord> languagePunishments = FetchRecentRecords(aPlayer.player_id, GetCommandByKey("player_language_punish").command_id, 1000, 1, true, false);
+                                            if (languagePunishments.Any())
+                                            {
+                                                aPlayer.LastLanguagePunishment = languagePunishments.FirstOrDefault();
+                                            }
+                                            List<ARecord> languageForgives = FetchRecentRecords(aPlayer.player_id, GetCommandByKey("player_language_reset").command_id, 1000, 1, true, false);
+                                            if (languageForgives.Any())
+                                            {
+                                                aPlayer.LastLanguageForgive = languageForgives.FirstOrDefault();
+                                            }
+                                        }
                                         aPlayer.player_server = _serverInfo;
                                         //Add the frostbite player info
                                         aPlayer.fbpInfo = playerInfo;
@@ -17715,6 +17815,30 @@ namespace PRoConEvents
                         });
                     }
 
+                    if (_LanguageAutomaticForgives &&
+                        aPlayer.player_languagePoints > 0 &&
+                        aPlayer.LastLanguagePunishment != null &&
+                        (UtcNow() - GetLanguagePunishmentEndTime(aPlayer.LastLanguagePunishment)).TotalDays > _LanguageAutomaticForgiveLastPunishDays &&
+                        (aPlayer.LastLanguageForgive == null || (UtcNow() - aPlayer.LastLanguageForgive.record_time).TotalDays > _LanguageAutomaticForgiveLastForgiveDays))
+                    {
+                        ARecord languageForgive = new ARecord
+                        {
+                            record_source = ARecord.Sources.Automated,
+                            server_id = _serverInfo.ServerID,
+                            command_type = GetCommandByKey("player_language_reset"),
+                            //1 = only forgive a single point. Manual !lreset (0) resets all language points
+                            command_numeric = 1,
+                            target_name = aPlayer.player_name,
+                            target_player = aPlayer,
+                            source_name = "InfractionManager",
+                            record_message = "Auto-Forgiven for Clean Language",
+                            record_time = UtcNow()
+                        };
+                        //Set immediately so following spawns don't queue another forgive before this one is processed
+                        aPlayer.LastLanguageForgive = languageForgive;
+                        QueueRecordForProcessing(languageForgive);
+                    }
+
                     //Auto-Nuke Slay Duration
                     var duration = NowDuration(_lastNukeTime);
                     if (duration.TotalSeconds < _nukeAutoSlayActiveDuration &&
@@ -20952,6 +21076,22 @@ namespace PRoConEvents
                                         FinalizeRecord(record);
                                         return;
                                     }
+                                }
+                            }
+                            break;
+                        case "player_language_reset":
+                            {
+                                if (record.target_player != null && FetchLanguagePoints(record.target_player) <= 0)
+                                {
+                                    SendMessageToSource(record, record.GetTargetNames() + " does not have any language infractions to reset.");
+                                    FinalizeRecord(record);
+                                    return;
+                                }
+                                if (record.source_name == record.target_name && record.source_name != _debugSoldierName)
+                                {
+                                    SendMessageToSource(record, "You may not reset your own language points, contact another administrator.");
+                                    FinalizeRecord(record);
+                                    return;
                                 }
                             }
                             break;
@@ -36258,62 +36398,337 @@ namespace PRoConEvents
             Log.Debug(() => "Exiting ChallengeAutoKillRemoveTarget", 6);
         }
 
-        public void LanguagePunishTarget(ARecord record) {
+        public void LanguagePunishTarget(ARecord record)
+        {
             Log.Debug(() => "Entering LanguagePunishTarget", 6);
-            try {
+            try
+            {
                 record.record_action_executed = true;
-                //Perform actions
-                if (String.IsNullOrEmpty(record.target_player.player_name)) {
-                    Log.Error("Tried to issue an language punish on a null target.");
+                if (record.target_player == null || record.target_player.player_id <= 0)
+                {
+                    SendMessageToSource(record, "Language punish requires a valid target, unable to continue.");
+                    FinalizeRecord(record);
+                    return;
                 }
-                else {
-                    if (record.record_source != ARecord.Sources.InGame && record.record_source != ARecord.Sources.Automated && record.record_source != ARecord.Sources.ServerCommand) {
-                        SendMessageToSource(record, "You issued a LANGUAGE PUNISH on " + record.GetTargetNames() + " for " + record.record_message);
-                    }
+                if (record.record_exception != null)
+                {
+                    //Exception found, only warn the player
+                    record.command_action = GetCommandByKey("player_warn");
+                    WarnTarget(record);
+                    return;
+                }
+                //Language infraction points are always tracked globally
+                if (!UpdateLanguagePoints(record.target_player, true))
+                {
+                    record.record_exception = new AException("Unable to add language infraction point for " + record.GetTargetNames() + ". Only warning the player.");
+                    Log.HandleException(record.record_exception);
+                    record.command_action = GetCommandByKey("player_warn");
+                    WarnTarget(record);
+                    return;
+                }
+                Int32 points = Math.Max(FetchLanguagePoints(record.target_player), 1);
+                String action = _LanguagePunishmentHierarchy[Math.Min(points, _LanguagePunishmentHierarchy.Length) - 1];
+                String actionKey;
+                Int32 actionMinutes;
+                if (!ParseLanguagePunishment(action, out actionKey, out actionMinutes))
+                {
+                    record.record_exception = new AException("Language punish options are set incorrectly. '" + action + "' not found. Inform plugin setting manager.");
+                    Log.HandleException(record.record_exception);
+                    actionKey = "player_warn";
+                    actionMinutes = 0;
+                }
+                Log.Debug(() => record.GetTargetNames() + " has " + points + " language points. Issuing " + actionKey + ".", 5);
 
-                    AdminSayMessage(Log.FBold(Log.CRed(record.GetTargetNames() + " LANGUAGE PUNISHED" + (_ShowAdminNameInAnnouncement ? (" by " + record.GetSourceName()) : ("")) + " for " + record.record_message)));
-                    ExecuteCommand("procon.protected.plugins.call", "LanguageEnforcer", "RemoteManuallyPunishPlayer", GetType().Name, record.target_player.player_name, record.target_player.player_guid);
+                //Set additional message
+                String pointMessage = " [" + points + " lang pts]";
+                if (!record.record_message.Contains(pointMessage))
+                {
+                    record.record_message += pointMessage;
                 }
+
+                record.command_action = GetCommandByKey(actionKey);
+                record.command_numeric = actionMinutes;
+                switch (actionKey)
+                {
+                    case "player_warn":
+                        WarnTarget(record);
+                        break;
+                    case "player_kill":
+                        KillTarget(record);
+                        break;
+                    case "player_kick":
+                        KickTarget(record);
+                        break;
+                    case "player_mute":
+                        AdminSayMessage(Log.FBold(Log.CRed(record.GetTargetNames() + " LANGUAGE PUNISHED" + (_ShowAdminNameInAnnouncement ? (" by " + record.GetSourceName()) : ("")) + " for " + record.record_message)));
+                        MuteTarget(record);
+                        break;
+                    case "player_persistentmute":
+                    case "player_persistentmute_force":
+                        AdminSayMessage(Log.FBold(Log.CRed(record.GetTargetNames() + " LANGUAGE PUNISHED" + (_ShowAdminNameInAnnouncement ? (" by " + record.GetSourceName()) : ("")) + " for " + record.record_message)));
+                        PersistentMuteTarget(record, actionKey == "player_persistentmute_force");
+                        break;
+                    case "player_ban_temp":
+                        TempBanTarget(record);
+                        break;
+                    case "player_ban_perm":
+                        PermaBanTarget(record);
+                        break;
+                }
+                record.target_player.LastLanguagePunishment = record;
             }
-            catch (Exception e) {
+            catch (Exception e)
+            {
                 record.record_exception = new AException("Error while taking action for language punish record.", e);
                 Log.HandleException(record.record_exception);
                 FinalizeRecord(record);
             }
-
             Log.Debug(() => "Exiting LanguagePunishTarget", 6);
         }
 
         public void LanguageResetTarget(ARecord record)
-         {
-             Log.Debug(() => "Entering LanguageResetTarget", 6);
-             try
-             {
-                 record.record_action_executed = true;
-                 //Perform actions
-                 if (String.IsNullOrEmpty(record.target_player.player_name))
-                 {
-                     Log.Error("Tried to issue an language reset on a null target.");
-                 }
-                 else
-                 {
-                     if (record.record_source != ARecord.Sources.InGame &&
-                         record.record_source != ARecord.Sources.Automated &&
-                         record.record_source != ARecord.Sources.ServerCommand)
-                     {
-                         SendMessageToSource(record, "You issued a LANGUAGE RESET on " + record.GetTargetNames() + " for " + record.record_message);
-                     }
-                     ExecuteCommand("procon.protected.plugins.call", "LanguageEnforcer", "RemoteManuallyResetPlayer", GetType().Name, record.target_player.player_name, record.target_player.player_guid);
-                 }
-             }
-             catch (Exception e)
-             {
-                 record.record_exception = new AException("Error while taking action for language reset record.", e);
-                 Log.HandleException(record.record_exception);
-                 FinalizeRecord(record);
-             }
-             Log.Debug(() => "Exiting LanguageResetTarget", 6);
-         }
+        {
+            Log.Debug(() => "Entering LanguageResetTarget", 6);
+            try
+            {
+                record.record_action_executed = true;
+                if (record.target_player == null || record.target_player.player_id <= 0)
+                {
+                    SendMessageToSource(record, "Language forgive requires a valid target, unable to continue.");
+                    FinalizeRecord(record);
+                    return;
+                }
+                //If the record has any exceptions, skip everything
+                if (record.record_exception == null)
+                {
+                    //Automatic forgives (command_numeric 1) remove a single point, manual resets clear all language points
+                    Boolean singlePoint = record.command_numeric == 1;
+                    Boolean success = singlePoint ? UpdateLanguagePoints(record.target_player, false) : ResetLanguagePoints(record.target_player);
+                    if (!success)
+                    {
+                        record.record_exception = new AException("Unable to reset language infraction points for " + record.GetTargetNames() + ".");
+                        Log.HandleException(record.record_exception);
+                        SendMessageToSource(record, "Unable to reset language infraction points for " + record.GetTargetNames() + ".");
+                        FinalizeRecord(record);
+                        return;
+                    }
+                    Int32 points = FetchLanguagePoints(record.target_player);
+                    if (singlePoint)
+                    {
+                        PlayerSayMessage(record.target_player.player_name, Log.CGreen("Forgiven 1 language infraction point. You now have " + points + " language point(s) against you."));
+                        SendMessageToSource(record, "Language forgive logged for " + record.GetTargetNames() + ". They now have " + points + " language infraction points.");
+                    }
+                    else
+                    {
+                        PlayerSayMessage(record.target_player.player_name, Log.CGreen("Your language infraction points have been reset. You now have a clean record."));
+                        SendMessageToSource(record, "Language points of " + record.GetTargetNames() + " reset to " + points + ".");
+                    }
+                    record.target_player.LastLanguageForgive = record;
+                }
+            }
+            catch (Exception e)
+            {
+                record.record_exception = new AException("Error while taking action for language reset record.", e);
+                Log.HandleException(record.record_exception);
+                FinalizeRecord(record);
+            }
+            Log.Debug(() => "Exiting LanguageResetTarget", 6);
+        }
+
+        /// <summary>
+        /// Parses an entry of the language punishment hierarchy.
+        /// Valid entries: warn, kill, kick, mute, tmute[minutes], pmute, tfmute[minutes], fmute, tban[minutes], ban
+        /// </summary>
+        private Boolean ParseLanguagePunishment(String action, out String commandKey, out Int32 minutes)
+        {
+            commandKey = null;
+            minutes = 0;
+            if (String.IsNullOrEmpty(action))
+            {
+                return false;
+            }
+            action = action.Trim().ToLower();
+            switch (action)
+            {
+                case "warn":
+                    commandKey = "player_warn";
+                    return true;
+                case "kill":
+                    commandKey = "player_kill";
+                    return true;
+                case "kick":
+                    commandKey = "player_kick";
+                    return true;
+                case "mute":
+                    commandKey = "player_mute";
+                    return true;
+                case "pmute":
+                    //20 years in minutes
+                    commandKey = "player_persistentmute";
+                    minutes = 10518984;
+                    return true;
+                case "fmute":
+                    //20 years in minutes
+                    commandKey = "player_persistentmute_force";
+                    minutes = 10518984;
+                    return true;
+                case "ban":
+                    commandKey = "player_ban_perm";
+                    return true;
+            }
+            Match match = Regex.Match(action, @"^(tmute|tfmute|tban)(\d+)$");
+            if (!match.Success || !Int32.TryParse(match.Groups[2].Value, out minutes) || minutes <= 0)
+            {
+                minutes = 0;
+                return false;
+            }
+            switch (match.Groups[1].Value)
+            {
+                case "tmute":
+                    commandKey = "player_persistentmute";
+                    break;
+                case "tfmute":
+                    commandKey = "player_persistentmute_force";
+                    break;
+                default:
+                    commandKey = "player_ban_temp";
+                    break;
+            }
+            return true;
+        }
+
+        private Boolean IsValidLanguagePunishment(String action)
+        {
+            String commandKey;
+            Int32 minutes;
+            return ParseLanguagePunishment(action, out commandKey, out minutes);
+        }
+
+        /// <summary>
+        /// Time from which the language auto-forgive cooldown starts. For temp bans and temp mutes this is the end of the punishment.
+        /// </summary>
+        private DateTime GetLanguagePunishmentEndTime(ARecord record)
+        {
+            DateTime endTime = record.record_time;
+            if (record.command_action != null &&
+                (record.command_action.command_key == "player_ban_temp" || record.command_action.command_key == "player_persistentmute" || record.command_action.command_key == "player_persistentmute_force") &&
+                record.command_numeric > 0 &&
+                record.command_numeric < 10518984)
+            {
+                endTime = endTime.AddMinutes(record.command_numeric);
+            }
+            return endTime;
+        }
+
+        private Int32 FetchLanguagePoints(APlayer player)
+        {
+            if (player == null)
+            {
+                return 0;
+            }
+            Int32 returnVal = player.player_languagePoints;
+            //Make sure database connection active
+            if (_databaseConnectionCriticalState || player.player_id <= 0)
+            {
+                return (returnVal > 0) ? (returnVal) : (0);
+            }
+            Log.Debug(() => "FetchLanguagePoints starting!", 6);
+            try
+            {
+                using (MySqlConnection connection = GetDatabaseConnection())
+                {
+                    using (MySqlCommand command = connection.CreateCommand())
+                    {
+                        command.CommandText = @"SELECT `total_points` FROM `adkats_language_infractions_global` WHERE `player_id` = @player_id";
+                        command.Parameters.AddWithValue("@player_id", player.player_id);
+                        using (MySqlDataReader reader = SafeExecuteReader(command))
+                        {
+                            returnVal = reader.Read() ? reader.GetInt32("total_points") : 0;
+                            player.player_languagePoints = returnVal;
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Log.HandleException(new AException("Error while getting language infraction points for player.", e));
+            }
+            Log.Debug(() => "FetchLanguagePoints finished!", 6);
+            return (returnVal > 0) ? (returnVal) : (0);
+        }
+
+        /// <summary>
+        /// Sets the global language points of a player to 0. The removed points are counted as forgive points so total = punish - forgive stays valid.
+        /// </summary>
+        private Boolean ResetLanguagePoints(APlayer player)
+        {
+            //Make sure database connection active
+            if (_databaseConnectionCriticalState || player == null || player.player_id <= 0)
+            {
+                return false;
+            }
+            try
+            {
+                using (MySqlConnection connection = GetDatabaseConnection())
+                {
+                    using (MySqlCommand command = connection.CreateCommand())
+                    {
+                        command.CommandText = @"
+                        UPDATE `adkats_language_infractions_global`
+                        SET
+                            `forgive_points` = `forgive_points` + `total_points`,
+                            `total_points` = 0
+                        WHERE `player_id` = @player_id
+                          AND `total_points` > 0";
+                        command.Parameters.AddWithValue("@player_id", player.player_id);
+                        SafeExecuteNonQuery(command);
+                        return true;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Log.HandleException(new AException("Error while resetting language infraction points for player.", e));
+            }
+            return false;
+        }
+
+        private Boolean UpdateLanguagePoints(APlayer player, Boolean punish)
+        {
+            //Make sure database connection active
+            if (_databaseConnectionCriticalState || player == null || player.player_id <= 0)
+            {
+                return false;
+            }
+            try
+            {
+                using (MySqlConnection connection = GetDatabaseConnection())
+                {
+                    using (MySqlCommand command = connection.CreateCommand())
+                    {
+                        command.CommandText = @"
+                        INSERT INTO `adkats_language_infractions_global`
+                            (`player_id`, `punish_points`, `forgive_points`, `total_points`)
+                        VALUES
+                            (@player_id, @punish_points, @forgive_points, @total_points)
+                        ON DUPLICATE KEY UPDATE
+                            `punish_points` = `punish_points` + @punish_points,
+                            `forgive_points` = `forgive_points` + @forgive_points,
+                            `total_points` = `total_points` + @total_points";
+                        command.Parameters.AddWithValue("@player_id", player.player_id);
+                        command.Parameters.AddWithValue("@punish_points", punish ? 1 : 0);
+                        command.Parameters.AddWithValue("@forgive_points", punish ? 0 : 1);
+                        command.Parameters.AddWithValue("@total_points", punish ? 1 : -1);
+                        return SafeExecuteNonQuery(command) > 0;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Log.HandleException(new AException("Error while updating language infraction points for player.", e));
+            }
+            return false;
+        }
 
         private Int32 PurgeInBatches(String deleteSql)
         {
@@ -41350,6 +41765,19 @@ namespace PRoConEvents
                       CONSTRAINT `adkats_challenge_reward_fk_ServerID` FOREIGN KEY (`ServerID`) REFERENCES `tbl_server` (`ServerID`) ON DELETE NO ACTION ON UPDATE CASCADE
                     ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='AdKats - Challenge Rewards'", true);
             }
+            if (!ConfirmTable("adkats_language_infractions_global"))
+            {
+                Log.Info("Language infractions table not found. Attempting to add.");
+                SendNonQuery("Adding language infractions table", @"
+                    CREATE TABLE IF NOT EXISTS `adkats_language_infractions_global` (
+                      `player_id` int(11) unsigned NOT NULL,
+                      `punish_points` int(11) NOT NULL DEFAULT 0,
+                      `forgive_points` int(11) NOT NULL DEFAULT 0,
+                      `total_points` int(11) NOT NULL DEFAULT 0,
+                      PRIMARY KEY (`player_id`),
+                      CONSTRAINT `adkats_language_infractions_global_fk_player_id` FOREIGN KEY (`player_id`) REFERENCES `tbl_playerdata` (`PlayerID`) ON DELETE CASCADE ON UPDATE CASCADE
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='AdKats - Global Player Language Infraction Points'", true);
+            }
             SendNonQuery("Updating setting value length to 10000.", "ALTER TABLE adkats_settings MODIFY setting_value varchar(10000)", false);
             return ConfirmTable("adkats_bans") &&
                    ConfirmTable("adkats_commands") &&
@@ -41639,6 +42067,11 @@ namespace PRoConEvents
                 QueueSettingForUpload(new CPluginVariable(@"Punishment Hierarchy", typeof(String), CPluginVariable.EncodeStringArray(_PunishmentHierarchy)));
                 QueueSettingForUpload(new CPluginVariable(@"Combine Server Punishments", typeof(Boolean), _CombineServerPunishments));
                 QueueSettingForUpload(new CPluginVariable(@"Automatic Forgives", typeof(Boolean), _AutomaticForgives));
+                QueueSettingForUpload(new CPluginVariable(@"Language Punishment Hierarchy", typeof(String), CPluginVariable.EncodeStringArray(_LanguagePunishmentHierarchy)));
+                QueueSettingForUpload(new CPluginVariable(@"Language Punish Duplicate Timeout Seconds", typeof(Int32), _LanguagePunishDuplicateTimeoutSeconds));
+                QueueSettingForUpload(new CPluginVariable(@"Language Automatic Forgives", typeof(Boolean), _LanguageAutomaticForgives));
+                QueueSettingForUpload(new CPluginVariable(@"Language Automatic Forgive Days Since Punished", typeof(Int32), _LanguageAutomaticForgiveLastPunishDays));
+                QueueSettingForUpload(new CPluginVariable(@"Language Automatic Forgive Days Since Forgiven", typeof(Int32), _LanguageAutomaticForgiveLastForgiveDays));
                 QueueSettingForUpload(new CPluginVariable(@"Only Kill Players when Server in low population", typeof(Boolean), _OnlyKillOnLowPop));
                 QueueSettingForUpload(new CPluginVariable(@"Short Server Name", typeof(String), _shortServerName));
                 QueueSettingForUpload(new CPluginVariable(@"Low Population Value", typeof(Int32), _lowPopulationPlayerCount));
@@ -42158,6 +42591,19 @@ namespace PRoConEvents
                             else
                             {
                                 SendMessageToSource(record, record.GetTargetNames() + " already acted on in the last 20 seconds.");
+                                FinalizeRecord(record);
+                                return false;
+                            }
+                            break;
+                        case "player_language_punish":
+                            if (_LanguagePunishDuplicateTimeoutSeconds <= 0 || CanPunish(record, _LanguagePunishDuplicateTimeoutSeconds, "player_language_punish"))
+                            {
+                                Log.Debug(() => "UPLOADING Language Punish", 5);
+                                UploadRecord(record);
+                            }
+                            else
+                            {
+                                SendMessageToSource(record, record.GetTargetNames() + " already language punished in the last " + _LanguagePunishDuplicateTimeoutSeconds + " seconds.");
                                 FinalizeRecord(record);
                                 return false;
                             }
@@ -46659,6 +47105,11 @@ namespace PRoConEvents
 
         private Boolean CanPunish(ARecord record, Int32 duration)
         {
+            return CanPunish(record, duration, "player_punish");
+        }
+
+        private Boolean CanPunish(ARecord record, Int32 duration, String commandKey)
+        {
             Log.Debug(() => "canPunish starting!", 6);
             if (duration < 1)
             {
@@ -46666,7 +47117,7 @@ namespace PRoConEvents
                 return false;
             }
             //TODO: Add check for multiple targets
-            if (record.target_player != null && record.target_player.TargetedRecords.Any(aRecord => aRecord.command_type.command_key == "player_punish" && (UtcNow() - aRecord.record_time).TotalSeconds < duration && aRecord.record_action_executed == true))
+            if (record.target_player != null && record.target_player.TargetedRecords.Any(aRecord => aRecord.command_type.command_key == commandKey && (UtcNow() - aRecord.record_time).TotalSeconds < duration && aRecord.record_action_executed == true))
             {
                 return false;
             }
@@ -46688,7 +47139,7 @@ namespace PRoConEvents
                         FROM
                             `adkats_records_main`
                         WHERE
-                            `adkats_records_main`.`command_type` = " + GetCommandByKey("player_punish").command_id + @"
+                            `adkats_records_main`.`command_type` = " + GetCommandByKey(commandKey).command_id + @"
                         AND
                             `adkats_records_main`.`target_id` = " + record.target_player.player_id + @"
                         AND
@@ -48232,8 +48683,8 @@ namespace PRoConEvents
             _CommandDescriptionDictionary["player_watchlist_remove"] = "Removes the target player from the watchlist.";
             _CommandDescriptionDictionary["player_whitelistmoveprotection"] = "Adds the target player to the move protection whitelist. Preventing admins from moving them.";
             _CommandDescriptionDictionary["player_whitelistmoveprotection_remove"] = "Removes the target player from the move protection whitelist.";
-            _CommandDescriptionDictionary["player_language_punish"] = "Issue a LanguageEnforcer punishment. Requires LanguageEnforcer to be installed and active.";
-            _CommandDescriptionDictionary["player_language_reset"] = "Issue a LanguageEnforcer counter reset. Resetting the punishment counter to 0 on the server.";
+            _CommandDescriptionDictionary["player_language_punish"] = "Issue a language punishment. Adds a global language infraction point and acts according to the Language Punishment Hierarchy.";
+            _CommandDescriptionDictionary["player_language_reset"] = "Issue a language reset. Resets the global language infraction points of the player to 0.";
         }
 
         private void FillReadableMapModeDictionaries()
@@ -62367,6 +62818,9 @@ namespace PRoConEvents
             public Int32 player_infractionPoints = Int32.MinValue;
             public ARecord LastPunishment = null;
             public ARecord LastForgive = null;
+            public Int32 player_languagePoints = 0;
+            public ARecord LastLanguagePunishment = null;
+            public ARecord LastLanguageForgive = null;
             public ATeam RequiredTeam = null;
             public Int32 RequiredSquad = -1;
             public readonly Queue<KeyValuePair<Double, DateTime>> player_pings;

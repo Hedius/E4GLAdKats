@@ -353,6 +353,15 @@ CREATE TABLE IF NOT EXISTS `adkats_infractions_server` (
   KEY `adkats_infractions_server_fk_server_id` (`server_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='AdKats - Server Specific Player Infraction Points';
 
+DROP TABLE IF EXISTS `adkats_language_infractions_global`;
+CREATE TABLE IF NOT EXISTS `adkats_language_infractions_global` (
+  `player_id` int(11) unsigned NOT NULL,
+  `punish_points` int(11) NOT NULL DEFAULT 0,
+  `forgive_points` int(11) NOT NULL DEFAULT 0,
+  `total_points` int(11) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`player_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='AdKats - Global Player Language Infraction Points';
+
 DROP TABLE IF EXISTS `adkats_records_debug`;
 CREATE TABLE IF NOT EXISTS `adkats_records_debug` (
   `record_id` int(11) unsigned NOT NULL AUTO_INCREMENT,
@@ -903,6 +912,9 @@ ALTER TABLE `adkats_bans`
 
 ALTER TABLE `adkats_infractions_global`
   ADD CONSTRAINT `adkats_infractions_global_fk_player_id` FOREIGN KEY (`player_id`) REFERENCES `tbl_playerdata` (`PlayerID`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE `adkats_language_infractions_global`
+  ADD CONSTRAINT `adkats_language_infractions_global_fk_player_id` FOREIGN KEY (`player_id`) REFERENCES `tbl_playerdata` (`PlayerID`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `adkats_infractions_server`
   ADD CONSTRAINT `adkats_infractions_server_fk_player_id` FOREIGN KEY (`player_id`) REFERENCES `tbl_playerdata` (`PlayerID`) ON DELETE CASCADE ON UPDATE CASCADE,
