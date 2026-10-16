@@ -13496,10 +13496,12 @@ namespace PRoConEvents
                                             {
                                                 aPlayer.LastLanguagePunishment = languagePunishments.FirstOrDefault();
                                             }
-                                            List<ARecord> languageForgives = FetchRecentRecords(aPlayer.player_id, GetCommandByKey("player_language_reset").command_id, 1000, 1, true, false);
+                                            //Last language forgive or reset, whichever is newer
+                                            List<ARecord> languageForgives = FetchRecentRecords(aPlayer.player_id, GetCommandByKey("player_language_forgive").command_id, 1000, 1, true, false);
+                                            languageForgives.AddRange(FetchRecentRecords(aPlayer.player_id, GetCommandByKey("player_language_reset").command_id, 1000, 1, true, false));
                                             if (languageForgives.Any())
                                             {
-                                                aPlayer.LastLanguageForgive = languageForgives.FirstOrDefault();
+                                                aPlayer.LastLanguageForgive = languageForgives.OrderByDescending(aRecord => aRecord.record_time).FirstOrDefault();
                                             }
                                         }
                                         aPlayer.player_server = _serverInfo;
@@ -17825,9 +17827,8 @@ namespace PRoConEvents
                         {
                             record_source = ARecord.Sources.Automated,
                             server_id = _serverInfo.ServerID,
-                            command_type = GetCommandByKey("player_language_reset"),
-                            //1 = only forgive a single point. Manual !lreset (0) resets all language points
-                            command_numeric = 1,
+                            command_type = GetCommandByKey("player_language_forgive"),
+                            command_numeric = 0,
                             target_name = aPlayer.player_name,
                             target_player = aPlayer,
                             source_name = "InfractionManager",
@@ -21080,16 +21081,17 @@ namespace PRoConEvents
                             }
                             break;
                         case "player_language_reset":
+                        case "player_language_forgive":
                             {
                                 if (record.target_player != null && FetchLanguagePoints(record.target_player) <= 0)
                                 {
-                                    SendMessageToSource(record, record.GetTargetNames() + " does not have any language infractions to reset.");
+                                    SendMessageToSource(record, record.GetTargetNames() + " does not have any language infractions to forgive.");
                                     FinalizeRecord(record);
                                     return;
                                 }
                                 if (record.source_name == record.target_name && record.source_name != _debugSoldierName)
                                 {
-                                    SendMessageToSource(record, "You may not reset your own language points, contact another administrator.");
+                                    SendMessageToSource(record, "You may not forgive or reset your own language points, contact another administrator.");
                                     FinalizeRecord(record);
                                     return;
                                 }
@@ -29695,6 +29697,7 @@ namespace PRoConEvents
                     // Hedius: REDUDANCY part 10k. :) This plugin is a mess.
                      case "player_language_punish":
                      case "player_language_reset":
+                     case "player_language_forgive":
                          {
                              //Remove previous commands awaiting confirmation
                              CancelSourcePendingAction(record);
@@ -31432,6 +31435,9 @@ namespace PRoConEvents
                         break;
                     case "player_language_reset":
                         LanguageResetTarget(record);
+                        break;
+                    case "player_language_forgive":
+                        LanguageForgiveTarget(record, false);
                         break;
                     case "player_changename":
                     case "player_changetag":
@@ -36488,51 +36494,58 @@ namespace PRoConEvents
 
         public void LanguageResetTarget(ARecord record)
         {
-            Log.Debug(() => "Entering LanguageResetTarget", 6);
+            LanguageForgiveTarget(record, true);
+        }
+
+        /// <summary>
+        /// Language forgive (!lforgive, also used by automatic forgives) removes a single global language point.
+        /// Language reset (!lreset) sets the global language points to 0.
+        /// </summary>
+        public void LanguageForgiveTarget(ARecord record, Boolean reset)
+        {
+            Log.Debug(() => "Entering LanguageForgiveTarget", 6);
             try
             {
                 record.record_action_executed = true;
                 if (record.target_player == null || record.target_player.player_id <= 0)
                 {
-                    SendMessageToSource(record, "Language forgive requires a valid target, unable to continue.");
+                    SendMessageToSource(record, "Language " + (reset ? "reset" : "forgive") + " requires a valid target, unable to continue.");
                     FinalizeRecord(record);
                     return;
                 }
                 //If the record has any exceptions, skip everything
                 if (record.record_exception == null)
                 {
-                    //Automatic forgives (command_numeric 1) remove a single point, manual resets clear all language points
-                    Boolean singlePoint = record.command_numeric == 1;
-                    Boolean success = singlePoint ? UpdateLanguagePoints(record.target_player, false) : ResetLanguagePoints(record.target_player);
+                    Boolean success = reset ? ResetLanguagePoints(record.target_player) : UpdateLanguagePoints(record.target_player, false);
                     if (!success)
                     {
-                        record.record_exception = new AException("Unable to reset language infraction points for " + record.GetTargetNames() + ".");
+                        record.record_exception = new AException("Unable to " + (reset ? "reset" : "forgive") + " language infraction points for " + record.GetTargetNames() + ".");
                         Log.HandleException(record.record_exception);
-                        SendMessageToSource(record, "Unable to reset language infraction points for " + record.GetTargetNames() + ".");
+                        SendMessageToSource(record, "Unable to " + (reset ? "reset" : "forgive") + " language infraction points for " + record.GetTargetNames() + ".");
                         FinalizeRecord(record);
                         return;
                     }
                     Int32 points = FetchLanguagePoints(record.target_player);
-                    if (singlePoint)
-                    {
-                        PlayerSayMessage(record.target_player.player_name, Log.CGreen("Forgiven 1 language infraction point. You now have " + points + " language point(s) against you."));
-                        SendMessageToSource(record, "Language forgive logged for " + record.GetTargetNames() + ". They now have " + points + " language infraction points.");
-                    }
-                    else
+                    if (reset)
                     {
                         PlayerSayMessage(record.target_player.player_name, Log.CGreen("Your language infraction points have been reset. You now have a clean record."));
                         SendMessageToSource(record, "Language points of " + record.GetTargetNames() + " reset to " + points + ".");
+                    }
+                    else
+                    {
+                        PlayerSayMessage(record.target_player.player_name, Log.CGreen("Forgiven 1 language infraction point. You now have " + points + " language point(s) against you."));
+                        SendMessageToSource(record, "Language forgive logged for " + record.GetTargetNames() + ". They now have " + points + " language infraction points.");
                     }
                     record.target_player.LastLanguageForgive = record;
                 }
             }
             catch (Exception e)
             {
-                record.record_exception = new AException("Error while taking action for language reset record.", e);
+                record.record_exception = new AException("Error while taking action for language " + (reset ? "reset" : "forgive") + " record.", e);
                 Log.HandleException(record.record_exception);
                 FinalizeRecord(record);
             }
-            Log.Debug(() => "Exiting LanguageResetTarget", 6);
+            Log.Debug(() => "Exiting LanguageForgiveTarget", 6);
         }
 
         /// <summary>
@@ -48502,6 +48515,11 @@ namespace PRoConEvents
                                     SendNonQuery("Adding command player_whitelistba", "INSERT INTO `adkats_commands` VALUES(158, 'Active', 'player_whitelistba', 'Log', 'BattlefieldAgency Whitelist Player', 'bawhitelist', TRUE, 'AnyHidden')", true);
                                     newCommands = true;
                                 }
+                                if (!_CommandIDDictionary.ContainsKey(160))
+                                {
+                                    SendNonQuery("Adding command player_language_forgive", "INSERT INTO `adkats_commands` VALUES(160, 'Active', 'player_language_forgive', 'Log', 'Issue Language Forgive', 'lforgive', TRUE, 'Any')", true);
+                                    newCommands = true;
+                                }
                                 if (!_CommandIDDictionary.ContainsKey(159))
                                 {
                                     SendNonQuery("Adding command player_whitelistba_remove", "INSERT INTO `adkats_commands` VALUES(159, 'Active', 'player_whitelistba_remove', 'Log', 'Remove BattlefieldAgency Whitelist', 'unbawhitelist', TRUE, 'AnyHidden')", true);
@@ -48685,6 +48703,7 @@ namespace PRoConEvents
             _CommandDescriptionDictionary["player_whitelistmoveprotection_remove"] = "Removes the target player from the move protection whitelist.";
             _CommandDescriptionDictionary["player_language_punish"] = "Issue a language punishment. Adds a global language infraction point and acts according to the Language Punishment Hierarchy.";
             _CommandDescriptionDictionary["player_language_reset"] = "Issue a language reset. Resets the global language infraction points of the player to 0.";
+            _CommandDescriptionDictionary["player_language_forgive"] = "Issue a language forgive. Removes one global language infraction point.";
         }
 
         private void FillReadableMapModeDictionaries()

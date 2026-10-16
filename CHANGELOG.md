@@ -1706,8 +1706,9 @@ Added small improvements to fuzzy player match response text.</li>
     <li>!lpunish adds one global language infraction point and issues the action at that index of the new 'Language Punishment Hierarchy' setting. Valid entries: warn, kill, kick, mute (round mute), tmute[minutes] (temp persistent mute), pmute (perma persistent mute), tfmute[minutes] (temp persistent force mute), fmute (perma persistent force mute), tban[minutes], ban.</li>
     <li>Default hierarchy (taken from LanguageEnforcer): 1x warn, 2x mute, 2x tmute90, 1x tmute1440, 1x tmute4320, 5x pmute, 1x fmute. Players above the end of the list get the last entry.</li>
     <li>!lreset resets the global language infraction points of the player to 0 (instead of resetting the LanguageEnforcer counter). The removed points are added to forgive_points.</li>
+    <li>New command !lforgive (player_language_forgive, command ID 160) removes a single global language infraction point. AdKats adds the command on startup. Reputation weights added for 160|160 and the new language punish actions.</li>
     <li>New setting 'Language Punish Duplicate Timeout Seconds' (default 20, 0 disables). A player can only be language punished once in this time window (across all servers).</li>
-    <li>New settings 'Language Automatic Forgives' (default true), 'Language Automatic Forgive Days Since Punished' (default 6) and 'Language Automatic Forgive Days Since Forgiven' (default 6). Auto-forgives are issued on spawn by InfractionManager and remove a single point (stored as a player_language_reset record with command_numeric 1). For temp bans and temp mutes the cooldown starts when the punishment ends.</li>
+    <li>New settings 'Language Automatic Forgives' (default true), 'Language Automatic Forgive Days Since Punished' (default 6) and 'Language Automatic Forgive Days Since Forgiven' (default 6). Auto-forgives are issued on spawn by InfractionManager as !lforgive (one point). For temp bans and temp mutes the cooldown starts when the punishment ends.</li>
     <li>LanguageEnforcer can trigger these punishments over AdKats (new LanguageEnforcer setting 'Use AdKats language punishment').</li>
 </ul>
 <b>Changes</b><br/>
@@ -1725,7 +1726,7 @@ CREATE TABLE IF NOT EXISTS `adkats_language_infractions_global` (
 </pre>
     Keys: primary key on player_id (one row per player, global), foreign key player_id -> tbl_playerdata.PlayerID (ON DELETE CASCADE, ON UPDATE CASCADE). No additional indexes are needed, all lookups are by player_id. total_points = punish_points - forgive_points.
     </li>
-    <li>The language punish and forgive actions are stored in adkats_records_main like normal punishes (command_type player_language_punish / player_language_reset, command_action = the executed action).</li>
+    <li>The language punish and forgive actions are stored in adkats_records_main like normal punishes (command_type player_language_punish / player_language_forgive / player_language_reset, command_action = the executed action).</li>
 </ul>
 <b>Bugs Fixed</b><br/>
 <ul>

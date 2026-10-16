@@ -554,7 +554,7 @@
 <p>
     AdKats has its own language punishment system. It works like the normal punishment system, but language infraction
     points are always tracked globally across all servers (table adkats_language_infractions_global).
-    Admins can use !lpunish to issue a language punishment and !lreset to reset the language infraction points of a player to 0.
+    Admins can use !lpunish to issue a language punishment, !lforgive to forgive one language infraction point and !lreset to reset the language infraction points of a player to 0.
     E4GLs LanguageEnforcer can trigger these language punishments automatically (LanguageEnforcer setting 'Use AdKats language punishment').
     Furthermore, this custom version of the plugin comes with temp and perma mute support.
 </p>
@@ -2820,6 +2820,22 @@ plugin.CallOtherPlugin("AdKats", "IssueCommand", command);
 	    The in-game command for issuing a language reset. Resets the global language infraction points of the player to 0.
         </td>
     </tr>
+    <tr>
+        <td><b>Issue Language Forgive</b></td>
+	 <td>lforgive</td>
+	<td>
+            None<br/>
+            OR<br/>
+            [player][reason]<br/>
+            OR<br/>
+            [reportID]<br/>
+            OR<br/>
+            [reportID][reason]
+        </td>
+        <td>
+	    The in-game command for issuing a language forgive. Removes one global language infraction point. Also used by the automatic language forgives.
+        </td>
+    </tr>
 </table>
 
 <h3>Maintenance Commands</h3>
@@ -3349,7 +3365,7 @@ plugin.CallOtherPlugin("AdKats", "IssueCommand", command);
         A player can only be language punished once within this many seconds (across all servers). 0 disables the check. Default is 20.
     </li>
     <li><b>'Language Automatic Forgives'</b> - 
-        Whether to automatically forgive one language infraction point after clean behaviour (manual !lreset clears all points). Default is true.
+        Whether to automatically issue a language forgive (!lforgive, one point) after clean behaviour. Default is true.
     </li>
     <li><b>'Language Automatic Forgive Days Since Punished'</b> - 
         The number of days since the last language punishment ended required for an automatic language forgive. Default is 6 days.
